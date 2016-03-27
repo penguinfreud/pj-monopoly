@@ -6,13 +6,14 @@ import monopoly.event.Listener;
 import monopoly.place.Place;
 import monopoly.place.Property;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class AbstractPlayer {
+    private final Object lock = new Object();
+
     private Place currentPlace;
     private int cash, deposit;
-    private ArrayList<Property> properties = new ArrayList<>();
+    private CopyOnWriteArrayList<Property> properties = new CopyOnWriteArrayList<>();
 
     final void initPlace(Place place) {
         currentPlace = place;
@@ -46,25 +47,29 @@ public abstract class AbstractPlayer {
     public abstract void askWhetherToUpgradeProperty(Game g);
 
     private void changeCash(Game g, int amount) {
-        cash += amount;
-        g.triggerCashChange(new Game.CashChangeEvent(this, amount));
+        synchronized (lock) {
+            cash += amount;
+            g.triggerCashChange(new Game.CashChangeEvent(this, amount));
+        }
     }
 
     private void sellProperties() {}
 
     public void payRent(Game g) {
-        int rent = ((Property)currentPlace).getRent();
-        changeCash(g, -rent);
-        if (cash < 0) {
-            if (cash + deposit >= 0) {
-                cash = 0;
-                deposit += cash;
-            } else {
-                cash += deposit;
-                deposit = 0;
-                sellProperties();
-                if (cash < 0) {
-                    g.triggerBankrupt(this);
+        synchronized (lock) {
+            int rent = ((Property) currentPlace).getRent();
+            changeCash(g, -rent);
+            if (cash < 0) {
+                if (cash + deposit >= 0) {
+                    cash = 0;
+                    deposit += cash;
+                } else {
+                    cash += deposit;
+                    deposit = 0;
+                    sellProperties();
+                    if (cash < 0) {
+                        g.triggerBankrupt(this);
+                    }
                 }
             }
         }

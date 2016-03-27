@@ -5,20 +5,26 @@ import monopoly.event.Listener;
 
 import java.util.*;
 
-public class Game {
+public class Game{
+    private final Object lock = new Object();
+
     private Config config;
     private Random random = new Random();
     private Map map;
     private Players players = new Players();
     private boolean started = false;
 
-    public Config getConfig() {
-        return config;
+    public Object getConfig(String key) {
+        synchronized (lock) {
+            return config.configTable.get(key);
+        }
     }
 
-    public void setConfig(Config config) {
-        if (!started) {
-            this.config = config;
+    public void putConfig(String key, Object value) {
+        synchronized (lock) {
+            if (!started) {
+                config.configTable.put(key, value);
+            }
         }
     }
 
@@ -27,45 +33,59 @@ public class Game {
     }
 
     public void setMap(Map map) {
-        if (!started) {
-            this.map = map;
+        synchronized (lock) {
+            if (!started) {
+                this.map = map;
+            }
         }
     }
 
     public void setPlayers(List<AbstractPlayer> playersList) throws Exception {
-        if (!started) {
-            players.setPlayers(playersList);
+        synchronized (lock) {
+            if (!started) {
+                players.setPlayers(playersList);
+            }
         }
     }
 
     public AbstractPlayer getCurrentPlayer() {
-        return players.getCurrentPlayer();
-    }
-
-    public void start() {
-        if (started) return;
-        started = true;
-        players.initPlayers(this);
-        _onGameStart.trigger(this, null);
-        beginTurn();
-    }
-
-    void beginTurn() {
-        if (started) {
-            getCurrentPlayer().beginTurn(this);
+        synchronized (lock) {
+            return players.getCurrentPlayer();
         }
     }
 
-    void endTurn() {
-        if (started) {
-            players.next();
+    public void start() {
+        synchronized (lock) {
+            if (started) return;
+            started = true;
+            players.initPlayers(this);
+            _onGameStart.trigger(this, null);
             beginTurn();
         }
     }
 
-    public void rollTheDice() {
-        if (started) {
+    void beginTurn() {
+        synchronized (lock) {
+            if (started) {
+                getCurrentPlayer().beginTurn(this);
+            }
+        }
+    }
 
+    void endTurn() {
+        synchronized (lock) {
+            if (started) {
+                players.next();
+                beginTurn();
+            }
+        }
+    }
+
+    public void rollTheDice() {
+        synchronized (lock) {
+            if (started) {
+
+            }
         }
     }
 
@@ -97,8 +117,10 @@ public class Game {
     }
 
     public void triggerCashChange(CashChangeEvent event) {
-        if (started) {
-            _onCashChange.trigger(this, event);
+        synchronized (lock) {
+            if (started) {
+                _onCashChange.trigger(this, event);
+            }
         }
     }
 
@@ -107,11 +129,13 @@ public class Game {
     }
 
     public void triggerBankrupt(AbstractPlayer player) {
-        if (started) {
-            players.removePlayer(player);
-            _onBankrupt.trigger(this, player);
-            if (players.count() == 1) {
-                _onGameOver.trigger(this, null);
+        synchronized (lock) {
+            if (started) {
+                players.removePlayer(player);
+                _onBankrupt.trigger(this, player);
+                if (players.count() == 1) {
+                    _onGameOver.trigger(this, null);
+                }
             }
         }
     }

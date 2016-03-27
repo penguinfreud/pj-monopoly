@@ -2,16 +2,16 @@ package monopoly.event;
 
 import monopoly.Game;
 
-import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Event<T> {
-    private ArrayList<Listener<T>> listeners;
+    private CopyOnWriteArrayList<Listener<T>> listeners = new CopyOnWriteArrayList<>();
 
-    public void addListener(Listener listener) {
+    public synchronized void addListener(Listener listener) {
         listeners.add(listener);
     }
 
-    public void trigger(Game g, T arg) {
+    public synchronized void trigger(Game g, T arg) {
         for (Listener<T> listener: listeners) {
             listener.run(g, arg);
         }
