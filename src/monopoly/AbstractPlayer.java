@@ -1,10 +1,13 @@
 package monopoly;
 
+import monopoly.event.Action;
+import monopoly.event.Event;
 import monopoly.event.Listener;
 import monopoly.place.Place;
 import monopoly.place.Property;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public abstract class AbstractPlayer {
     private Place currentPlace;
@@ -35,7 +38,35 @@ public abstract class AbstractPlayer {
         return properties.contains(prop);
     }
 
-    public void beginTurn(Game g, Listener<Action> cb) {
-        cb.run(Action.getDiceAction());
+    protected void beginTurn(Game g) {
+        g.rollTheDice();
+    }
+
+    public abstract void askWhetherToBuyProperty(Game g);
+    public abstract void askWhetherToUpgradeProperty(Game g);
+
+    private void changeCash(Game g, int amount) {
+        cash += amount;
+        g.triggerCashChange(new Game.CashChangeEvent(this, amount));
+    }
+
+    private void sellProperties() {}
+
+    public void payRent(Game g) {
+        int rent = ((Property)currentPlace).getRent();
+        changeCash(g, -rent);
+        if (cash < 0) {
+            if (cash + deposit >= 0) {
+                cash = 0;
+                deposit += cash;
+            } else {
+                cash += deposit;
+                deposit = 0;
+                sellProperties();
+                if (cash < 0) {
+                    g.triggerBankrupt(this);
+                }
+            }
+        }
     }
 }

@@ -1,5 +1,7 @@
 package monopoly.event;
 
+import monopoly.Game;
+
 import java.util.ArrayList;
 
 public class Event<T> {
@@ -9,9 +11,9 @@ public class Event<T> {
         listeners.add(listener);
     }
 
-    public void trigger(T arg) {
+    public void trigger(Game g, T arg) {
         for (Listener<T> listener: listeners) {
-            listener.run(arg);
+            listener.run(g, arg);
         }
     }
 }

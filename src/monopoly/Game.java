@@ -1,62 +1,118 @@
 package monopoly;
 
+import monopoly.event.Event;
 import monopoly.event.Listener;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Random;
+import java.util.*;
 
 public class Game {
     private Config config;
     private Random random = new Random();
     private Map map;
-    private ArrayList<AbstractPlayer> players;
-    private int currentPlayerIndex;
+    private Players players = new Players();
     private boolean started = false;
 
-    private Listener beginTurnCb = new Listener<Action>() {
-        public void run(Action action) {
+    public Config getConfig() {
+        return config;
+    }
 
+    public void setConfig(Config config) {
+        if (!started) {
+            this.config = config;
         }
-    };
+    }
 
     public Map getMap() {
         return map;
     }
 
     public void setMap(Map map) {
-        this.map = map;
+        if (!started) {
+            this.map = map;
+        }
     }
 
-    public void addPlayer(AbstractPlayer player) {
-        this.players.add(player);
-    }
-
-    public void removePlayer(AbstractPlayer player) {
-        this.players.remove(player);
+    public void setPlayers(List<AbstractPlayer> playersList) throws Exception {
+        if (!started) {
+            players.setPlayers(playersList);
+        }
     }
 
     public AbstractPlayer getCurrentPlayer() {
-        return players.get(currentPlayerIndex);
+        return players.getCurrentPlayer();
     }
 
     public void start() {
         if (started) return;
         started = true;
-        Collections.shuffle(players);
-        currentPlayerIndex = 0;
-
-        for (AbstractPlayer player: players) {
-            player.initPlace(map.getStartingPoint());
-            player.initCash(config.get("init cash").getInt());
-            player.initDeposit(config.get("init deposit").getInt());
-        }
-
+        players.initPlayers(this);
+        _onGameStart.trigger(this, null);
         beginTurn();
     }
 
     void beginTurn() {
-        AbstractPlayer currentPlayer = getCurrentPlayer();
-        currentPlayer.beginTurn(this, beginTurnCb);
+        if (started) {
+            getCurrentPlayer().beginTurn(this);
+        }
+    }
+
+    void endTurn() {
+        if (started) {
+            players.next();
+            beginTurn();
+        }
+    }
+
+    public void rollTheDice() {
+        if (started) {
+
+        }
+    }
+
+    public static class CashChangeEvent {
+        private AbstractPlayer player;
+        private int amount;
+
+        public CashChangeEvent(AbstractPlayer player, int amount) {
+            this.player = player;
+            this.amount = amount;
+        }
+
+        public AbstractPlayer getPlayer() {
+            return player;
+        }
+
+        public int getAmount() {
+            return amount;
+        }
+    }
+
+    private Event<Object> _onGameStart = new Event<>(),
+        _onGameOver = new Event<>();
+    private Event<CashChangeEvent> _onCashChange = new Event<>();
+    private Event<AbstractPlayer> _onBankrupt = new Event<>();
+
+    public void onCashChange(Listener<CashChangeEvent> listener) {
+        _onCashChange.addListener(listener);
+    }
+
+    public void triggerCashChange(CashChangeEvent event) {
+        if (started) {
+            _onCashChange.trigger(this, event);
+        }
+    }
+
+    public void onBankrupt(Listener<AbstractPlayer> listener) {
+        _onBankrupt.addListener(listener);
+    }
+
+    public void triggerBankrupt(AbstractPlayer player) {
+        if (started) {
+            players.removePlayer(player);
+            _onBankrupt.trigger(this, player);
+            if (players.count() == 1) {
+                _onGameOver.trigger(this, null);
+            }
+        }
     }
 }

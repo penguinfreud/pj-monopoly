@@ -1,6 +1,7 @@
 package monopoly.place;
 
 import monopoly.AbstractPlayer;
+import monopoly.Game;
 
 public abstract class Place {
     Place prev, next;
@@ -13,5 +14,6 @@ public abstract class Place {
         return next;
     }
 
-    public abstract void onLanded(AbstractPlayer player);
+    public void onLanded(Game g) {}
+    public void onPassing(Game g) {}
 }
