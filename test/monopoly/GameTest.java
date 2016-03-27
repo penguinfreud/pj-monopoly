@@ -1,11 +1,10 @@
 package monopoly;
 
-import monopoly.place.Map;
-import org.junit.After;
+import monopoly.player.AIPlayer;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.File;
 import java.util.ArrayList;
 
 import static org.junit.Assert.*;
@@ -18,11 +17,11 @@ public class GameTest {
 
     @Before
     public void setUp() throws Exception {
-        map = new Map(0);
+        map = Map.fromFile(new File("test.map"));
 
         players = new ArrayList<>();
-        firstPlayer = new Player("player A");
-        secondPlayer = new Player("player B");
+        firstPlayer = new AIPlayer("player A");
+        secondPlayer = new AIPlayer("player B");
         players.add(firstPlayer);
         players.add(secondPlayer);
 
@@ -38,5 +37,8 @@ public class GameTest {
         assertTrue(game.getCurrentPlayer() == firstPlayer ||
             game.getCurrentPlayer() == secondPlayer);
         assertEquals("bar", game.getConfig("foo"));
+        assertEquals("Empty", game.getMap().getStartingPoint().getName());
+
+        game.start();
     }
 }

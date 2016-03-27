@@ -1,5 +1,5 @@
 package monopoly.event;
 
-public abstract class Function<S, T> {
-    public abstract T run(S arg);
+public interface Function<S, T> {
+    T run(S arg);
 }

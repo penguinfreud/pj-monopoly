@@ -1,8 +1,6 @@
 package monopoly;
 
 import monopoly.event.Listener;
-import monopoly.place.Place;
-import monopoly.place.Property;
 
 import java.io.Serializable;
 import java.util.List;
@@ -11,23 +9,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public abstract class AbstractPlayer implements Serializable {
     private static final Object lock = new Object();
 
-    public static final class Promise implements Serializable {
-        private AbstractPlayer owner;
-
-        private Promise(AbstractPlayer owner) {
-            this.owner = owner;
-        }
-
-        public AbstractPlayer getOwner() {
-            return owner;
-        }
-    }
-
     private String name;
     private Place currentPlace;
     private int cash, deposit;
     private List<Property> properties = new CopyOnWriteArrayList<>();
-    private final Promise iOwnIt = new Promise(this);
 
     final void initPlace(Place place) {
         currentPlace = place;
@@ -45,7 +30,7 @@ public abstract class AbstractPlayer implements Serializable {
         return name;
     }
 
-    final void setName(String name) {
+    protected final void setName(String name) {
         this.name = name;
     }
 
@@ -69,7 +54,15 @@ public abstract class AbstractPlayer implements Serializable {
         return new CopyOnWriteArrayList<>(properties);
     }
 
-    void beginTurn(Game g) {
+    public int getTotalPossessions() {
+        int poss = cash + deposit;
+        for (Property prop: properties) {
+            poss += prop.getMortgagePrice();
+        }
+        return poss;
+    }
+
+    void startTurn(Game g) {
         g.rollTheDice();
     }
 
@@ -90,7 +83,7 @@ public abstract class AbstractPlayer implements Serializable {
                 if (properties.contains(prop)) {
                     cash += prop.getMortgagePrice();
                     properties.remove(prop);
-                    prop.mortgage(iOwnIt);
+                    prop.mortgage();
                 }
             }
             if (cash < 0) {
@@ -103,31 +96,32 @@ public abstract class AbstractPlayer implements Serializable {
         }
     }
 
-    public final void buyProperty(Game g) {
+    final void buyProperty(Game g) {
         synchronized (lock) {
             Property prop = (Property) currentPlace;
             int price = prop.getPurchasePrice();
             if (prop.isFree() && cash > price) {
                 _changeCash(g, -price);
                 properties.add(prop);
-                prop.changeOwner(iOwnIt);
+                prop.changeOwner(this);
             }
         }
     }
 
-    public final void upgradeProperty(Game g) {
+    final void upgradeProperty(Game g) {
         synchronized (lock) {
             Property prop = (Property) currentPlace;
             int price = prop.getUpgradePrice();
             if (prop.isFree() && cash > price) {
                 _changeCash(g, -price);
-                prop.upgrade(iOwnIt);
+                prop.upgrade();
             }
         }
     }
 
-    public final void payRent(Game g) {
+     final void payRent(Game g) {
         synchronized (lock) {
+            System.out.println("pay rent");
             int rent = ((Property) currentPlace).getRent();
             _changeCash(g, -rent);
             if (cash < 0) {
@@ -146,15 +140,29 @@ public abstract class AbstractPlayer implements Serializable {
         }
     }
 
-    final void advance(Game g, int steps) {
-        if (steps >= 1) {
+    private int stepsToAdvance;
+
+    final void startWalking(Game g, int steps) {
+        if (g.getState() == Game.State.TURN_WALKING) {
+            System.out.println("start walking");
+            stepsToAdvance = steps;
+            _startStep(g);
+        }
+    }
+
+    protected void _startStep(Game g) {
+        step(g);
+    }
+
+    protected final void step(Game g) {
+        if (g.getState() == Game.State.TURN_WALKING) {
+            System.out.println("step");
             currentPlace = currentPlace.getNext();
-            if (steps == 1) {
-                currentPlace.onLanded(g);
+            if (--stepsToAdvance == 0) {
+                g.endWalking();
             } else {
-                currentPlace.onPassing(g, (obj) -> {
-                    advance(g, steps - 1);
-                });
+                currentPlace.onPassingBy(g);
+                _startStep(g);
             }
         }
     }

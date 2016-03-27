@@ -17,6 +17,10 @@ class Players implements Serializable {
         return players.get(currentPlayerIndex);
     }
 
+    boolean isNewCycle() {
+        return currentPlayerIndex == 0;
+    }
+
     List<AbstractPlayer> getPlayers() {
         return new CopyOnWriteArrayList<>(players);
     }

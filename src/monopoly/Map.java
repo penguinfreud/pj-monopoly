@@ -1,23 +1,21 @@
-package monopoly.place;
+package monopoly;
 
 import monopoly.event.Function;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
 public class Map implements Serializable {
-    private Place[] places;
-    private int _size;
+    private List<Place> places = new ArrayList<>();
 
-    public Map(int size) {
-        _size = size;
-        places = new Place[size];
-    }
+    private Map() {}
 
     public int size() {
-        return _size;
+        return places.size();
     }
 
     public static Map fromFile(File fin) throws Exception {
@@ -25,14 +23,17 @@ public class Map implements Serializable {
         InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
         Scanner sc = new Scanner(isr);
         sc.useDelimiter(Pattern.compile("\\s*,\\s*"));
-        int size = sc.nextInt();
 
-        Map map = new Map(size);
+        Map map = new Map();
         Place prev = null, next;
-        for (int i = 0; i<size; ++i) {
+        while (sc.hasNext()) {
             String id = sc.next();
+            if (!placeTypes.containsKey(id)) {
+                Class.forName("monopoly.place." + id);
+            }
             if (placeTypes.containsKey(id)) {
-                next = map.places[i] = placeTypes.get(id).run(sc);
+                next = placeTypes.get(id).run(sc);
+                map.places.add(next);
                 if (prev != null) {
                     prev.next = next;
                     next.prev = prev;
@@ -43,8 +44,8 @@ public class Map implements Serializable {
             }
         }
 
-        if (size > 0) {
-            next = map.places[0];
+        if (!map.places.isEmpty()) {
+            next = map.places.get(0);
             prev.next = next;
             next.prev = prev;
         }
@@ -56,22 +57,12 @@ public class Map implements Serializable {
     }
 
     public Place getStartingPoint() {
-        if (_size > 0)
-            return places[0];
-        return null;
+        return places.get(0);
     }
 
     private static java.util.Map<String, Function<Scanner, Place>> placeTypes = new Hashtable<>();
 
     public static void registerPlaceType(String id, Function<Scanner, Place> reader) {
         placeTypes.put(id, reader);
-    }
-
-    static {
-        try {
-            Class.forName("monopoly.place.Street");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
     }
 }

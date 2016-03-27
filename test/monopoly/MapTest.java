@@ -1,5 +1,8 @@
-package monopoly.place;
+package monopoly;
 
+import monopoly.Map;
+import monopoly.Place;
+import monopoly.place.Street;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +22,7 @@ public class MapTest {
     public void setUp() throws IOException {
         tempFile = File.createTempFile("map", "txt");
         PrintStream ps = new PrintStream(new FileOutputStream(tempFile));
-        ps.print("1,Street,myStreet,10");
+        ps.print("Street,myStreet,10");
         ps.close();
     }
 

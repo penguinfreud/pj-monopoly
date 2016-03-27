@@ -1,19 +1,15 @@
 package monopoly.place;
 
+import monopoly.Map;
+import monopoly.Place;
+import monopoly.Property;
 import monopoly.event.Function;
 
 import java.util.Scanner;
 
 public class Street extends Property {
     static {
-        Map.registerPlaceType("Street", new Function<Scanner, Place>() {
-            @Override
-            public Place run(Scanner sc) {
-                String name = sc.next();
-                int price = sc.nextInt();
-                return new Street(name, price);
-            }
-        });
+        Map.registerPlaceType("Street", (sc) -> new Street(sc.next(), sc.nextInt()));
     }
 
     protected Street(String name, int price) {

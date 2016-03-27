@@ -9,11 +9,12 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.*;
 
+
 class GameData implements Serializable {
     Config config = new Config();
-    monopoly.place.Map map;
+    Map map;
     Players players = new Players();
-    boolean started = false;
+    Game.State state = Game.State.OVER;
 
     Event<Object> _onGameOver = new Event<>(),
         _onTurn = new Event<>(),
@@ -23,9 +24,19 @@ class GameData implements Serializable {
 }
 
 public class Game {
+    public enum State {
+        OVER, STARTING, TURN_STARTING, TURN_WALKING, TURN_LANDED, TURN_ENDING
+    }
+
     private final Object lock = new Object();
     private Random random = new Random();
     private GameData data = new GameData();
+
+    public State getState() {
+        synchronized (lock) {
+            return data.state;
+        }
+    }
 
     public Object getConfig(String key) {
         synchronized (lock) {
@@ -35,19 +46,19 @@ public class Game {
 
     public void putConfig(String key, Object value) {
         synchronized (lock) {
-            if (!data.started) {
+            if (data.state == State.OVER) {
                 data.config.configTable.put(key, value);
             }
         }
     }
 
-    public monopoly.place.Map getMap() {
+    public Map getMap() {
         return data.map;
     }
 
-    public void setMap(monopoly.place.Map map) {
+    public void setMap(Map map) {
         synchronized (lock) {
-            if (!data.started) {
+            if (data.state == State.OVER) {
                 data.map = map;
             }
         }
@@ -55,7 +66,7 @@ public class Game {
 
     public void setPlayers(List<AbstractPlayer> playersList) throws Exception {
         synchronized (lock) {
-            if (!data.started) {
+            if (data.state == State.OVER) {
                 data.players.set(playersList);
             }
         }
@@ -69,37 +80,61 @@ public class Game {
 
     public void start() {
         synchronized (lock) {
-            if (data.started) return;
-            data.started = true;
-            data.players.init(this);
-            _onGameStart.trigger(this);
-            beginTurn();
+            if (data.state == State.OVER) {
+                data.state = State.STARTING;
+                data.players.init(this);
+                _onGameStart.trigger(this);
+                startTurn();
+            }
         }
     }
 
-    void beginTurn() {
+    void startTurn() {
         synchronized (lock) {
-            if (data.started) {
-                data.players.getCurrentPlayer().beginTurn(this);
+            if (data.state == State.STARTING || data.state == State.TURN_ENDING) {
+                data.state = State.TURN_STARTING;
+                data._onTurn.trigger(null);
+                if (data.players.isNewCycle() && data.state == State.TURN_ENDING) {
+                    data._onCycle.trigger(null);
+                }
+                data.players.getCurrentPlayer().startTurn(this);
             }
         }
     }
 
     void endTurn() {
         synchronized (lock) {
-            if (data.started) {
+            if (data.state == State.TURN_LANDED) {
+                data.state = State.TURN_ENDING;
                 data.players.next();
-                beginTurn();
+                startTurn();
             }
         }
     }
 
     public void rollTheDice() {
         synchronized (lock) {
-            if (data.started) {
+            if (data.state == State.TURN_STARTING) {
+                data.state = State.TURN_WALKING;
                 int dice = random.nextInt((Integer) getConfig("dice sides")) + 1;
-                data.players.getCurrentPlayer().advance(this, dice);
+                data.players.getCurrentPlayer().startWalking(this, dice);
             }
+        }
+    }
+
+    void endWalking() {
+        synchronized (lock) {
+            if (data.state == State.TURN_WALKING) {
+                data.state = State.TURN_LANDED;
+                data.players.getCurrentPlayer().getCurrentPlace().onLanded(this);
+            }
+        }
+    }
+
+    private void endGame() {
+        if (data.state != State.OVER) {
+            data.state = State.OVER;
+            data._onGameOver.trigger(null);
         }
     }
 
@@ -145,7 +180,7 @@ public class Game {
 
     void triggerCashChange(CashChangeEvent event) {
         synchronized (lock) {
-            if (data.started) {
+            if (data.state != State.OVER) {
                 data._onCashChange.trigger(event);
             }
         }
@@ -157,11 +192,11 @@ public class Game {
 
     void triggerBankrupt(AbstractPlayer player) {
         synchronized (lock) {
-            if (data.started) {
+            if (data.state != State.OVER) {
                 data.players.remove(player);
                 data._onBankrupt.trigger(player);
                 if (data.players.count() == 1) {
-                    data._onGameOver.trigger(null);
+                    endGame();
                 }
             }
         }
