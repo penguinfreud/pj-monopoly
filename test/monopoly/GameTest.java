@@ -1,13 +1,10 @@
 package monopoly;
 
-import monopoly.event.Listener;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 import static org.junit.Assert.*;
 
