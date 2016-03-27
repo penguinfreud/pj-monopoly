@@ -1,21 +1,33 @@
 package monopoly;
 
-import monopoly.event.Action;
-import monopoly.event.Event;
 import monopoly.event.Listener;
 import monopoly.place.Place;
 import monopoly.place.Property;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class AbstractPlayer implements Serializable {
-    private transient final Object lock = new Object();
+    private static final Object lock = new Object();
+
+    public static final class Promise implements Serializable {
+        private AbstractPlayer owner;
+
+        private Promise(AbstractPlayer owner) {
+            this.owner = owner;
+        }
+
+        public AbstractPlayer getOwner() {
+            return owner;
+        }
+    }
 
     private String name;
     private Place currentPlace;
     private int cash, deposit;
-    private CopyOnWriteArrayList<Property> properties = new CopyOnWriteArrayList<>();
+    private List<Property> properties = new CopyOnWriteArrayList<>();
+    private final Promise iOwnIt = new Promise(this);
 
     final void initPlace(Place place) {
         currentPlace = place;
@@ -33,7 +45,7 @@ public abstract class AbstractPlayer implements Serializable {
         return name;
     }
 
-    public void setName(String name) {
+    public final void setName(String name) {
         this.name = name;
     }
 
@@ -45,30 +57,66 @@ public abstract class AbstractPlayer implements Serializable {
         return deposit;
     }
 
+    public Place getCurrentPlace() {
+        return currentPlace;
+    }
+
     public final boolean owns(Property prop) {
         return properties.contains(prop);
+    }
+
+    public final List<Property> getProperties() {
+        return new CopyOnWriteArrayList<>(properties);
     }
 
     protected void beginTurn(Game g) {
         g.rollTheDice();
     }
 
-    public abstract void askWhetherToBuyProperty(Game g);
-    public abstract void askWhetherToUpgradeProperty(Game g);
+    public abstract void askWhetherToBuyProperty(Game g, Listener<Boolean> cb);
+    public abstract void askWhetherToUpgradeProperty(Game g, Listener<Boolean> cb);
+    public abstract void askWhichPropertyToMortgage(Game g, Listener<Property> cb);
 
-    private void changeCash(Game g, int amount) {
+    private void _changeCash(Game g, int amount) {
         synchronized (lock) {
             cash += amount;
             g.triggerCashChange(new Game.CashChangeEvent(this, amount));
         }
     }
 
-    private void sellProperties() {}
+    private final void sellProperties() {
+        if (properties.size() > 0) {
 
-    public void payRent(Game g) {
+        }
+    }
+
+    public final void buyProperty(Game g) {
+        synchronized (lock) {
+            Property prop = (Property) currentPlace;
+            int price = prop.getPurchasePrice();
+            if (prop.isFree() && cash > price) {
+                _changeCash(g, -price);
+                properties.add(prop);
+                prop.changeOwner(iOwnIt);
+            }
+        }
+    }
+
+    public final void upgradeProperty(Game g) {
+        synchronized (lock) {
+            Property prop = (Property) currentPlace;
+            int price = prop.getUpgradePrice();
+            if (prop.isFree() && cash > price) {
+                _changeCash(g, -price);
+                prop.upgrade(iOwnIt);
+            }
+        }
+    }
+
+    public final void payRent(Game g) {
         synchronized (lock) {
             int rent = ((Property) currentPlace).getRent();
-            changeCash(g, -rent);
+            _changeCash(g, -rent);
             if (cash < 0) {
                 if (cash + deposit >= 0) {
                     cash = 0;

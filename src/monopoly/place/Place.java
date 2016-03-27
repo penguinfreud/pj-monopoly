@@ -1,12 +1,20 @@
 package monopoly.place;
 
-import monopoly.AbstractPlayer;
 import monopoly.Game;
 
 import java.io.Serializable;
 
 public abstract class Place implements Serializable {
+    private String name;
     Place prev, next;
+
+    protected Place(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
 
     public Place getPrev() {
         return prev;

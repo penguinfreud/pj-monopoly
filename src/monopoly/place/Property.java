@@ -5,13 +5,32 @@ import monopoly.Game;
 
 public abstract class Property extends Place {
     private AbstractPlayer owner;
-    private int level = 0;
+    private int price = 0, level = 0;
 
-    public abstract int getPurchasePrice();
+    protected Property(String name, int price) {
+        super(name);
+        this.price = price;
+    }
 
-    public abstract int getUpgradePrice();
+    public boolean isFree() {
+        return owner == null;
+    }
 
-    public abstract int getRent();
+    public int getPrice() {
+        return price;
+    }
+
+    public int getPurchasePrice() {
+        return price;
+    }
+
+    public int getUpgradePrice() {
+        return price / 2;
+    }
+
+    public int getRent() {
+        return price * 3 / 10;
+    }
 
     public AbstractPlayer getOwner() {
         return owner;
@@ -21,13 +40,27 @@ public abstract class Property extends Place {
         return level;
     }
 
+    public void changeOwner(AbstractPlayer.Promise newOwner) {
+        owner = newOwner.getOwner();
+    }
+
+    public void upgrade(AbstractPlayer.Promise upgrade) {
+        if (upgrade.getOwner() == owner) {
+            level++;
+        }
+    }
+
     @Override
     public void onLanded(Game g) {
         AbstractPlayer p = g.getCurrentPlayer();
         if (owner == null) {
-            p.askWhetherToBuyProperty(g);
+            p.askWhetherToBuyProperty(g, (ok) -> {
+                if (ok) p.buyProperty(g);
+            });
         } else if (owner == p) {
-            p.askWhetherToUpgradeProperty(g);
+            p.askWhetherToUpgradeProperty(g, (ok) -> {
+                if (ok) p.upgradeProperty(g);
+            });
         } else {
             p.payRent(g);
         }

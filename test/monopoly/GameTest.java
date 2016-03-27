@@ -1,5 +1,7 @@
 package monopoly;
 
+import monopoly.place.Map;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,23 +38,5 @@ public class GameTest {
         assertTrue(game.getCurrentPlayer() == firstPlayer ||
             game.getCurrentPlayer() == secondPlayer);
         assertEquals("bar", game.getConfig("foo"));
-    }
-
-    //@Test
-    public void testSerialization() throws IOException, ClassNotFoundException {
-        File tmp = File.createTempFile("game", null);
-        FileOutputStream fos = new FileOutputStream(tmp);
-        ObjectOutputStream oos = new ObjectOutputStream(fos);
-        oos.writeObject(game);
-
-        oos.close();
-        fos.close();
-
-        FileInputStream fis = new FileInputStream(tmp);
-        ObjectInputStream ois = new ObjectInputStream(fis);
-        Game newGame = (Game) ois.readObject();
-
-        assertEquals(game.getCurrentPlayer().getName(), newGame.getCurrentPlayer().getName());
-        assertEquals("bar", newGame.getConfig("foo"));
     }
 }

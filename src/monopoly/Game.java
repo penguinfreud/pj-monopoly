@@ -3,71 +3,82 @@ package monopoly;
 import monopoly.event.Event;
 import monopoly.event.Listener;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.*;
 
-public class Game implements Serializable {
-    private transient final Object lock = new Object();
+class GameData implements Serializable {
+    Config config = new Config();
+    monopoly.place.Map map;
+    Players players = new Players();
+    boolean started = false;
 
-    private Config config = new Config();
+    Event<Object> _onGameStart = new Event<>(),
+            _onGameOver = new Event<>();
+    Event<Game.CashChangeEvent> _onCashChange = new Event<>();
+    Event<AbstractPlayer> _onBankrupt = new Event<>();
+}
+
+public class Game {
+    private final Object lock = new Object();
     private Random random = new Random();
-    private Map map;
-    private Players players = new Players();
-    private boolean started = false;
+    private GameData data = new GameData();
 
     public Object getConfig(String key) {
         synchronized (lock) {
-            return config.configTable.get(key);
+            return data.config.configTable.get(key);
         }
     }
 
     public void putConfig(String key, Object value) {
         synchronized (lock) {
-            if (!started) {
-                config.configTable.put(key, value);
+            if (!data.started) {
+                data.config.configTable.put(key, value);
             }
         }
     }
 
-    public Map getMap() {
-        return map;
+    public monopoly.place.Map getMap() {
+        return data.map;
     }
 
-    public void setMap(Map map) {
+    public void setMap(monopoly.place.Map map) {
         synchronized (lock) {
-            if (!started) {
-                this.map = map;
+            if (!data.started) {
+                data.map = map;
             }
         }
     }
 
     public void setPlayers(List<AbstractPlayer> playersList) throws Exception {
         synchronized (lock) {
-            if (!started) {
-                players.setPlayers(playersList);
+            if (!data.started) {
+                data.players.setPlayers(playersList);
             }
         }
     }
 
     public AbstractPlayer getCurrentPlayer() {
         synchronized (lock) {
-            return players.getCurrentPlayer();
+            return data.players.getCurrentPlayer();
         }
     }
 
     public void start() {
         synchronized (lock) {
-            if (started) return;
-            started = true;
-            players.initPlayers(this);
-            _onGameStart.trigger(this, null);
+            if (data.started) return;
+            data.started = true;
+            data.players.initPlayers(this);
+            data._onGameStart.trigger(null);
             beginTurn();
         }
     }
 
     void beginTurn() {
         synchronized (lock) {
-            if (started) {
+            if (data.started) {
                 getCurrentPlayer().beginTurn(this);
             }
         }
@@ -75,8 +86,8 @@ public class Game implements Serializable {
 
     void endTurn() {
         synchronized (lock) {
-            if (started) {
-                players.next();
+            if (data.started) {
+                data.players.next();
                 beginTurn();
             }
         }
@@ -84,7 +95,7 @@ public class Game implements Serializable {
 
     public void rollTheDice() {
         synchronized (lock) {
-            if (started) {
+            if (data.started) {
 
             }
         }
@@ -108,44 +119,52 @@ public class Game implements Serializable {
         }
     }
 
-    private Event<Object> _onGameStart = new Event<>(),
-        _onGameOver = new Event<>();
-    private Event<CashChangeEvent> _onCashChange = new Event<>();
-    private Event<AbstractPlayer> _onBankrupt = new Event<>();
 
     public void onGameStart(Listener<Object> listener) {
-        _onGameStart.addListener(listener);
+        data._onGameStart.addListener(listener);
     }
 
     public void onGameOver(Listener<Object> listener) {
-        _onGameOver.addListener(listener);
+        data._onGameOver.addListener(listener);
     }
 
     public void onCashChange(Listener<CashChangeEvent> listener) {
-        _onCashChange.addListener(listener);
+        data._onCashChange.addListener(listener);
     }
 
     public void triggerCashChange(CashChangeEvent event) {
         synchronized (lock) {
-            if (started) {
-                _onCashChange.trigger(this, event);
+            if (data.started) {
+                data._onCashChange.trigger(event);
             }
         }
     }
 
     public void onBankrupt(Listener<AbstractPlayer> listener) {
-        _onBankrupt.addListener(listener);
+        data._onBankrupt.addListener(listener);
     }
 
     public void triggerBankrupt(AbstractPlayer player) {
         synchronized (lock) {
-            if (started) {
-                players.removePlayer(player);
-                _onBankrupt.trigger(this, player);
-                if (players.count() == 1) {
-                    _onGameOver.trigger(this, null);
+            if (data.started) {
+                data.players.removePlayer(player);
+                data._onBankrupt.trigger(player);
+                if (data.players.count() == 1) {
+                    data._onGameOver.trigger(null);
                 }
             }
+        }
+    }
+
+    public void readData(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        synchronized (lock) {
+            data = (GameData) ois.readObject();
+        }
+    }
+
+    public void writeData(ObjectOutputStream oos) throws IOException {
+        synchronized (lock) {
+            oos.writeObject(data);
         }
     }
 }

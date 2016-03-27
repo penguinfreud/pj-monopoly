@@ -12,9 +12,9 @@ public class Event<T> implements Serializable {
         listeners.add(listener);
     }
 
-    public synchronized void trigger(Game g, T arg) {
+    public synchronized void trigger(T arg) {
         for (Listener<T> listener: listeners) {
-            listener.run(g, arg);
+            listener.run(arg);
         }
     }
 }
