@@ -3,7 +3,9 @@ package monopoly.place;
 import monopoly.AbstractPlayer;
 import monopoly.Game;
 
-public abstract class Place {
+import java.io.Serializable;
+
+public abstract class Place implements Serializable {
     Place prev, next;
 
     public Place getPrev() {

@@ -1,8 +1,9 @@
 package monopoly;
 
+import java.io.Serializable;
 import java.util.Hashtable;
 
-public class Config {
+public class Config implements Serializable {
     protected Hashtable<String, Object> configTable = new Hashtable<>();
 
     public Config() {

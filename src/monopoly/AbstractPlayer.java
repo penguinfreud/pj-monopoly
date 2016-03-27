@@ -6,11 +6,13 @@ import monopoly.event.Listener;
 import monopoly.place.Place;
 import monopoly.place.Property;
 
+import java.io.Serializable;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public abstract class AbstractPlayer {
-    private final Object lock = new Object();
+public abstract class AbstractPlayer implements Serializable {
+    private transient final Object lock = new Object();
 
+    private String name;
     private Place currentPlace;
     private int cash, deposit;
     private CopyOnWriteArrayList<Property> properties = new CopyOnWriteArrayList<>();
@@ -25,6 +27,14 @@ public abstract class AbstractPlayer {
 
     final void initDeposit(int deposit) {
         this.deposit = deposit;
+    }
+
+    public final String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public final int getCash() {

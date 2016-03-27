@@ -3,12 +3,13 @@ package monopoly;
 import monopoly.event.Event;
 import monopoly.event.Listener;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Game{
-    private final Object lock = new Object();
+public class Game implements Serializable {
+    private transient final Object lock = new Object();
 
-    private Config config;
+    private Config config = new Config();
     private Random random = new Random();
     private Map map;
     private Players players = new Players();
@@ -111,6 +112,14 @@ public class Game{
         _onGameOver = new Event<>();
     private Event<CashChangeEvent> _onCashChange = new Event<>();
     private Event<AbstractPlayer> _onBankrupt = new Event<>();
+
+    public void onGameStart(Listener<Object> listener) {
+        _onGameStart.addListener(listener);
+    }
+
+    public void onGameOver(Listener<Object> listener) {
+        _onGameOver.addListener(listener);
+    }
 
     public void onCashChange(Listener<CashChangeEvent> listener) {
         _onCashChange.addListener(listener);

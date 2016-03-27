@@ -2,7 +2,9 @@ package monopoly;
 
 import monopoly.place.Place;
 
-public class Map {
+import java.io.Serializable;
+
+public class Map implements Serializable {
     private Place[] places;
     private int size;
 

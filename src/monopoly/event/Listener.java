@@ -2,6 +2,8 @@ package monopoly.event;
 
 import monopoly.Game;
 
-public interface Listener<T> {
-    public void run(Game g, T arg);
+import java.io.Serializable;
+
+public interface Listener<T> extends Serializable {
+    void run(Game g, T arg);
 }

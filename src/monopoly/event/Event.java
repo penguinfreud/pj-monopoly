@@ -2,9 +2,10 @@ package monopoly.event;
 
 import monopoly.Game;
 
+import java.io.Serializable;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class Event<T> {
+public class Event<T> implements Serializable {
     private CopyOnWriteArrayList<Listener<T>> listeners = new CopyOnWriteArrayList<>();
 
     public synchronized void addListener(Listener listener) {

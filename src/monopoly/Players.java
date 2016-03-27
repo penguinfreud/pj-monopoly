@@ -1,11 +1,12 @@
 package monopoly;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-class Players {
-    private static class AbstractPlayerNode {
+class Players implements Serializable {
+    private static class AbstractPlayerNode implements Serializable {
         AbstractPlayer player;
         AbstractPlayerNode next;
 
@@ -22,6 +23,8 @@ class Players {
     }
 
     AbstractPlayer getCurrentPlayer() {
+        if (currentPlayer == null)
+            return null;
         return currentPlayer.player;
     }
 
@@ -60,8 +63,8 @@ class Players {
         do {
             AbstractPlayer player = node.player;
             player.initPlace(g.getMap().getStartingPoint());
-            player.initCash(g.getConfig().get("init cash").getInt());
-            player.initDeposit(g.getConfig().get("init deposit").getInt());
+            player.initCash((Integer) g.getConfig("init cash"));
+            player.initDeposit((Integer) g.getConfig("init deposit"));
             node = currentPlayer.next;
         } while(node != currentPlayer);
     }
