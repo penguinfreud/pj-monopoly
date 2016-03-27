@@ -1,4 +1,7 @@
 package monopoly;
 
-public class AbstractPlayer {
+public abstract class AbstractPlayer {
+    public void beginTurn(Game g) {
+        g.rollTheDice();
+    }
 }

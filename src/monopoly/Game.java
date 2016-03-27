@@ -1,11 +1,15 @@
 package monopoly;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
 
 public class Game {
+    private Config config;
+    private Random random = new Random();
     private Map map;
     private ArrayList<AbstractPlayer> players;
-    private AbstractPlayer currentPlayer;
+    private int currentPlayerIndex;
     private boolean started = false;
 
     public Map getMap() {
@@ -25,6 +29,24 @@ public class Game {
     }
 
     public AbstractPlayer getCurrentPlayer() {
-        return currentPlayer;
+        return players.get(currentPlayerIndex);
     }
+
+    public void start() {
+        if (started) return;
+        Collections.shuffle(players);
+        currentPlayerIndex = 0;
+        started = true;
+        beginTurn();
+    }
+
+    void beginTurn() {
+        AbstractPlayer currentPlayer = getCurrentPlayer();
+        currentPlayer.beginTurn(this);
+    }
+
+    public void rollTheDice() {
+        int dice = random.nextInt(config.get("dice-sides").getInt());
+    }
+
 }
