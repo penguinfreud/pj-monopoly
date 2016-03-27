@@ -1,4 +1,4 @@
 package monopoly;
 
-public class Player {
+public class Player extends AbstractPlayer {
 }

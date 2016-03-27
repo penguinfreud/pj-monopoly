@@ -4,32 +4,30 @@ import java.util.Hashtable;
 
 public class Config {
     public static class Entry {
-        private boolean booleanVaue;
-        private int intValue;
-        private String stringValue;
+        private Object value;
 
         public boolean getBoolean() {
-            return booleanVaue;
+            return (Boolean)value;
         }
 
         public int getInt() {
-            return intValue;
+            return (Integer)value;
         }
 
         public String getString() {
-            return stringValue;
+            return (String)value;
         }
 
         public Entry(boolean v) {
-            booleanVaue = v;
+            value = v;
         }
 
         public Entry(int v) {
-            intValue = v;
+            value = v;
         }
 
         public Entry(String v) {
-            stringValue = v;
+            value = v;
         }
     }
 
@@ -48,6 +46,12 @@ public class Config {
     }
 
     private void defaultConfig() {
-        put("dice-sides", new Entry(6));
+        put("dice sides", new Entry(6));
+        put("init cash", new Entry(2000));
+        put("init deposit", new Entry(2000));
+    }
+
+    void readFile() {
+
     }
 }

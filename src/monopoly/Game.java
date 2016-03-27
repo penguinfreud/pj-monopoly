@@ -1,5 +1,7 @@
 package monopoly;
 
+import monopoly.event.Listener;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
@@ -11,6 +13,12 @@ public class Game {
     private ArrayList<AbstractPlayer> players;
     private int currentPlayerIndex;
     private boolean started = false;
+
+    private Listener beginTurnCb = new Listener<Action>() {
+        public void run(Action action) {
+
+        }
+    };
 
     public Map getMap() {
         return map;
@@ -34,19 +42,21 @@ public class Game {
 
     public void start() {
         if (started) return;
+        started = true;
         Collections.shuffle(players);
         currentPlayerIndex = 0;
-        started = true;
+
+        for (AbstractPlayer player: players) {
+            player.initPlace(map.getStartingPoint());
+            player.initCash(config.get("init cash").getInt());
+            player.initDeposit(config.get("init deposit").getInt());
+        }
+
         beginTurn();
     }
 
     void beginTurn() {
         AbstractPlayer currentPlayer = getCurrentPlayer();
-        currentPlayer.beginTurn(this);
+        currentPlayer.beginTurn(this, beginTurnCb);
     }
-
-    public void rollTheDice() {
-        int dice = random.nextInt(config.get("dice-sides").getInt());
-    }
-
 }
