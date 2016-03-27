@@ -45,7 +45,7 @@ public abstract class AbstractPlayer implements Serializable {
         return name;
     }
 
-    public final void setName(String name) {
+    final void setName(String name) {
         this.name = name;
     }
 
@@ -69,7 +69,7 @@ public abstract class AbstractPlayer implements Serializable {
         return new CopyOnWriteArrayList<>(properties);
     }
 
-    protected void beginTurn(Game g) {
+    void beginTurn(Game g) {
         g.rollTheDice();
     }
 
@@ -84,9 +84,22 @@ public abstract class AbstractPlayer implements Serializable {
         }
     }
 
-    private final void sellProperties() {
-        if (properties.size() > 0) {
-
+    private void sellProperties(Game g, Property prop) {
+        if (cash < 0) {
+            if (prop != null) {
+                if (properties.contains(prop)) {
+                    cash += prop.getMortgagePrice();
+                    properties.remove(prop);
+                    prop.mortgage(iOwnIt);
+                }
+            }
+            if (cash < 0) {
+                if (properties.size() > 0) {
+                    askWhichPropertyToMortgage(g, (nextProp) -> sellProperties(g, nextProp));
+                } else {
+                    g.triggerBankrupt(this);
+                }
+            }
         }
     }
 
@@ -124,11 +137,24 @@ public abstract class AbstractPlayer implements Serializable {
                 } else {
                     cash += deposit;
                     deposit = 0;
-                    sellProperties();
+                    sellProperties(g, null);
                     if (cash < 0) {
                         g.triggerBankrupt(this);
                     }
                 }
+            }
+        }
+    }
+
+    final void advance(Game g, int steps) {
+        if (steps >= 1) {
+            currentPlace = currentPlace.getNext();
+            if (steps == 1) {
+                currentPlace.onLanded(g);
+            } else {
+                currentPlace.onPassing(g, (obj) -> {
+                    advance(g, steps - 1);
+                });
             }
         }
     }

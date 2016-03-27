@@ -32,6 +32,10 @@ public abstract class Property extends Place {
         return price * 3 / 10;
     }
 
+    public int getMortgagePrice() {
+        return price;
+    }
+
     public AbstractPlayer getOwner() {
         return owner;
     }
@@ -40,13 +44,19 @@ public abstract class Property extends Place {
         return level;
     }
 
-    public void changeOwner(AbstractPlayer.Promise newOwner) {
-        owner = newOwner.getOwner();
+    public void changeOwner(AbstractPlayer.Promise promise) {
+        owner = promise.getOwner();
     }
 
-    public void upgrade(AbstractPlayer.Promise upgrade) {
-        if (upgrade.getOwner() == owner) {
+    public void upgrade(AbstractPlayer.Promise promise) {
+        if (promise.getOwner() == owner) {
             level++;
+        }
+    }
+
+    public void mortgage(AbstractPlayer.Promise promise) {
+        if (promise.getOwner() == owner) {
+            owner = null;
         }
     }
 

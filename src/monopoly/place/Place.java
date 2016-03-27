@@ -1,6 +1,7 @@
 package monopoly.place;
 
 import monopoly.Game;
+import monopoly.event.Listener;
 
 import java.io.Serializable;
 
@@ -25,5 +26,7 @@ public abstract class Place implements Serializable {
     }
 
     public void onLanded(Game g) {}
-    public void onPassing(Game g) {}
+    public void onPassing(Game g, Listener<Object> cb) {
+        cb.run(null);
+    }
 }

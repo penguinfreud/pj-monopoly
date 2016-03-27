@@ -15,8 +15,9 @@ class GameData implements Serializable {
     Players players = new Players();
     boolean started = false;
 
-    Event<Object> _onGameStart = new Event<>(),
-            _onGameOver = new Event<>();
+    Event<Object> _onGameOver = new Event<>(),
+        _onTurn = new Event<>(),
+        _onCycle = new Event<>();
     Event<Game.CashChangeEvent> _onCashChange = new Event<>();
     Event<AbstractPlayer> _onBankrupt = new Event<>();
 }
@@ -55,7 +56,7 @@ public class Game {
     public void setPlayers(List<AbstractPlayer> playersList) throws Exception {
         synchronized (lock) {
             if (!data.started) {
-                data.players.setPlayers(playersList);
+                data.players.set(playersList);
             }
         }
     }
@@ -70,8 +71,8 @@ public class Game {
         synchronized (lock) {
             if (data.started) return;
             data.started = true;
-            data.players.initPlayers(this);
-            data._onGameStart.trigger(null);
+            data.players.init(this);
+            _onGameStart.trigger(this);
             beginTurn();
         }
     }
@@ -79,7 +80,7 @@ public class Game {
     void beginTurn() {
         synchronized (lock) {
             if (data.started) {
-                getCurrentPlayer().beginTurn(this);
+                data.players.getCurrentPlayer().beginTurn(this);
             }
         }
     }
@@ -96,7 +97,8 @@ public class Game {
     public void rollTheDice() {
         synchronized (lock) {
             if (data.started) {
-
+                int dice = random.nextInt((Integer) getConfig("dice sides")) + 1;
+                data.players.getCurrentPlayer().advance(this, dice);
             }
         }
     }
@@ -119,20 +121,29 @@ public class Game {
         }
     }
 
+    private static Event<Game> _onGameStart = new Event<>();
 
-    public void onGameStart(Listener<Object> listener) {
-        data._onGameStart.addListener(listener);
+    public static void onGameStart(Listener<Game> listener) {
+        _onGameStart.addListener(listener);
     }
 
     public void onGameOver(Listener<Object> listener) {
         data._onGameOver.addListener(listener);
     }
 
+    public void onTurn(Listener<Object> listener) {
+        data._onTurn.addListener(listener);
+    }
+
+    public void onCycle(Listener<Object> listener) {
+        data._onCycle.addListener(listener);
+    }
+
     public void onCashChange(Listener<CashChangeEvent> listener) {
         data._onCashChange.addListener(listener);
     }
 
-    public void triggerCashChange(CashChangeEvent event) {
+    void triggerCashChange(CashChangeEvent event) {
         synchronized (lock) {
             if (data.started) {
                 data._onCashChange.trigger(event);
@@ -144,10 +155,10 @@ public class Game {
         data._onBankrupt.addListener(listener);
     }
 
-    public void triggerBankrupt(AbstractPlayer player) {
+    void triggerBankrupt(AbstractPlayer player) {
         synchronized (lock) {
             if (data.started) {
-                data.players.removePlayer(player);
+                data.players.remove(player);
                 data._onBankrupt.trigger(player);
                 if (data.players.count() == 1) {
                     data._onGameOver.trigger(null);
@@ -156,13 +167,13 @@ public class Game {
         }
     }
 
-    public void readData(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+    void readData(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         synchronized (lock) {
             data = (GameData) ois.readObject();
         }
     }
 
-    public void writeData(ObjectOutputStream oos) throws IOException {
+    void writeData(ObjectOutputStream oos) throws IOException {
         synchronized (lock) {
             oos.writeObject(data);
         }

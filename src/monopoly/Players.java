@@ -3,72 +3,56 @@ package monopoly;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 class Players implements Serializable {
-    private static class AbstractPlayerNode implements Serializable {
-        AbstractPlayer player;
-        AbstractPlayerNode next;
-
-        AbstractPlayerNode(AbstractPlayer player) {
-            this.player = player;
-        }
-    }
-
-    private AbstractPlayerNode currentPlayer;
-    private int _count;
+    private List<AbstractPlayer> players = new CopyOnWriteArrayList<>();
+    private int currentPlayerIndex = 0;
 
     int count() {
-        return _count;
+        return players.size();
     }
 
     AbstractPlayer getCurrentPlayer() {
-        if (currentPlayer == null)
-            return null;
-        return currentPlayer.player;
+        return players.get(currentPlayerIndex);
     }
 
-    void setPlayers(List<AbstractPlayer> players) throws Exception {
-        _count = players.size();
-        if (_count < 2)
+    List<AbstractPlayer> getPlayers() {
+        return new CopyOnWriteArrayList<>(players);
+    }
+
+    void set(List<AbstractPlayer> thePlayers) throws Exception {
+        if (thePlayers.size() < 2)
             throw new Exception("Too few players.");
+        players.clear();
+        players.addAll(thePlayers);
         Collections.shuffle(players);
-        currentPlayer = new AbstractPlayerNode(players.get(0));
-        AbstractPlayerNode prev = null;
+        currentPlayerIndex = 0;
+    }
 
+    void init(Game g) {
         for (AbstractPlayer player: players) {
-            AbstractPlayerNode node = new AbstractPlayerNode(player);
-            if (prev != null)
-                prev.next = node;
-            prev = node;
-        }
-        prev.next = currentPlayer;
-    }
-
-    void removePlayer(AbstractPlayer player) {
-        AbstractPlayerNode node = currentPlayer;
-        do {
-            if (node.player == player) {
-                node.player = node.next.player;
-                node.next = node.next.next;
-                --_count;
-                break;
-            }
-            node = currentPlayer.next;
-        } while(node != currentPlayer);
-    }
-
-    void initPlayers(Game g) {
-        AbstractPlayerNode node = currentPlayer;
-        do {
-            AbstractPlayer player = node.player;
             player.initPlace(g.getMap().getStartingPoint());
             player.initCash((Integer) g.getConfig("init cash"));
             player.initDeposit((Integer) g.getConfig("init deposit"));
-            node = currentPlayer.next;
-        } while(node != currentPlayer);
+        }
+    }
+
+    void remove(AbstractPlayer player) {
+        int i = players.indexOf(player);
+        if (i == -1) return;
+        if (i < currentPlayerIndex) {
+            --currentPlayerIndex;
+        }
+        players.remove(player);
+        if (currentPlayerIndex == players.size()) {
+            currentPlayerIndex = 0;
+        }
     }
 
     void next() {
-        currentPlayer = currentPlayer.next;
+        if (++currentPlayerIndex == players.size()) {
+            currentPlayerIndex = 0;
+        }
     }
 }
