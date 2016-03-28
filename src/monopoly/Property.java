@@ -73,4 +73,9 @@ public abstract class Property extends Place {
             }
         }
     }
+    
+    @Override
+    public Property asProperty() {
+        return this;
+    }
 }

@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class AbstractPlayer implements Serializable {
-    private static final Object lock = new Object();
-
     private String name;
     private Place currentPlace;
     private int cash, deposit;
@@ -57,18 +55,41 @@ public abstract class AbstractPlayer implements Serializable {
         }
         return poss;
     }
+    
+    private Listener<Card> selectCardCb;
+    private Listener<Object> useCardCb;
 
     final void startTurn(Game g) {
-        useCards(g, (o) -> g.rollTheDice());
+        synchronized (g.lock) {
+            selectCardCb = (card) -> {
+                synchronized (g.lock) {
+                    if (g.getState() == Game.State.TURN_STARTING) {
+                        if (card == null) {
+                            g.rollTheDice();
+                        } else {
+                            card.use(g, useCardCb);
+                        }
+                    }
+                }
+            };
+            useCardCb = (o) -> {
+                synchronized (g.lock) {
+                    if (g.getState() == Game.State.TURN_STARTING) {
+                        askWhichCardToUse(g, selectCardCb);
+                    }
+                }
+            };
+            useCardCb.run(null);
+        }
     }
 
     public abstract void askWhetherToBuyProperty(Game g, Listener<Boolean> cb);
     public abstract void askWhetherToUpgradeProperty(Game g, Listener<Boolean> cb);
     public abstract void askWhichPropertyToMortgage(Game g, Listener<Property> cb);
-    public abstract void useCards(Game g, Listener<Object> cb);
+    public abstract void askWhichCardToUse(Game g, Listener<Card> cb);
 
     private void _changeCash(Game g, int amount) {
-        synchronized (lock) {
+        synchronized (g.lock) {
             cash += amount;
             g.triggerCashChange(new Game.CashChangeEvent(this, amount));
         }
@@ -94,43 +115,49 @@ public abstract class AbstractPlayer implements Serializable {
     }
 
     final void buyProperty(Game g) {
-        synchronized (lock) {
-            Property prop = (Property) currentPlace;
-            int price = prop.getPurchasePrice();
-            if (prop.isFree() && cash > price) {
-                _changeCash(g, -price);
-                properties.add(prop);
-                prop.changeOwner(this);
+        synchronized (g.lock) {
+            if (g.getState() == Game.State.TURN_LANDED) {
+                Property prop = currentPlace.asProperty();
+                int price = prop.getPurchasePrice();
+                if (prop.isFree() && cash > price) {
+                    _changeCash(g, -price);
+                    properties.add(prop);
+                    prop.changeOwner(this);
+                }
             }
         }
     }
 
     final void upgradeProperty(Game g) {
-        synchronized (lock) {
-            Property prop = (Property) currentPlace;
-            int price = prop.getUpgradePrice();
-            if (prop.isFree() && cash > price) {
-                _changeCash(g, -price);
-                prop.upgrade();
+        synchronized (g.lock) {
+            if (g.getState() == Game.State.TURN_LANDED) {
+                Property prop = currentPlace.asProperty();
+                int price = prop.getUpgradePrice();
+                if (prop.isFree() && cash > price) {
+                    _changeCash(g, -price);
+                    prop.upgrade();
+                }
             }
         }
     }
 
      final void payRent(Game g) {
-        synchronized (lock) {
-            System.out.println("pay rent");
-            int rent = ((Property) currentPlace).getRent();
-            _changeCash(g, -rent);
-            if (cash < 0) {
-                if (cash + deposit >= 0) {
-                    cash = 0;
-                    deposit += cash;
-                } else {
-                    cash += deposit;
-                    deposit = 0;
-                    sellProperties(g, null);
-                    if (cash < 0) {
-                        g.triggerBankrupt(this);
+        synchronized (g.lock) {
+            if (g.getState() == Game.State.TURN_LANDED) {
+                System.out.println("pay rent");
+                int rent = currentPlace.asProperty().getRent();
+                _changeCash(g, -rent);
+                if (cash < 0) {
+                    if (cash + deposit >= 0) {
+                        cash = 0;
+                        deposit += cash;
+                    } else {
+                        cash += deposit;
+                        deposit = 0;
+                        sellProperties(g, null);
+                        if (cash < 0) {
+                            g.triggerBankrupt(this);
+                        }
                     }
                 }
             }
@@ -140,10 +167,12 @@ public abstract class AbstractPlayer implements Serializable {
     private int stepsToAdvance;
 
     final void startWalking(Game g, int steps) {
-        if (g.getState() == Game.State.TURN_WALKING) {
-            System.out.println("start walking");
-            stepsToAdvance = steps;
-            _startStep(g);
+        synchronized (g.lock) {
+            if (g.getState() == Game.State.TURN_WALKING) {
+                System.out.println("start walking");
+                stepsToAdvance = steps;
+                _startStep(g);
+            }
         }
     }
 
@@ -152,14 +181,16 @@ public abstract class AbstractPlayer implements Serializable {
     }
 
     protected final void step(Game g) {
-        if (g.getState() == Game.State.TURN_WALKING) {
-            System.out.println("step");
-            currentPlace = currentPlace.getNext();
-            if (--stepsToAdvance == 0) {
-                g.endWalking();
-            } else {
-                currentPlace.onPassingBy(g);
-                _startStep(g);
+        synchronized (g.lock) {
+            if (g.getState() == Game.State.TURN_WALKING) {
+                System.out.println("step");
+                currentPlace = currentPlace.getNext();
+                if (--stepsToAdvance == 0) {
+                    g.endWalking();
+                } else {
+                    currentPlace.onPassingBy(g);
+                    _startStep(g);
+                }
             }
         }
     }

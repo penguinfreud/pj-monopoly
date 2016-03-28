@@ -1,9 +1,8 @@
 package monopoly.ui;
 
 import javax.swing.*;
-import java.io.Serializable;
 
-public abstract class Pane implements Serializable {
+public abstract class Pane {
     protected JComponent comp;
     protected MainController controller;
 
@@ -11,6 +10,6 @@ public abstract class Pane implements Serializable {
         this.controller = controller;
     }
 
-    protected abstract void onEnter();
-    protected abstract void onLeave();
+    protected void onEnter() {}
+    protected void onLeave() {}
 }

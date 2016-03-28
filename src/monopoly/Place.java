@@ -27,4 +27,8 @@ public abstract class Place implements Serializable {
     }
 
     public void onPassingBy(Game g) {}
+    
+    public Property asProperty() {
+        return null;
+    }
 }

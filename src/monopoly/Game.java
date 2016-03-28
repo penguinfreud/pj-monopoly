@@ -32,7 +32,7 @@ public class Game {
         OVER, STARTING, TURN_STARTING, TURN_WALKING, TURN_LANDED, TURN_ENDING
     }
 
-    private final Object lock = new Object();
+    protected final Object lock = new Object();
     private Random random = new Random();
     private GameData data;
 
@@ -84,6 +84,12 @@ public class Game {
         }
     }
 
+    public List<AbstractPlayer> getPlayers() {
+        synchronized (lock) {
+            return data.players.getPlayers();
+        }
+    }
+
     public AbstractPlayer getCurrentPlayer() {
         synchronized (lock) {
             return data.players.getCurrentPlayer();
@@ -103,10 +109,11 @@ public class Game {
 
     void startTurn() {
         synchronized (lock) {
-            if (data.state == State.STARTING || data.state == State.TURN_ENDING) {
+            boolean notFirst = data.state == State.TURN_ENDING;
+            if (data.state == State.STARTING || notFirst) {
                 data.state = State.TURN_STARTING;
                 data._onTurn.trigger(null);
-                if (data.players.isNewCycle() && data.state == State.TURN_ENDING) {
+                if (data.players.isNewCycle() && notFirst) {
                     data._onCycle.trigger(null);
                 }
                 data.players.getCurrentPlayer().startTurn(this);
@@ -220,13 +227,13 @@ public class Game {
         }
     }
 
-    void readData(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+    protected void readData(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         synchronized (lock) {
             data = (GameData) ois.readObject();
         }
     }
 
-    void writeData(ObjectOutputStream oos) throws IOException {
+    protected void writeData(ObjectOutputStream oos) throws IOException {
         synchronized (lock) {
             oos.writeObject(data);
         }

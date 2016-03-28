@@ -1,4 +1,4 @@
 package monopoly.ui;
 
-public class Config {
+public class Config extends monopoly.Config {
 }

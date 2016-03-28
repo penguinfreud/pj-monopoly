@@ -6,14 +6,12 @@ public class WelcomePane extends Pane {
     public WelcomePane(MainController controller) {
         super(controller);
         comp = new JPanel();
-        JButton btnNewGame = new JButton("New Game");
-        btnNewGame.addActionListener((e) -> controller.switchTo(controller.newGamePane));
-        comp.add(btnNewGame);
+        comp.add(createNewGameBtn());
     }
-
-    @Override
-    protected void onEnter() {}
-
-    @Override
-    protected void onLeave() {}
+    
+    private JComponent createNewGameBtn() {
+        JButton btnNewGame = new JButton("New Game");
+        btnNewGame.addActionListener((e) -> controller.newGame());
+        return btnNewGame;
+    }
 }

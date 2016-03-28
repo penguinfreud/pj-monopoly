@@ -11,11 +11,16 @@ import java.util.regex.Pattern;
 
 public class Map implements Serializable {
     private List<Place> places = new ArrayList<>();
+    private String name;
 
     private Map() {}
 
     public int size() {
         return places.size();
+    }
+    
+    public String getName() {
+        return name;
     }
 
     public static Map readMap(InputStream is) throws Exception {
@@ -24,23 +29,17 @@ public class Map implements Serializable {
         sc.useDelimiter(Pattern.compile("\\s*,\\s*"));
 
         Map map = new Map();
+        map.name = sc.next();
         Place prev = null, next;
+        
         while (sc.hasNext()) {
-            String id = sc.next();
-            if (!placeTypes.containsKey(id)) {
-                Class.forName("monopoly.place." + id);
+            next = readPlace(sc);
+            map.places.add(next);
+            if (prev != null) {
+                prev.next = next;
+                next.prev = prev;
             }
-            if (placeTypes.containsKey(id)) {
-                next = placeTypes.get(id).run(sc);
-                map.places.add(next);
-                if (prev != null) {
-                    prev.next = next;
-                    next.prev = prev;
-                }
-                prev = next;
-            } else {
-                throw new Exception("Unknown place type: '" + id + "'");
-            }
+            prev = next;
         }
 
         if (prev != null) {
@@ -51,8 +50,16 @@ public class Map implements Serializable {
 
         sc.close();
         isr.close();
-        is.close();
         return map;
+    }
+    
+    public static Place readPlace(Scanner sc) throws Exception {
+        String id = sc.next();
+        if (placeTypes.containsKey(id)) {
+            return placeTypes.get(id).run(sc);
+        } else {
+            throw new Exception("Unknown place type: '" + id + "'");
+        }
     }
 
     public Place getStartingPoint() {

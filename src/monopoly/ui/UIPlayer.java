@@ -1,14 +1,15 @@
 package monopoly.ui;
 
 import monopoly.AbstractPlayer;
+import monopoly.Card;
 import monopoly.Game;
 import monopoly.Property;
 import monopoly.event.Listener;
 
-public class Player extends AbstractPlayer {
-    public Player() {}
+public class UIPlayer extends AbstractPlayer {
+    public UIPlayer() {}
 
-    public Player(String name) {
+    public UIPlayer(String name) {
         setName(name);
     }
 
@@ -28,7 +29,7 @@ public class Player extends AbstractPlayer {
     }
 
     @Override
-    public void useCards(Game g, Listener<Object> cb) {
+    public void askWhichCardToUse(Game g, Listener<Card> cb) {
         cb.run(null);
     }
 }

@@ -28,7 +28,7 @@ public class AIPlayer extends AbstractPlayer {
     }
 
     @Override
-    public void useCards(Game g, Listener<Object> cb) {
+    public void askWhichCardToUse(Game g, Listener<Card> cb) {
         cb.run(null);
     }
 }

@@ -10,22 +10,27 @@ public class NewPlayerPane extends Pane {
     public NewPlayerPane(MainController controller) {
         super(controller);
         comp = Box.createVerticalBox();
-
-        comp.add(new JLabel("Enter Player's Name:"));
-
-        txtName = new JTextField();
-        comp.add(txtName);
-
-        JButton btnAddPlayer = new JButton("OK");
-        comp.add(btnAddPlayer);
-        btnAddPlayer.addActionListener((e) -> {
-            controller.players.add(new AIPlayer(txtName.getText()));
-            controller.switchTo(controller.newGamePane);
-        });
+        comp.add(createNameField());
+        comp.add(createOKBtn());
     }
-
-    @Override
-    protected void onEnter() {}
+    
+    private JComponent createNameField() {
+        Box box = Box.createVerticalBox();
+        box.add(new JLabel("Enter Player's Name:"));
+        txtName = new JTextField();
+        box.add(txtName);
+        return txtName;
+    }
+    
+    private JComponent createOKBtn() {
+        JButton btnOk = new JButton("OK");
+        btnOk.addActionListener((e) -> {
+            synchronized (controller.lock) {
+                controller.addPlayer(new AIPlayer(txtName.getText()));
+            }
+        });
+        return btnOk;
+    }
 
     @Override
     protected void onLeave() {
