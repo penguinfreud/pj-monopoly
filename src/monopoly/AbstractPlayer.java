@@ -11,6 +11,7 @@ public abstract class AbstractPlayer implements Serializable {
     private Place currentPlace;
     private int cash, deposit;
     private List<Property> properties = new CopyOnWriteArrayList<>();
+    private List<Card> cards = new CopyOnWriteArrayList<>();
 
     final void initPlace(Place place) {
         currentPlace = place;
@@ -183,7 +184,7 @@ public abstract class AbstractPlayer implements Serializable {
     protected final void step(Game g) {
         synchronized (g.lock) {
             if (g.getState() == Game.State.TURN_WALKING) {
-                System.out.println("step");
+                System.out.println("step " + getCurrentPlace().getName());
                 currentPlace = currentPlace.getNext();
                 if (--stepsToAdvance == 0) {
                     g.endWalking();

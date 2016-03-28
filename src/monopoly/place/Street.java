@@ -5,7 +5,7 @@ import monopoly.Property;
 
 public class Street extends Property {
     static {
-        Map.registerPlaceType("Street", (sc) -> new Street(sc.next(), sc.nextInt()));
+        Map.registerPlaceReader("Street", (sc) -> new Street(sc.next(), sc.nextInt()));
     }
 
     protected Street(String name, int price) {

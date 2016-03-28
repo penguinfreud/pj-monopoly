@@ -9,6 +9,6 @@ public class Empty extends Place {
     }
 
     static {
-        Map.registerPlaceType("Empty", (sc) -> new Empty());
+        Map.registerPlaceReader("Empty", (sc) -> new Empty());
     }
 }

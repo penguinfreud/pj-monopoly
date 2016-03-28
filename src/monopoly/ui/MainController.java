@@ -21,20 +21,14 @@ public class MainController {
     private UIGame game;
     
     private Pane currentPane;
-    private List<Pane> panes = new ArrayList<>();
 
     public MainController() {
         createFrame();
         welcomePane = new WelcomePane(this);
-        panes.add(welcomePane);
         newGamePane = new NewGamePane(this);
-        panes.add(newGamePane);
         newPlayerPane = new NewPlayerPane(this);
-        panes.add(newPlayerPane);
         gamePane = new GamePane(this);
-        panes.add(gamePane);
         gameOverPane = new GameOverPane(this);
-        panes.add(gameOverPane);
         
         switchTo(welcomePane);
         main.setVisible(true);
@@ -122,6 +116,14 @@ public class MainController {
     public void gameOver() {
         synchronized (lock) {
             if (currentPane == gamePane) {
+                switchTo(gameOverPane);
+            }
+        }
+    }
+
+    public void welcome() {
+        synchronized (lock) {
+            if (currentPane == gameOverPane) {
                 switchTo(welcomePane);
             }
         }

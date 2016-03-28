@@ -32,7 +32,7 @@ public class Game {
         OVER, STARTING, TURN_STARTING, TURN_WALKING, TURN_LANDED, TURN_ENDING
     }
 
-    protected final Object lock = new Object();
+    final Object lock = new Object();
     private Random random = new Random();
     private GameData data;
 
@@ -107,7 +107,7 @@ public class Game {
         }
     }
 
-    void startTurn() {
+    private void startTurn() {
         synchronized (lock) {
             boolean notFirst = data.state == State.TURN_ENDING;
             if (data.state == State.STARTING || notFirst) {
@@ -138,11 +138,20 @@ public class Game {
         }
     }
 
-    void startWalking(int steps) {
+    public void startWalking(int steps) {
         synchronized (lock) {
             if (data.state == State.TURN_STARTING) {
                 data.state = State.TURN_WALKING;
                 data.players.getCurrentPlayer().startWalking(this, steps);
+            }
+        }
+    }
+
+    public void stay() {
+        synchronized (lock) {
+            if (data.state == State.TURN_STARTING) {
+                data.state = State.TURN_LANDED;
+                endTurn();
             }
         }
     }

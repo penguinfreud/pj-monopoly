@@ -6,7 +6,7 @@ public abstract class Pane {
     protected JComponent comp;
     protected MainController controller;
 
-    Pane(MainController controller) {
+    protected Pane(MainController controller) {
         this.controller = controller;
     }
 

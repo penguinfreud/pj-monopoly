@@ -1,1 +1,7 @@
-Empty,Empty,Empty,StopTheGame
+Map,
+test,
+Street,a,0,
+Street,b,0,
+Street,c,0,
+Street,d,0,
+StopTheGame

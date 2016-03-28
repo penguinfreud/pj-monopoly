@@ -16,6 +16,9 @@ public class GameTest {
 
     @Before
     public void setUp() throws Exception {
+        Class.forName("monopoly.MapReader");
+        Class.forName("monopoly.place.Street");
+        Class.forName("monopoly.StopTheGame");
         map = Map.readMap(new FileInputStream("test.map"));
 
         players = new ArrayList<>();
@@ -36,7 +39,7 @@ public class GameTest {
         assertTrue(game.getCurrentPlayer() == firstPlayer ||
             game.getCurrentPlayer() == secondPlayer);
         assertEquals("bar", game.getConfig("foo"));
-        assertEquals("Empty", game.getMap().getStartingPoint().getName());
+        assertEquals("a", game.getMap().getStartingPoint().getName());
 
         game.start();
     }

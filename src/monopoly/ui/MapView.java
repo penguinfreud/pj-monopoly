@@ -11,11 +11,11 @@ public class MapView extends Pane {
         public void paint(Graphics g) {
             drawBackground(g);
             
-            DrawablePlace start = (DrawablePlace) controller.getGame().getMap().getStartingPoint();
-            DrawablePlace place = start;
+            UIPlace start = (UIPlace) controller.getGame().getMap().getStartingPoint();
+            UIPlace place = start;
             do {
                 place.draw(g);
-                place = (DrawablePlace) place.getNext();
+                place = (UIPlace) place.getNext();
             } while(place != start);
             
             for (AbstractPlayer player: controller.getGame().getPlayers()) {

@@ -19,4 +19,8 @@ public class StopTheGame extends Property {
     public void onLanded(Game g) {
         g.getCurrentPlayer().payRent(g);
     }
+
+    static {
+        Map.registerPlaceReader("StopTheGame", (sc) -> new StopTheGame());
+    }
 }

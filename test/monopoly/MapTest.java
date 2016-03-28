@@ -14,10 +14,12 @@ public class MapTest {
     private File tempFile;
 
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws IOException, ClassNotFoundException {
+        Class.forName("monopoly.MapReader");
+        Class.forName("monopoly.place.Street");
         tempFile = File.createTempFile("map", "txt");
         PrintStream ps = new PrintStream(new FileOutputStream(tempFile));
-        ps.print("Street,myStreet,10");
+        ps.print("Map,foo,Street,myStreet,10");
         ps.close();
     }
 
