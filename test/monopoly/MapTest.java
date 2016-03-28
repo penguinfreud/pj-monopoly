@@ -1,16 +1,11 @@
 package monopoly;
 
-import monopoly.Map;
-import monopoly.Place;
 import monopoly.place.Street;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
@@ -28,7 +23,7 @@ public class MapTest {
 
     @Test
     public void testMapFromFile() throws Exception {
-        Map map = Map.fromFile(tempFile);
+        Map map = Map.readMap(new FileInputStream(tempFile));
         assertEquals(1, map.size());
         Place p = map.getStartingPoint();
         assertThat(p, instanceOf(Street.class));

@@ -1,11 +1,7 @@
 package monopoly.place;
 
 import monopoly.Map;
-import monopoly.Place;
 import monopoly.Property;
-import monopoly.event.Function;
-
-import java.util.Scanner;
 
 public class Street extends Property {
     static {

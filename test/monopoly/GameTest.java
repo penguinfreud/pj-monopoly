@@ -1,10 +1,9 @@
 package monopoly;
 
-import monopoly.player.AIPlayer;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 
 import static org.junit.Assert.*;
@@ -17,7 +16,7 @@ public class GameTest {
 
     @Before
     public void setUp() throws Exception {
-        map = Map.fromFile(new File("test.map"));
+        map = Map.readMap(new FileInputStream("test.map"));
 
         players = new ArrayList<>();
         firstPlayer = new AIPlayer("player A");

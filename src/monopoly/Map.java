@@ -18,9 +18,8 @@ public class Map implements Serializable {
         return places.size();
     }
 
-    public static Map fromFile(File fin) throws Exception {
-        FileInputStream fis = new FileInputStream(fin);
-        InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+    public static Map readMap(InputStream is) throws Exception {
+        InputStreamReader isr = new InputStreamReader(is, "UTF-8");
         Scanner sc = new Scanner(isr);
         sc.useDelimiter(Pattern.compile("\\s*,\\s*"));
 
@@ -44,7 +43,7 @@ public class Map implements Serializable {
             }
         }
 
-        if (!map.places.isEmpty()) {
+        if (prev != null) {
             next = map.places.get(0);
             prev.next = next;
             next.prev = prev;
@@ -52,7 +51,7 @@ public class Map implements Serializable {
 
         sc.close();
         isr.close();
-        fis.close();
+        is.close();
         return map;
     }
 
@@ -60,7 +59,7 @@ public class Map implements Serializable {
         return places.get(0);
     }
 
-    private static java.util.Map<String, Function<Scanner, Place>> placeTypes = new Hashtable<>();
+    private static final java.util.Map<String, Function<Scanner, Place>> placeTypes = new Hashtable<>();
 
     public static void registerPlaceType(String id, Function<Scanner, Place> reader) {
         placeTypes.put(id, reader);

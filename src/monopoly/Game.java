@@ -11,7 +11,7 @@ import java.util.*;
 
 
 class GameData implements Serializable {
-    Config config = new Config();
+    Config config;
     Map map;
     Players players = new Players();
     Game.State state = Game.State.OVER;
@@ -21,6 +21,10 @@ class GameData implements Serializable {
         _onCycle = new Event<>();
     Event<Game.CashChangeEvent> _onCashChange = new Event<>();
     Event<AbstractPlayer> _onBankrupt = new Event<>();
+
+    public GameData(Config c) {
+        config = c;
+    }
 }
 
 public class Game {
@@ -30,7 +34,15 @@ public class Game {
 
     private final Object lock = new Object();
     private Random random = new Random();
-    private GameData data = new GameData();
+    private GameData data;
+
+    public Game() {
+        data = new GameData(new Config());
+    }
+
+    protected Game(Config c) {
+        data = new GameData(c);
+    }
 
     public State getState() {
         synchronized (lock) {
@@ -112,19 +124,25 @@ public class Game {
         }
     }
 
-    public void rollTheDice() {
+    void rollTheDice() {
+        synchronized (lock) {
+            int dice = random.nextInt((Integer) getConfig("dice sides")) + 1;
+            startWalking(dice);
+        }
+    }
+
+    void startWalking(int steps) {
         synchronized (lock) {
             if (data.state == State.TURN_STARTING) {
                 data.state = State.TURN_WALKING;
-                int dice = random.nextInt((Integer) getConfig("dice sides")) + 1;
-                data.players.getCurrentPlayer().startWalking(this, dice);
+                data.players.getCurrentPlayer().startWalking(this, steps);
             }
         }
     }
 
     void endWalking() {
         synchronized (lock) {
-            if (data.state == State.TURN_WALKING) {
+            if (data.state == State.TURN_WALKING || data.state == State.TURN_STARTING) {
                 data.state = State.TURN_LANDED;
                 data.players.getCurrentPlayer().getCurrentPlace().onLanded(this);
             }
@@ -156,7 +174,7 @@ public class Game {
         }
     }
 
-    private static Event<Game> _onGameStart = new Event<>();
+    private static final Event<Game> _onGameStart = new Event<>();
 
     public static void onGameStart(Listener<Game> listener) {
         _onGameStart.addListener(listener);

@@ -46,10 +46,6 @@ public abstract class AbstractPlayer implements Serializable {
         return currentPlace;
     }
 
-    public final boolean owns(Property prop) {
-        return properties.contains(prop);
-    }
-
     public final List<Property> getProperties() {
         return new CopyOnWriteArrayList<>(properties);
     }
@@ -62,13 +58,14 @@ public abstract class AbstractPlayer implements Serializable {
         return poss;
     }
 
-    void startTurn(Game g) {
-        g.rollTheDice();
+    final void startTurn(Game g) {
+        useCards(g, (o) -> g.rollTheDice());
     }
 
     public abstract void askWhetherToBuyProperty(Game g, Listener<Boolean> cb);
     public abstract void askWhetherToUpgradeProperty(Game g, Listener<Boolean> cb);
     public abstract void askWhichPropertyToMortgage(Game g, Listener<Property> cb);
+    public abstract void useCards(Game g, Listener<Object> cb);
 
     private void _changeCash(Game g, int amount) {
         synchronized (lock) {

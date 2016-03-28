@@ -1,4 +1,4 @@
-package monopoly.player;
+package monopoly;
 
 import monopoly.AbstractPlayer;
 import monopoly.Game;
@@ -25,5 +25,10 @@ public class AIPlayer extends AbstractPlayer {
     @Override
     public void askWhichPropertyToMortgage(Game g, Listener<Property> cb) {
         cb.run(getProperties().get(0));
+    }
+
+    @Override
+    public void useCards(Game g, Listener<Object> cb) {
+        cb.run(null);
     }
 }

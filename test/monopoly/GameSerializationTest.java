@@ -1,7 +1,5 @@
 package monopoly;
 
-import monopoly.event.Listener;
-import monopoly.player.AIPlayer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +18,7 @@ public class GameSerializationTest {
 
     @Before
     public void setUp() throws Exception {
-        map = Map.fromFile(new File("test.map"));
+        map = Map.readMap(new FileInputStream("test.map"));
 
         players = new ArrayList<>();
         firstPlayer = new AIPlayer("player A");

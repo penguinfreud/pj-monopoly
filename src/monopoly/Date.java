@@ -9,7 +9,7 @@ public final class Date {
     static {
         Game.onGameStart((g) -> {
             Calendar calendar = Calendar.getInstance();
-            calendar.set(2016, 0, 1);
+            calendar.set(2016, Calendar.JANUARY, 1);
             g.onCycle((obj) -> {
                 int oldMonth = calendar.get(Calendar.MONTH);
                 calendar.add(Calendar.DATE, 1);
@@ -21,7 +21,7 @@ public final class Date {
         });
     }
 
-    private static Event<Game> _onMonth = new Event<>();
+    private static final Event<Game> _onMonth = new Event<>();
 
     public void onMonth(Listener<Game> listener) {
         _onMonth.addListener(listener);
