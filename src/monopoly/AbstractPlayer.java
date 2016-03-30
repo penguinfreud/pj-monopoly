@@ -1,7 +1,7 @@
 package monopoly;
 
 import monopoly.async.Callback;
-import monopoly.async.CashChangeEvent;
+import monopoly.async.MoneyChangeEvent;
 
 import java.io.Serializable;
 import java.util.List;
@@ -91,7 +91,16 @@ public abstract class AbstractPlayer implements Serializable {
     private void _changeCash(Game g, int amount) {
         synchronized (g.lock) {
             cash += amount;
-            g.triggerCashChange(new CashChangeEvent(this, amount));
+            g.triggerMoneyChange(new MoneyChangeEvent(this, amount));
+        }
+    }
+
+    void changeDeposit(Game g, int amount) {
+        synchronized (g.lock) {
+            if (deposit + amount >= 0) {
+                deposit += amount;
+                g.triggerMoneyChange(new MoneyChangeEvent(this, amount));
+            }
         }
     }
 

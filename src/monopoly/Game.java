@@ -1,6 +1,6 @@
 package monopoly;
 
-import monopoly.async.CashChangeEvent;
+import monopoly.async.MoneyChangeEvent;
 import monopoly.async.Event;
 import monopoly.async.Callback;
 
@@ -15,31 +15,33 @@ class GameData implements Serializable {
     Config config;
     Map map;
     Calendar calendar;
+    Bank bank;
     Players players = new Players();
     Game.State state = Game.State.OVER;
 
     java.util.Map<String, Event<Object>> oEvents = new Hashtable<>();
     java.util.Map<String, Event<AbstractPlayer>> pEvents = new Hashtable<>();
-    java.util.Map<String, Event<CashChangeEvent>> cEvents = new Hashtable<>();
+    java.util.Map<String, Event<MoneyChangeEvent>> mEvents = new Hashtable<>();
 
     Event<Object> onGameStart = new Event<>(),
             onGameOver = new Event<>(),
             onTurn = new Event<>(),
             onCycle = new Event<>();
     Event<AbstractPlayer> onBankrupt = new Event<>();
-    Event<CashChangeEvent> onCashChange = new Event<>();
+    Event<MoneyChangeEvent> onMoneyChange = new Event<>();
 
-    {
+    GameData(Game g, Config c) {
+        config = c;
+    }
+
+    void init(Game g) {
         oEvents.put("gameStart", onGameStart);
         oEvents.put("gameOver", onGameOver);
         oEvents.put("turn", onTurn);
         oEvents.put("cycle", onCycle);
         pEvents.put("bankrupt", onBankrupt);
-        cEvents.put("cashChange", onCashChange);
-    }
-
-    GameData(Game g, Config c) {
-        config = c;
+        mEvents.put("cashChange", onMoneyChange);
+        calendar = new Calendar(g);
     }
 }
 
@@ -54,7 +56,7 @@ public class Game {
 
     public Game() {
         data = new GameData(this, new Config());
-        data.calendar = new Calendar(this);
+        data.init(this);
     }
 
     protected Game(Config c) {
@@ -111,6 +113,10 @@ public class Game {
         synchronized (lock) {
             return data.players.getCurrentPlayer();
         }
+    }
+
+    public String getDate() {
+        return data.calendar.getDate();
     }
 
     public void start() {
@@ -197,8 +203,8 @@ public class Game {
         data.pEvents.get(id).addListener(callback);
     }
 
-    public void onC(String id, Callback<CashChangeEvent> callback) {
-        data.cEvents.get(id).addListener(callback);
+    public void onC(String id, Callback<MoneyChangeEvent> callback) {
+        data.mEvents.get(id).addListener(callback);
     }
 
     void registerOEvent(String id, Event<Object> event) {
@@ -209,14 +215,14 @@ public class Game {
         data.pEvents.put(id, event);
     }
 
-    void registerCEvent(String id, Event<CashChangeEvent> event) {
-        data.cEvents.put(id, event);
+    void registerCEvent(String id, Event<MoneyChangeEvent> event) {
+        data.mEvents.put(id, event);
     }
 
-    void triggerCashChange(CashChangeEvent event) {
+    void triggerMoneyChange(MoneyChangeEvent event) {
         synchronized (lock) {
             if (data.state != State.OVER) {
-                data.onCashChange.trigger(event);
+                data.onMoneyChange.trigger(event);
             }
         }
     }

@@ -2,11 +2,11 @@ package monopoly.async;
 
 import monopoly.AbstractPlayer;
 
-public class CashChangeEvent {
+public class MoneyChangeEvent {
     private AbstractPlayer player;
     private int amount;
 
-    public CashChangeEvent(AbstractPlayer player, int amount) {
+    public MoneyChangeEvent(AbstractPlayer player, int amount) {
         this.player = player;
         this.amount = amount;
     }
