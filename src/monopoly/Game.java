@@ -47,7 +47,7 @@ class GameData implements Serializable {
 
 public class Game {
     public enum State {
-        OVER, STARTING, TURN_STARTING, TURN_WALKING, TURN_LANDED, TURN_ENDING
+        OVER, STARTING, TURN_STARTING, TURN_WALKING, TURN_LANDED
     }
 
     final Object lock = new Object();
@@ -132,7 +132,7 @@ public class Game {
 
     private void startTurn() {
         synchronized (lock) {
-            boolean notFirst = data.state == State.TURN_ENDING;
+            boolean notFirst = data.state == State.TURN_LANDED;
             if (data.state == State.STARTING || notFirst) {
                 data.state = State.TURN_STARTING;
                 data.onTurn.trigger(null);
@@ -144,15 +144,14 @@ public class Game {
         }
     }
 
-    void endTurn() {
+    private Callback<Object> endTurn = (o) -> {
         synchronized (lock) {
             if (data.state == State.TURN_LANDED) {
-                data.state = State.TURN_ENDING;
                 data.players.next();
                 startTurn();
             }
         }
-    }
+    };
 
     void rollTheDice() {
         synchronized (lock) {
@@ -174,7 +173,8 @@ public class Game {
         synchronized (lock) {
             if (data.state == State.TURN_STARTING) {
                 data.state = State.TURN_LANDED;
-                endTurn();
+                data.players.next();
+                startTurn();
             }
         }
     }
@@ -183,7 +183,7 @@ public class Game {
         synchronized (lock) {
             if (data.state == State.TURN_WALKING || data.state == State.TURN_STARTING) {
                 data.state = State.TURN_LANDED;
-                data.players.getCurrentPlayer().getCurrentPlace().onLanded(this);
+                data.players.getCurrentPlayer().getCurrentPlace().onLanded(this, endTurn);
             }
         }
     }

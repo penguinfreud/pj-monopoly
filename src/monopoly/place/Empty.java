@@ -4,11 +4,11 @@ import monopoly.Map;
 import monopoly.Place;
 
 public class Empty extends Place {
-    protected Empty() {
-        super("Empty");
-    }
-
     static {
         Map.registerPlaceReader("Empty", (r, sc) -> new Empty());
+    }
+
+    protected Empty() {
+        super("Empty");
     }
 }

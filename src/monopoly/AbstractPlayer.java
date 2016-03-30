@@ -87,6 +87,7 @@ public abstract class AbstractPlayer implements Serializable {
     public abstract void askWhetherToUpgradeProperty(Game g, Callback<Boolean> cb);
     public abstract void askWhichPropertyToMortgage(Game g, Callback<Property> cb);
     public abstract void askWhichCardToUse(Game g, Callback<Card> cb);
+    public abstract void askHowMuchToDepositOrWithdraw(Game g, Callback<Integer> cb);
 
     private void _changeCash(Game g, int amount) {
         synchronized (g.lock) {
@@ -100,6 +101,15 @@ public abstract class AbstractPlayer implements Serializable {
             if (deposit + amount >= 0) {
                 deposit += amount;
                 g.triggerMoneyChange(new MoneyChangeEvent(this, amount));
+            }
+        }
+    }
+
+    public void depositOrWithdraw(Game g, int amount) {
+        synchronized (g.lock) {
+            if (cash - amount >= 0 && deposit + amount >= 0) {
+                cash -= amount;
+                deposit += amount;
             }
         }
     }

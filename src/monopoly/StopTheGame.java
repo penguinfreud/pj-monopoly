@@ -1,6 +1,12 @@
 package monopoly;
 
+import monopoly.async.Callback;
+
 public class StopTheGame extends Property {
+    static {
+        Map.registerPlaceReader("StopTheGame", (r, sc) -> new StopTheGame());
+    }
+
     public StopTheGame() {
         super("StopTheGame", Integer.MAX_VALUE);
     }
@@ -16,11 +22,8 @@ public class StopTheGame extends Property {
     }
 
     @Override
-    public void onLanded(Game g) {
+    public void onLanded(Game g, Callback<Object> cb) {
         g.getCurrentPlayer().payRent(g);
-    }
-
-    static {
-        Map.registerPlaceReader("StopTheGame", (r, sc) -> new StopTheGame());
+        cb.run(null);
     }
 }

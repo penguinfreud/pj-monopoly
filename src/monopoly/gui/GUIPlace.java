@@ -1,6 +1,7 @@
 package monopoly.gui;
 
 import monopoly.*;
+import monopoly.async.Callback;
 
 import java.awt.Graphics;
 
@@ -29,8 +30,8 @@ public class GUIPlace extends Place {
     }
 
     @Override
-    public void onLanded(Game g) {
-        place.onLanded(g);
+    public void onLanded(Game g, Callback<Object> cb) {
+        place.onLanded(g, cb);
     }
 
     @Override

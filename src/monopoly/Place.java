@@ -1,5 +1,7 @@
 package monopoly;
 
+import monopoly.async.Callback;
+
 import java.io.Serializable;
 
 public abstract class Place implements Serializable {
@@ -22,8 +24,8 @@ public abstract class Place implements Serializable {
         return next;
     }
 
-    public void onLanded(Game g) {
-        g.endTurn();
+    public void onLanded(Game g, Callback<Object> cb) {
+        cb.run(null);
     }
 
     public void onPassingBy(Game g) {}

@@ -32,4 +32,9 @@ public class GUIPlayer extends AbstractPlayer {
     public void askWhichCardToUse(Game g, Callback<Card> cb) {
         cb.run(null);
     }
+
+    @Override
+    public void askHowMuchToDepositOrWithdraw(Game g, Callback<Integer> cb) {
+        cb.run(0);
+    }
 }

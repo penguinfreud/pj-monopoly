@@ -1,8 +1,11 @@
 package monopoly;
 
+import monopoly.async.Callback;
+
 public abstract class Property extends Place {
     private AbstractPlayer owner;
-    private int price = 0, level = 0;
+    private int price = 0, level = 1;
+    private static final int MAX_LEVEL = 6;
 
     protected Property(String name, int price) {
         super(name);
@@ -46,7 +49,9 @@ public abstract class Property extends Place {
     }
 
     void upgrade() {
-        level++;
+        if (level < MAX_LEVEL) {
+            level++;
+        }
     }
 
     void mortgage() {
@@ -54,22 +59,24 @@ public abstract class Property extends Place {
     }
 
     @Override
-    public void onLanded(Game g) {
+    public void onLanded(Game g, Callback<Object> cb) {
         if (g.getState() == Game.State.TURN_LANDED) {
             AbstractPlayer p = g.getCurrentPlayer();
             if (owner == null) {
                 p.askWhetherToBuyProperty(g, (ok) -> {
                     if (ok) p.buyProperty(g);
-                    g.endTurn();
+                    cb.run(null);
                 });
             } else if (owner == p) {
-                p.askWhetherToUpgradeProperty(g, (ok) -> {
-                    if (ok) p.upgradeProperty(g);
-                    g.endTurn();
-                });
+                if (level < MAX_LEVEL) {
+                    p.askWhetherToUpgradeProperty(g, (ok) -> {
+                        if (ok) p.upgradeProperty(g);
+                        cb.run(null);
+                    });
+                }
             } else {
                 p.payRent(g);
-                g.endTurn();
+                cb.run(null);
             }
         }
     }
