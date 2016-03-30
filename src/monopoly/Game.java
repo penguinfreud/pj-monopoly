@@ -1,7 +1,7 @@
 package monopoly;
 
-import monopoly.event.Event;
-import monopoly.event.Listener;
+import monopoly.async.Event;
+import monopoly.async.Callback;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -192,24 +192,24 @@ public class Game {
 
     private static final Event<Game> _onGameStart = new Event<>();
 
-    public static void onGameStart(Listener<Game> listener) {
-        _onGameStart.addListener(listener);
+    public static void onGameStart(Callback<Game> callback) {
+        _onGameStart.addListener(callback);
     }
 
-    public void onGameOver(Listener<Object> listener) {
-        data._onGameOver.addListener(listener);
+    public void onGameOver(Callback<Object> callback) {
+        data._onGameOver.addListener(callback);
     }
 
-    public void onTurn(Listener<Object> listener) {
-        data._onTurn.addListener(listener);
+    public void onTurn(Callback<Object> callback) {
+        data._onTurn.addListener(callback);
     }
 
-    public void onCycle(Listener<Object> listener) {
-        data._onCycle.addListener(listener);
+    public void onCycle(Callback<Object> callback) {
+        data._onCycle.addListener(callback);
     }
 
-    public void onCashChange(Listener<CashChangeEvent> listener) {
-        data._onCashChange.addListener(listener);
+    public void onCashChange(Callback<CashChangeEvent> callback) {
+        data._onCashChange.addListener(callback);
     }
 
     void triggerCashChange(CashChangeEvent event) {
@@ -220,8 +220,8 @@ public class Game {
         }
     }
 
-    public void onBankrupt(Listener<AbstractPlayer> listener) {
-        data._onBankrupt.addListener(listener);
+    public void onBankrupt(Callback<AbstractPlayer> callback) {
+        data._onBankrupt.addListener(callback);
     }
 
     void triggerBankrupt(AbstractPlayer player) {

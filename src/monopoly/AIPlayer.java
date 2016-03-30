@@ -1,9 +1,6 @@
 package monopoly;
 
-import monopoly.AbstractPlayer;
-import monopoly.Game;
-import monopoly.Property;
-import monopoly.event.Listener;
+import monopoly.async.Callback;
 
 public class AIPlayer extends AbstractPlayer {
     public AIPlayer() {}
@@ -13,22 +10,22 @@ public class AIPlayer extends AbstractPlayer {
     }
 
     @Override
-    public void askWhetherToBuyProperty(Game g, Listener<Boolean> cb) {
+    public void askWhetherToBuyProperty(Game g, Callback<Boolean> cb) {
         cb.run(true);
     }
 
     @Override
-    public void askWhetherToUpgradeProperty(Game g, Listener<Boolean> cb) {
+    public void askWhetherToUpgradeProperty(Game g, Callback<Boolean> cb) {
         cb.run(true);
     }
 
     @Override
-    public void askWhichPropertyToMortgage(Game g, Listener<Property> cb) {
+    public void askWhichPropertyToMortgage(Game g, Callback<Property> cb) {
         cb.run(getProperties().get(0));
     }
 
     @Override
-    public void askWhichCardToUse(Game g, Listener<Card> cb) {
+    public void askWhichCardToUse(Game g, Callback<Card> cb) {
         cb.run(null);
     }
 }

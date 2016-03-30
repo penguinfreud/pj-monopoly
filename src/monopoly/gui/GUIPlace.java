@@ -46,4 +46,8 @@ public class GUIPlace extends Place {
     public void draw(Graphics g) {
     
     }
+
+    static {
+        Map.registerPlaceReader("GUIPlace", (r, sc) -> new GUIPlace(sc.nextInt(), sc.nextInt(), r.readPlace(sc)));
+    }
 }

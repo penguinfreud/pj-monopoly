@@ -1,7 +1,7 @@
 package monopoly;
 
-import monopoly.event.Event;
-import monopoly.event.Listener;
+import monopoly.async.Event;
+import monopoly.async.Callback;
 
 import java.util.Calendar;
 
@@ -23,7 +23,7 @@ public final class Date {
 
     private static final Event<Game> _onMonth = new Event<>();
 
-    public void onMonth(Listener<Game> listener) {
-        _onMonth.addListener(listener);
+    public void onMonth(Callback<Game> callback) {
+        _onMonth.addListener(callback);
     }
 }

@@ -21,6 +21,6 @@ public class StopTheGame extends Property {
     }
 
     static {
-        Map.registerPlaceReader("StopTheGame", (sc) -> new StopTheGame());
+        Map.registerPlaceReader("StopTheGame", (r, sc) -> new StopTheGame());
     }
 }

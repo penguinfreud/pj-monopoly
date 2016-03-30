@@ -1,6 +1,6 @@
 package monopoly;
 
-import monopoly.event.Function;
+import monopoly.async.Function;
 
 import java.util.Scanner;
 
@@ -16,11 +16,11 @@ public class MapReader {
         return map;
     }
 
-    protected Place readPlace(Scanner sc) throws Exception {
+    public Place readPlace(Scanner sc) throws Exception {
         String id = sc.next();
-        Function<Scanner, Place> reader = Map.getPlaceReader(id);
+        PlaceReader reader = Map.getPlaceReader(id);
         if (reader != null) {
-            return reader.run(sc);
+            return reader.read(this, sc);
         } else {
             throw new Exception("Unknown place type: '" + id + "'");
         }

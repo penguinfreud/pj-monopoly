@@ -1,6 +1,6 @@
 package monopoly;
 
-import monopoly.event.Listener;
+import monopoly.async.Callback;
 
 public class Card {
     private String name;
@@ -18,7 +18,7 @@ public class Card {
         owner = newOwner;
     }
 
-    public void use(Game g, Listener<Object> cb) {
+    public void use(Game g, Callback<Object> cb) {
         cb.run(null);
     }
 }

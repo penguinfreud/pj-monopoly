@@ -1,6 +1,6 @@
 package monopoly;
 
-import monopoly.event.Listener;
+import monopoly.async.Callback;
 
 import java.io.Serializable;
 import java.util.List;
@@ -57,8 +57,8 @@ public abstract class AbstractPlayer implements Serializable {
         return poss;
     }
     
-    private Listener<Card> selectCardCb;
-    private Listener<Object> useCardCb;
+    private Callback<Card> selectCardCb;
+    private Callback<Object> useCardCb;
 
     final void startTurn(Game g) {
         synchronized (g.lock) {
@@ -84,10 +84,10 @@ public abstract class AbstractPlayer implements Serializable {
         }
     }
 
-    public abstract void askWhetherToBuyProperty(Game g, Listener<Boolean> cb);
-    public abstract void askWhetherToUpgradeProperty(Game g, Listener<Boolean> cb);
-    public abstract void askWhichPropertyToMortgage(Game g, Listener<Property> cb);
-    public abstract void askWhichCardToUse(Game g, Listener<Card> cb);
+    public abstract void askWhetherToBuyProperty(Game g, Callback<Boolean> cb);
+    public abstract void askWhetherToUpgradeProperty(Game g, Callback<Boolean> cb);
+    public abstract void askWhichPropertyToMortgage(Game g, Callback<Property> cb);
+    public abstract void askWhichCardToUse(Game g, Callback<Card> cb);
 
     private void _changeCash(Game g, int amount) {
         synchronized (g.lock) {

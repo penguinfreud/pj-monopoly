@@ -1,6 +1,6 @@
 package monopoly;
 
-import monopoly.event.Function;
+import monopoly.async.Function;
 
 import java.io.*;
 import java.util.Hashtable;
@@ -66,13 +66,13 @@ public class Map implements Serializable {
         return places.get(0);
     }
 
-    private static final java.util.Map<String, Function<Scanner, Place>> placeReaders = new Hashtable<>();
+    private static final java.util.Map<String, PlaceReader> placeReaders = new Hashtable<>();
 
-    public static void registerPlaceReader(String id, Function<Scanner, Place> reader) {
+    public static void registerPlaceReader(String id, PlaceReader reader) {
         placeReaders.put(id, reader);
     }
 
-    public static Function<Scanner, Place> getPlaceReader(String id) {
+    public static PlaceReader getPlaceReader(String id) {
         return placeReaders.get(id);
     }
 

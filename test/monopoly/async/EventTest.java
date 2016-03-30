@@ -1,4 +1,4 @@
-package monopoly.event;
+package monopoly.async;
 
 import org.junit.Before;
 import org.junit.Test;

@@ -4,7 +4,7 @@ import monopoly.AbstractPlayer;
 import monopoly.Card;
 import monopoly.Game;
 import monopoly.Property;
-import monopoly.event.Listener;
+import monopoly.async.Callback;
 
 public class GUIPlayer extends AbstractPlayer {
     public GUIPlayer() {}
@@ -14,22 +14,22 @@ public class GUIPlayer extends AbstractPlayer {
     }
 
     @Override
-    public void askWhetherToBuyProperty(Game g, Listener<Boolean> cb) {
+    public void askWhetherToBuyProperty(Game g, Callback<Boolean> cb) {
 
     }
 
     @Override
-    public void askWhetherToUpgradeProperty(Game g, Listener<Boolean> cb) {
+    public void askWhetherToUpgradeProperty(Game g, Callback<Boolean> cb) {
 
     }
 
     @Override
-    public void askWhichPropertyToMortgage(Game g, Listener<Property> cb) {
+    public void askWhichPropertyToMortgage(Game g, Callback<Property> cb) {
 
     }
 
     @Override
-    public void askWhichCardToUse(Game g, Listener<Card> cb) {
+    public void askWhichCardToUse(Game g, Callback<Card> cb) {
         cb.run(null);
     }
 }

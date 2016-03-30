@@ -14,6 +14,7 @@ public class GUIMapTest {
     @Before
     public void setUp() throws IOException, ClassNotFoundException {
         Class.forName("monopoly.gui.GUIMapReader");
+        Class.forName("monopoly.gui.GUIPlace");
         Class.forName("monopoly.place.Street");
     }
 
