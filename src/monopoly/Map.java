@@ -1,7 +1,5 @@
 package monopoly;
 
-import monopoly.async.Function;
-
 import java.io.*;
 import java.util.Hashtable;
 import java.util.List;
@@ -49,7 +47,7 @@ public class Map implements Serializable {
         sc.useDelimiter(Pattern.compile("\\s*,\\s*"));
         String mapType = sc.next();
         MapReader reader = mapReaders.get(mapType);
-        Map map = null;
+        Map map;
 
         if (reader != null) {
             map = reader.readMap(sc);

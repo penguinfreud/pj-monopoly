@@ -11,21 +11,21 @@ public class AIPlayer extends AbstractPlayer {
 
     @Override
     public void askWhetherToBuyProperty(Game g, Callback<Boolean> cb) {
-        cb.run(true);
+        cb.run(g, true);
     }
 
     @Override
     public void askWhetherToUpgradeProperty(Game g, Callback<Boolean> cb) {
-        cb.run(true);
+        cb.run(g, true);
     }
 
     @Override
     public void askWhichPropertyToMortgage(Game g, Callback<Property> cb) {
-        cb.run(getProperties().get(0));
+        cb.run(g, getProperties().get(0));
     }
 
     @Override
     public void askWhichCardToUse(Game g, Callback<Card> cb) {
-        cb.run(null);
+        cb.run(g, null);
     }
 }

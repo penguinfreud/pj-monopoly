@@ -1,6 +1,7 @@
 package monopoly;
 
 import monopoly.async.Callback;
+import monopoly.async.CashChangeEvent;
 
 import java.io.Serializable;
 import java.util.List;
@@ -56,32 +57,32 @@ public abstract class AbstractPlayer implements Serializable {
         }
         return poss;
     }
-    
-    private Callback<Card> selectCardCb;
+
     private Callback<Object> useCardCb;
+    private Callback<Card> selectCardCb = (g, card) -> {
+        synchronized (g.lock) {
+            if (g.getState() == Game.State.TURN_STARTING) {
+                if (card == null) {
+                    g.rollTheDice();
+                } else {
+                    card.use(g, useCardCb);
+                }
+            }
+        }
+    };
+    
+    {
+        useCardCb = (g, o) -> {
+            synchronized (g.lock) {
+                if (g.getState() == Game.State.TURN_STARTING) {
+                    askWhichCardToUse(g, selectCardCb);
+                }
+            }
+        };
+    }
 
     final void startTurn(Game g) {
-        synchronized (g.lock) {
-            selectCardCb = (card) -> {
-                synchronized (g.lock) {
-                    if (g.getState() == Game.State.TURN_STARTING) {
-                        if (card == null) {
-                            g.rollTheDice();
-                        } else {
-                            card.use(g, useCardCb);
-                        }
-                    }
-                }
-            };
-            useCardCb = (o) -> {
-                synchronized (g.lock) {
-                    if (g.getState() == Game.State.TURN_STARTING) {
-                        askWhichCardToUse(g, selectCardCb);
-                    }
-                }
-            };
-            useCardCb.run(null);
-        }
+        useCardCb.run(g, null);
     }
 
     public abstract void askWhetherToBuyProperty(Game g, Callback<Boolean> cb);
@@ -92,7 +93,7 @@ public abstract class AbstractPlayer implements Serializable {
     private void _changeCash(Game g, int amount) {
         synchronized (g.lock) {
             cash += amount;
-            g.triggerCashChange(new Game.CashChangeEvent(this, amount));
+            g.triggerCashChange(new CashChangeEvent(this, amount));
         }
     }
 
@@ -107,7 +108,7 @@ public abstract class AbstractPlayer implements Serializable {
             }
             if (cash < 0) {
                 if (properties.size() > 0) {
-                    askWhichPropertyToMortgage(g, (nextProp) -> sellProperties(g, nextProp));
+                    askWhichPropertyToMortgage(g, (_g, nextProp) -> sellProperties(g, nextProp));
                 } else {
                     g.triggerBankrupt(this);
                 }

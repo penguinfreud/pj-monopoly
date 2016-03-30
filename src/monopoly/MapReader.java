@@ -1,7 +1,5 @@
 package monopoly;
 
-import monopoly.async.Function;
-
 import java.util.Scanner;
 
 public class MapReader {

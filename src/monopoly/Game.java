@@ -1,5 +1,6 @@
 package monopoly;
 
+import monopoly.async.CashChangeEvent;
 import monopoly.async.Event;
 import monopoly.async.Callback;
 
@@ -16,13 +17,7 @@ class GameData implements Serializable {
     Players players = new Players();
     Game.State state = Game.State.OVER;
 
-    Event<Object> _onGameOver = new Event<>(),
-        _onTurn = new Event<>(),
-        _onCycle = new Event<>();
-    Event<Game.CashChangeEvent> _onCashChange = new Event<>();
-    Event<AbstractPlayer> _onBankrupt = new Event<>();
-
-    public GameData(Config c) {
+    GameData(Config c) {
         config = c;
     }
 }
@@ -101,7 +96,7 @@ public class Game {
             if (data.state == State.OVER) {
                 data.state = State.STARTING;
                 data.players.init(this);
-                _onGameStart.trigger(this);
+                onGameStart.trigger(this, null);
                 startTurn();
             }
         }
@@ -112,9 +107,9 @@ public class Game {
             boolean notFirst = data.state == State.TURN_ENDING;
             if (data.state == State.STARTING || notFirst) {
                 data.state = State.TURN_STARTING;
-                data._onTurn.trigger(null);
+                onTurn.trigger(this, null);
                 if (data.players.isNewCycle() && notFirst) {
-                    data._onCycle.trigger(null);
+                    onCycle.trigger(this, null);
                 }
                 data.players.getCurrentPlayer().startTurn(this);
             }
@@ -168,67 +163,63 @@ public class Game {
     private void endGame() {
         if (data.state != State.OVER) {
             data.state = State.OVER;
-            data._onGameOver.trigger(null);
+            onGameOver.trigger(this, null);
         }
     }
 
-    public static class CashChangeEvent {
-        private AbstractPlayer player;
-        private int amount;
+    private static java.util.Map<String, Event<Object>> oEvents = new Hashtable<>();
+    private static java.util.Map<String, Event<AbstractPlayer>> pEvents = new Hashtable<>();
+    private static java.util.Map<String, Event<CashChangeEvent>> cEvents = new Hashtable<>();
 
-        public CashChangeEvent(AbstractPlayer player, int amount) {
-            this.player = player;
-            this.amount = amount;
+    private static Event<Object> onGameStart = new Event<>(),
+    onGameOver = new Event<>(),
+    onTurn = new Event<>(),
+    onCycle = new Event<>();
+    private static Event<AbstractPlayer> onBankrupt = new Event<>();
+    private static Event<CashChangeEvent> onCashChange = new Event<>();
+
+    static {
+        oEvents.put("gameStart", onGameStart);
+        oEvents.put("gameOver", onGameOver);
+        oEvents.put("turn", onTurn);
+        oEvents.put("cycle", onCycle);
+        pEvents.put("bankrupt", onBankrupt);
+        cEvents.put("cashChange", onCashChange);
+    }
+
+    private static <T> void on(java.util.Map<String, Event<T>> events, String id, Callback<T> callback) throws Exception {
+        Event<T> event = events.get(id);
+        if (event == null) {
+            throw new Exception("No such event: " + id);
         }
-
-        public AbstractPlayer getPlayer() {
-            return player;
-        }
-
-        public int getAmount() {
-            return amount;
-        }
+        event.addListener(callback);
     }
 
-    private static final Event<Game> _onGameStart = new Event<>();
-
-    public static void onGameStart(Callback<Game> callback) {
-        _onGameStart.addListener(callback);
+    public static void onO(String id, Callback<Object> callback) throws Exception {
+        Game.<Object> on(oEvents, id, callback);
     }
 
-    public void onGameOver(Callback<Object> callback) {
-        data._onGameOver.addListener(callback);
+    public static void onP(String id, Callback<AbstractPlayer> callback) throws Exception {
+        Game.<AbstractPlayer> on(pEvents, id, callback);
     }
 
-    public void onTurn(Callback<Object> callback) {
-        data._onTurn.addListener(callback);
-    }
-
-    public void onCycle(Callback<Object> callback) {
-        data._onCycle.addListener(callback);
-    }
-
-    public void onCashChange(Callback<CashChangeEvent> callback) {
-        data._onCashChange.addListener(callback);
+    public static void onC(String id, Callback<CashChangeEvent> callback) throws Exception {
+        Game.<CashChangeEvent> on(cEvents, id, callback);
     }
 
     void triggerCashChange(CashChangeEvent event) {
         synchronized (lock) {
             if (data.state != State.OVER) {
-                data._onCashChange.trigger(event);
+                onCashChange.trigger(this, event);
             }
         }
-    }
-
-    public void onBankrupt(Callback<AbstractPlayer> callback) {
-        data._onBankrupt.addListener(callback);
     }
 
     void triggerBankrupt(AbstractPlayer player) {
         synchronized (lock) {
             if (data.state != State.OVER) {
                 data.players.remove(player);
-                data._onBankrupt.trigger(player);
+                onBankrupt.trigger(this, player);
                 if (data.players.count() == 1) {
                     endGame();
                 }
