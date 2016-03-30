@@ -1,14 +1,14 @@
-package monopoly.ui;
+package monopoly.gui;
 
 import monopoly.*;
 
 import java.awt.Graphics;
 
-public class UIPlace extends Place {
+public class GUIPlace extends Place {
     private Place place;
     private int x, y;
     
-    public UIPlace(int x, int y, Place place) {
+    public GUIPlace(int x, int y, Place place) {
         super(place.getName());
         this.x = x;
         this.y = y;

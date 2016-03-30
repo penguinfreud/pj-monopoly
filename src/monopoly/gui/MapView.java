@@ -1,4 +1,4 @@
-package monopoly.ui;
+package monopoly.gui;
 
 import monopoly.AbstractPlayer;
 
@@ -11,11 +11,11 @@ public class MapView extends Pane {
         public void paint(Graphics g) {
             drawBackground(g);
             
-            UIPlace start = (UIPlace) controller.getGame().getMap().getStartingPoint();
-            UIPlace place = start;
+            GUIPlace start = (GUIPlace) controller.getGame().getMap().getStartingPoint();
+            GUIPlace place = start;
             do {
                 place.draw(g);
-                place = (UIPlace) place.getNext();
+                place = (GUIPlace) place.getNext();
             } while(place != start);
             
             for (AbstractPlayer player: controller.getGame().getPlayers()) {

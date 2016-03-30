@@ -1,4 +1,4 @@
-package monopoly.ui;
+package monopoly.gui;
 
 import monopoly.AbstractPlayer;
 import monopoly.Map;
@@ -18,7 +18,7 @@ public class MainController {
     private JFrame main;
     private List<AbstractPlayer> players;
     private File mapFile;
-    private UIGame game;
+    private GUIGame game;
     
     private Pane currentPane;
 
@@ -62,7 +62,7 @@ public class MainController {
         }
     }
     
-    public UIGame getGame() {
+    public GUIGame getGame() {
         return game;
     }
     
@@ -101,7 +101,7 @@ public class MainController {
             if (currentPane == newGamePane &&
                 mapFile != null && mapFile.exists() && players.size() >= 2) {
                 try {
-                    game = new UIGame();
+                    game = new GUIGame();
                     Map map = Map.readMap(new FileInputStream(mapFile));
                     game.setMap(map);
                     game.setPlayers(players);

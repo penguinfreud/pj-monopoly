@@ -1,4 +1,4 @@
-package monopoly.ui;
+package monopoly.gui;
 
 import monopoly.AbstractPlayer;
 import monopoly.Card;
@@ -6,10 +6,10 @@ import monopoly.Game;
 import monopoly.Property;
 import monopoly.event.Listener;
 
-public class UIPlayer extends AbstractPlayer {
-    public UIPlayer() {}
+public class GUIPlayer extends AbstractPlayer {
+    public GUIPlayer() {}
 
-    public UIPlayer(String name) {
+    public GUIPlayer(String name) {
         setName(name);
     }
 

@@ -1,4 +1,4 @@
-package monopoly.ui;
+package monopoly.gui;
 
 import monopoly.AIPlayer;
 
