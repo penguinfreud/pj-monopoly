@@ -18,19 +18,19 @@ public abstract class Property extends Place {
     }
 
     public int getPurchasePrice() {
-        return price;
+        return 0;
     }
 
     public int getUpgradePrice() {
-        return price / 2;
+        return 0;
     }
 
     public int getRent() {
-        return price * 3 / 10;
+        return 0;
     }
 
     public int getMortgagePrice() {
-        return price;
+        return 0;
     }
 
     public AbstractPlayer getOwner() {

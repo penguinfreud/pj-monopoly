@@ -1,7 +1,7 @@
 Map,
 test,
-Land,a,0,
-Land,b,0,
-Land,c,0,
-Land,d,0,
+Land,a,0,s,
+Land,b,0,s,
+Land,c,0,s,
+Land,d,0,s,
 StopTheGame

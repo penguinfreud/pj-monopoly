@@ -19,7 +19,7 @@ public class MapTest {
         Class.forName("monopoly.place.Land");
         tempFile = File.createTempFile("map", "txt");
         PrintStream ps = new PrintStream(new FileOutputStream(tempFile));
-        ps.print("Map,foo,Land,myStreet,10");
+        ps.print("Map,foo,Land,myStreet,10,s");
         ps.close();
     }
 

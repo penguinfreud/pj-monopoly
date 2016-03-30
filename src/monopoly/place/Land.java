@@ -5,10 +5,34 @@ import monopoly.Property;
 
 public class Land extends Property {
     static {
-        Map.registerPlaceReader("Land", (r, sc) -> new Land(sc.next(), sc.nextInt()));
+        Map.registerPlaceReader("Land", (r, sc) -> new Land(sc.next(), sc.nextInt(), r.getStreet(sc.next())));
     }
 
-    protected Land(String name, int price) {
+    private Street street;
+
+    protected Land(String name, int price, Street street) {
         super(name, price);
+        this.street = street;
+        street.addLand(this);
+    }
+
+    @Override
+    public int getPurchasePrice() {
+        return getPrice() * getLevel();
+    }
+
+    @Override
+    public int getUpgradePrice() {
+        return getPrice() / 2;
+    }
+
+    @Override
+    public int getRent() {
+        return getPrice() * 3 / 10 + street.getExtraRent();
+    }
+
+    @Override
+    public int getMortgagePrice() {
+        return getPrice() * getLevel();
     }
 }

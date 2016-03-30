@@ -7,7 +7,6 @@ import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -73,7 +72,7 @@ public class MainController {
     public void newGame() {
         synchronized (lock) {
             if (currentPane == welcomePane) {
-                players = new ArrayList<>();
+                players = new CopyOnWriteArrayList<>();
                 switchTo(newGamePane);
             }
         }

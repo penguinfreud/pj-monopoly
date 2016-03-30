@@ -5,12 +5,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.*;
-import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.Assert.assertEquals;
 
 public class GameSerializationTest {
-    private ArrayList<AbstractPlayer> players;
+    private List<AbstractPlayer> players;
     private Map map;
     private AbstractPlayer firstPlayer, secondPlayer;
     private Game game;
@@ -23,7 +24,7 @@ public class GameSerializationTest {
         Class.forName("monopoly.StopTheGame");
         map = Map.readMap(new FileInputStream("test_res/test.map"));
 
-        players = new ArrayList<>();
+        players = new CopyOnWriteArrayList<>();
         firstPlayer = new AIPlayer("player A");
         secondPlayer = new AIPlayer("player B");
         players.add(firstPlayer);
