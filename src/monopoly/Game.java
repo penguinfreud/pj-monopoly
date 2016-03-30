@@ -14,10 +14,31 @@ import java.util.*;
 class GameData implements Serializable {
     Config config;
     Map map;
+    Calendar calendar;
     Players players = new Players();
     Game.State state = Game.State.OVER;
 
-    GameData(Config c) {
+    java.util.Map<String, Event<Object>> oEvents = new Hashtable<>();
+    java.util.Map<String, Event<AbstractPlayer>> pEvents = new Hashtable<>();
+    java.util.Map<String, Event<CashChangeEvent>> cEvents = new Hashtable<>();
+
+    Event<Object> onGameStart = new Event<>(),
+            onGameOver = new Event<>(),
+            onTurn = new Event<>(),
+            onCycle = new Event<>();
+    Event<AbstractPlayer> onBankrupt = new Event<>();
+    Event<CashChangeEvent> onCashChange = new Event<>();
+
+    {
+        oEvents.put("gameStart", onGameStart);
+        oEvents.put("gameOver", onGameOver);
+        oEvents.put("turn", onTurn);
+        oEvents.put("cycle", onCycle);
+        pEvents.put("bankrupt", onBankrupt);
+        cEvents.put("cashChange", onCashChange);
+    }
+
+    GameData(Game g, Config c) {
         config = c;
     }
 }
@@ -32,11 +53,12 @@ public class Game {
     private GameData data;
 
     public Game() {
-        data = new GameData(new Config());
+        data = new GameData(this, new Config());
+        data.calendar = new Calendar(this);
     }
 
     protected Game(Config c) {
-        data = new GameData(c);
+        data = new GameData(this, c);
     }
 
     public State getState() {
@@ -96,7 +118,7 @@ public class Game {
             if (data.state == State.OVER) {
                 data.state = State.STARTING;
                 data.players.init(this);
-                onGameStart.trigger(this, null);
+                data.onGameStart.trigger(null);
                 startTurn();
             }
         }
@@ -107,9 +129,9 @@ public class Game {
             boolean notFirst = data.state == State.TURN_ENDING;
             if (data.state == State.STARTING || notFirst) {
                 data.state = State.TURN_STARTING;
-                onTurn.trigger(this, null);
+                data.onTurn.trigger(null);
                 if (data.players.isNewCycle() && notFirst) {
-                    onCycle.trigger(this, null);
+                    data.onCycle.trigger(null);
                 }
                 data.players.getCurrentPlayer().startTurn(this);
             }
@@ -163,54 +185,38 @@ public class Game {
     private void endGame() {
         if (data.state != State.OVER) {
             data.state = State.OVER;
-            onGameOver.trigger(this, null);
+            data.onGameOver.trigger(null);
         }
     }
 
-    private static java.util.Map<String, Event<Object>> oEvents = new Hashtable<>();
-    private static java.util.Map<String, Event<AbstractPlayer>> pEvents = new Hashtable<>();
-    private static java.util.Map<String, Event<CashChangeEvent>> cEvents = new Hashtable<>();
-
-    private static Event<Object> onGameStart = new Event<>(),
-    onGameOver = new Event<>(),
-    onTurn = new Event<>(),
-    onCycle = new Event<>();
-    private static Event<AbstractPlayer> onBankrupt = new Event<>();
-    private static Event<CashChangeEvent> onCashChange = new Event<>();
-
-    static {
-        oEvents.put("gameStart", onGameStart);
-        oEvents.put("gameOver", onGameOver);
-        oEvents.put("turn", onTurn);
-        oEvents.put("cycle", onCycle);
-        pEvents.put("bankrupt", onBankrupt);
-        cEvents.put("cashChange", onCashChange);
+    public void onO(String id, Callback<Object> callback) {
+        data.oEvents.get(id).addListener(callback);
     }
 
-    private static <T> void on(java.util.Map<String, Event<T>> events, String id, Callback<T> callback) throws Exception {
-        Event<T> event = events.get(id);
-        if (event == null) {
-            throw new Exception("No such event: " + id);
-        }
-        event.addListener(callback);
+    public void onP(String id, Callback<AbstractPlayer> callback) {
+        data.pEvents.get(id).addListener(callback);
     }
 
-    public static void onO(String id, Callback<Object> callback) throws Exception {
-        Game.<Object> on(oEvents, id, callback);
+    public void onC(String id, Callback<CashChangeEvent> callback) {
+        data.cEvents.get(id).addListener(callback);
     }
 
-    public static void onP(String id, Callback<AbstractPlayer> callback) throws Exception {
-        Game.<AbstractPlayer> on(pEvents, id, callback);
+    void registerOEvent(String id, Event<Object> event) {
+        data.oEvents.put(id, event);
     }
 
-    public static void onC(String id, Callback<CashChangeEvent> callback) throws Exception {
-        Game.<CashChangeEvent> on(cEvents, id, callback);
+    void registerPEvent(String id, Event<AbstractPlayer> event) {
+        data.pEvents.put(id, event);
+    }
+
+    void registerCEvent(String id, Event<CashChangeEvent> event) {
+        data.cEvents.put(id, event);
     }
 
     void triggerCashChange(CashChangeEvent event) {
         synchronized (lock) {
             if (data.state != State.OVER) {
-                onCashChange.trigger(this, event);
+                data.onCashChange.trigger(event);
             }
         }
     }
@@ -219,12 +225,22 @@ public class Game {
         synchronized (lock) {
             if (data.state != State.OVER) {
                 data.players.remove(player);
-                onBankrupt.trigger(this, player);
+                data.onBankrupt.trigger(player);
                 if (data.players.count() == 1) {
                     endGame();
                 }
             }
         }
+    }
+
+    private static java.util.Map<Object, Object> storage = new Hashtable<>();
+
+    public Object getData(Object key) {
+        return storage.get(key);
+    }
+
+    public void putData(Object key, Object val) {
+        storage.put(key, val);
     }
 
     protected void readData(ObjectInputStream ois) throws IOException, ClassNotFoundException {

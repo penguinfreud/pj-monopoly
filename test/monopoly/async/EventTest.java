@@ -17,9 +17,9 @@ public class EventTest {
 
     @Test
     public void testEvent() {
-        event.addListener((g, i) -> x = i);
+        event.addListener((i) -> x = i);
 
-        event.trigger(null, 13);
+        event.trigger(13);
         assertEquals(13, x);
     }
 }

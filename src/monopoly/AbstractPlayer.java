@@ -59,30 +59,28 @@ public abstract class AbstractPlayer implements Serializable {
     }
 
     private Callback<Object> useCardCb;
-    private Callback<Card> selectCardCb = (g, card) -> {
-        synchronized (g.lock) {
-            if (g.getState() == Game.State.TURN_STARTING) {
-                if (card == null) {
-                    g.rollTheDice();
-                } else {
-                    card.use(g, useCardCb);
+    private Callback<Card> selectCardCb;
+
+    final void startTurn(Game g) {
+        selectCardCb = (card) -> {
+            synchronized (g.lock) {
+                if (g.getState() == Game.State.TURN_STARTING) {
+                    if (card == null) {
+                        g.rollTheDice();
+                    } else {
+                        card.use(g, useCardCb);
+                    }
                 }
             }
-        }
-    };
-    
-    {
-        useCardCb = (g, o) -> {
+        };
+        useCardCb = (o) -> {
             synchronized (g.lock) {
                 if (g.getState() == Game.State.TURN_STARTING) {
                     askWhichCardToUse(g, selectCardCb);
                 }
             }
         };
-    }
-
-    final void startTurn(Game g) {
-        useCardCb.run(g, null);
+        useCardCb.run(null);
     }
 
     public abstract void askWhetherToBuyProperty(Game g, Callback<Boolean> cb);
@@ -108,7 +106,7 @@ public abstract class AbstractPlayer implements Serializable {
             }
             if (cash < 0) {
                 if (properties.size() > 0) {
-                    askWhichPropertyToMortgage(g, (_g, nextProp) -> sellProperties(g, nextProp));
+                    askWhichPropertyToMortgage(g, (nextProp) -> sellProperties(g, nextProp));
                 } else {
                     g.triggerBankrupt(this);
                 }

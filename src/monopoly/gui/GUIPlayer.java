@@ -30,6 +30,6 @@ public class GUIPlayer extends AbstractPlayer {
 
     @Override
     public void askWhichCardToUse(Game g, Callback<Card> cb) {
-        cb.run(g, null);
+        cb.run(null);
     }
 }

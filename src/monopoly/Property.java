@@ -58,12 +58,12 @@ public abstract class Property extends Place {
         if (g.getState() == Game.State.TURN_LANDED) {
             AbstractPlayer p = g.getCurrentPlayer();
             if (owner == null) {
-                p.askWhetherToBuyProperty(g, (_g, ok) -> {
+                p.askWhetherToBuyProperty(g, (ok) -> {
                     if (ok) p.buyProperty(g);
                     g.endTurn();
                 });
             } else if (owner == p) {
-                p.askWhetherToUpgradeProperty(g, (_g, ok) -> {
+                p.askWhetherToUpgradeProperty(g, (ok) -> {
                     if (ok) p.upgradeProperty(g);
                     g.endTurn();
                 });

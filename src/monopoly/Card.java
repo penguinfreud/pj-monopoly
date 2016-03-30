@@ -19,6 +19,6 @@ public class Card {
     }
 
     public void use(Game g, Callback<Object> cb) {
-        cb.run(g, null);
+        cb.run(null);
     }
 }
