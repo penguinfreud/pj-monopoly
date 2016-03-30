@@ -58,6 +58,10 @@ public abstract class AbstractPlayer implements Serializable {
         return poss;
     }
 
+    public final void giveUp(Game g) {
+        g.triggerBankrupt(this);
+    }
+
     private Callback<Object> useCardCb;
     private Callback<Card> selectCardCb;
 
@@ -89,23 +93,27 @@ public abstract class AbstractPlayer implements Serializable {
     public abstract void askWhichCardToUse(Game g, Callback<Card> cb);
     public abstract void askHowMuchToDepositOrWithdraw(Game g, Callback<Integer> cb);
 
-    private void _changeCash(Game g, int amount) {
+    private void _changeCash(Game g, int amount, String msg) {
         synchronized (g.lock) {
             cash += amount;
-            g.triggerMoneyChange(new MoneyChangeEvent(this, amount));
+            g.triggerMoneyChange(new MoneyChangeEvent(this, amount, msg));
         }
     }
 
-    void changeDeposit(Game g, int amount) {
+    public final void changeCash(Game g, int amount, String msg) {
+        _changeCash(g, amount, msg);
+    }
+
+    public final void changeDeposit(Game g, int amount, String msg) {
         synchronized (g.lock) {
             if (deposit + amount >= 0) {
                 deposit += amount;
-                g.triggerMoneyChange(new MoneyChangeEvent(this, amount));
+                g.triggerMoneyChange(new MoneyChangeEvent(this, amount, msg));
             }
         }
     }
 
-    public void depositOrWithdraw(Game g, int amount) {
+    public final void depositOrWithdraw(Game g, int amount) {
         synchronized (g.lock) {
             if (cash - amount >= 0 && deposit + amount >= 0) {
                 cash -= amount;
@@ -139,7 +147,7 @@ public abstract class AbstractPlayer implements Serializable {
                 Property prop = currentPlace.asProperty();
                 int price = prop.getPurchasePrice();
                 if (prop.isFree() && cash > price) {
-                    _changeCash(g, -price);
+                    _changeCash(g, -price, "");
                     properties.add(prop);
                     prop.changeOwner(this);
                 }
@@ -153,8 +161,8 @@ public abstract class AbstractPlayer implements Serializable {
                 Property prop = currentPlace.asProperty();
                 int price = prop.getUpgradePrice();
                 if (prop.isFree() && cash > price) {
-                    _changeCash(g, -price);
-                    prop.upgrade();
+                    _changeCash(g, -price, "");
+                    prop.upgrade(g);
                 }
             }
         }
@@ -164,20 +172,23 @@ public abstract class AbstractPlayer implements Serializable {
         synchronized (g.lock) {
             if (g.getState() == Game.State.TURN_LANDED) {
                 System.out.println("pay rent");
-                int rent = currentPlace.asProperty().getRent();
-                _changeCash(g, -rent);
-                if (cash < 0) {
-                    if (cash + deposit >= 0) {
-                        cash = 0;
-                        deposit += cash;
-                    } else {
-                        cash += deposit;
-                        deposit = 0;
-                        sellProperties(g, null);
-                        if (cash < 0) {
-                            g.triggerBankrupt(this);
-                        }
-                    }
+                pay(g, currentPlace.asProperty().getRent(), "");
+            }
+        }
+    }
+
+    public final void pay(Game g, int amount, String msg) {
+        _changeCash(g, -amount, msg);
+        if (cash < 0) {
+            if (cash + deposit >= 0) {
+                cash = 0;
+                deposit += cash;
+            } else {
+                cash += deposit;
+                deposit = 0;
+                sellProperties(g, null);
+                if (cash <= 0) {
+                    g.triggerBankrupt(this);
                 }
             }
         }

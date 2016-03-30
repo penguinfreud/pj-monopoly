@@ -9,6 +9,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 class GameData implements Serializable {
@@ -51,7 +52,6 @@ public class Game {
     }
 
     final Object lock = new Object();
-    private Random random = new Random();
     private GameData data;
 
     public Game() {
@@ -155,7 +155,7 @@ public class Game {
 
     void rollTheDice() {
         synchronized (lock) {
-            int dice = random.nextInt((Integer) getConfig("dice sides")) + 1;
+            int dice = ThreadLocalRandom.current().nextInt((Integer) getConfig("dice-sides")) + 1;
             startWalking(dice);
         }
     }

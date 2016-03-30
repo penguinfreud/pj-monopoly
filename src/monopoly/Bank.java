@@ -12,6 +12,6 @@ public class Bank implements Serializable {
     }
 
     private void giveInterest(Game g, AbstractPlayer player) {
-        player.changeDeposit(g, player.getDeposit() / 10);
+        player.changeDeposit(g, player.getDeposit() / 10, "");
     }
 }

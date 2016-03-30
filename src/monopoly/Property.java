@@ -5,7 +5,6 @@ import monopoly.async.Callback;
 public abstract class Property extends Place {
     private AbstractPlayer owner;
     private int price = 0, level = 1;
-    private static final int MAX_LEVEL = 6;
 
     protected Property(String name, int price) {
         super(name);
@@ -48,8 +47,8 @@ public abstract class Property extends Place {
         this.owner = owner;
     }
 
-    void upgrade() {
-        if (level < MAX_LEVEL) {
+    void upgrade(Game g) {
+        if (level < (Integer) g.getConfig("property-max-level")) {
             level++;
         }
     }
@@ -68,7 +67,7 @@ public abstract class Property extends Place {
                     cb.run(null);
                 });
             } else if (owner == p) {
-                if (level < MAX_LEVEL) {
+                if (level < (Integer) g.getConfig("property-max-level")) {
                     p.askWhetherToUpgradeProperty(g, (ok) -> {
                         if (ok) p.upgradeProperty(g);
                         cb.run(null);

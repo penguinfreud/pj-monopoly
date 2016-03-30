@@ -5,10 +5,12 @@ import monopoly.AbstractPlayer;
 public class MoneyChangeEvent {
     private AbstractPlayer player;
     private int amount;
+    private String msg;
 
-    public MoneyChangeEvent(AbstractPlayer player, int amount) {
+    public MoneyChangeEvent(AbstractPlayer player, int amount, String msg) {
         this.player = player;
         this.amount = amount;
+        this.msg = msg;
     }
 
     public AbstractPlayer getPlayer() {
@@ -17,5 +19,9 @@ public class MoneyChangeEvent {
 
     public int getAmount() {
         return amount;
+    }
+
+    public String getMessage() {
+        return msg;
     }
 }

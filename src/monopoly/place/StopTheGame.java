@@ -1,29 +1,27 @@
-package monopoly;
+package monopoly.place;
 
+import monopoly.Game;
+import monopoly.Map;
+import monopoly.Place;
 import monopoly.async.Callback;
 
-public class StopTheGame extends Property {
+public class StopTheGame extends Place {
     static {
         Map.registerPlaceReader("StopTheGame", (r, sc) -> new StopTheGame());
     }
 
     public StopTheGame() {
-        super("StopTheGame", Integer.MAX_VALUE);
-    }
-
-    @Override
-    public int getRent() {
-        return Integer.MAX_VALUE;
+        super("StopTheGame");
     }
 
     @Override
     public void onPassingBy(Game g) {
-        g.getCurrentPlayer().payRent(g);
+        g.getCurrentPlayer().giveUp(g);
     }
 
     @Override
     public void onLanded(Game g, Callback<Object> cb) {
-        g.getCurrentPlayer().payRent(g);
+        onPassingBy(g);
         cb.run(null);
     }
 }
