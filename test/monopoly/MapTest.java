@@ -1,6 +1,6 @@
 package monopoly;
 
-import monopoly.place.Street;
+import monopoly.place.Land;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,10 +16,10 @@ public class MapTest {
     @Before
     public void setUp() throws IOException, ClassNotFoundException {
         Class.forName("monopoly.MapReader");
-        Class.forName("monopoly.place.Street");
+        Class.forName("monopoly.place.Land");
         tempFile = File.createTempFile("map", "txt");
         PrintStream ps = new PrintStream(new FileOutputStream(tempFile));
-        ps.print("Map,foo,Street,myStreet,10");
+        ps.print("Map,foo,Land,myStreet,10");
         ps.close();
     }
 
@@ -28,9 +28,9 @@ public class MapTest {
         Map map = Map.readMap(new FileInputStream(tempFile));
         assertEquals(1, map.size());
         Place p = map.getStartingPoint();
-        assertThat(p, instanceOf(Street.class));
+        assertThat(p, instanceOf(Land.class));
         assertEquals("myStreet", p.getName());
-        assertEquals(10, ((Street) p).getPrice());
+        assertEquals(10, ((Land) p).getPrice());
         assertEquals(p, p.prev);
         assertEquals(p, p.next);
     }

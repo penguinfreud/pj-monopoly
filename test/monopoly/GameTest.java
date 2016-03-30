@@ -17,7 +17,7 @@ public class GameTest {
     @Before
     public void setUp() throws Exception {
         Class.forName("monopoly.MapReader");
-        Class.forName("monopoly.place.Street");
+        Class.forName("monopoly.place.Land");
         Class.forName("monopoly.StopTheGame");
         map = Map.readMap(new FileInputStream("test_res/test.map"));
 
