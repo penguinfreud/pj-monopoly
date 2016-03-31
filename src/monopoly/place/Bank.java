@@ -17,7 +17,7 @@ public class Bank extends Place {
 
     @Override
     public void onPassingBy(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
-        pi.depositOrWithdraw(g.getCurrentPlayer(), g, cb);
+        pi.depositOrWithdraw(g, cb);
     }
 
     @Override

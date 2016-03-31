@@ -170,7 +170,7 @@ public class Game {
         }
     }
 
-    public void startWalking(int steps) {
+    void startWalking(int steps) {
         synchronized (lock) {
             if (data.state == State.TURN_STARTING) {
                 data.state = State.TURN_WALKING;
@@ -179,7 +179,7 @@ public class Game {
         }
     }
 
-    public void stay() {
+    void stay() {
         synchronized (lock) {
             if (data.state == State.TURN_STARTING) {
                 data.state = State.TURN_LANDED;

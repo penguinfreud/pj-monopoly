@@ -1,9 +1,6 @@
 package monopoly.gui;
 
-import monopoly.AbstractPlayer;
-import monopoly.Card;
-import monopoly.Game;
-import monopoly.Property;
+import monopoly.*;
 import monopoly.async.Callback;
 
 public class GUIPlayer extends AbstractPlayer {
@@ -36,5 +33,11 @@ public class GUIPlayer extends AbstractPlayer {
     @Override
     public void askHowMuchToDepositOrWithdraw(Game g, Callback<Integer> cb) {
         cb.run(0);
+    }
+
+    @Override
+    public void askWhichPlaceToGo(Game g, Callback<Place> cb) {
+        Place cur = getCurrentPlace();
+        cb.run(isReversed()? cur.getPrev(): cur.getNext());
     }
 }

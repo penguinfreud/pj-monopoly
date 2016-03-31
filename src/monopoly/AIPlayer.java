@@ -33,4 +33,10 @@ public class AIPlayer extends AbstractPlayer {
     public void askHowMuchToDepositOrWithdraw(Game g, Callback<Integer> cb) {
         cb.run(0);
     }
+
+    @Override
+    public void askWhichPlaceToGo(Game g, Callback<Place> cb) {
+        Place cur = getCurrentPlace();
+        cb.run(isReversed()? cur.getPrev(): cur.getNext());
+    }
 }

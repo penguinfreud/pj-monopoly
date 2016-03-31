@@ -67,6 +67,10 @@ public abstract class AbstractPlayer implements Serializable {
         return poss;
     }
 
+    public boolean isReversed() {
+        return reversed;
+    }
+
     protected final void giveUp(Game g) {
         g.triggerBankrupt(this);
     }
@@ -101,6 +105,8 @@ public abstract class AbstractPlayer implements Serializable {
     protected abstract void askWhichPropertyToMortgage(Game g, Callback<Property> cb);
     protected abstract void askWhichCardToUse(Game g, Callback<Card> cb);
     protected abstract void askHowMuchToDepositOrWithdraw(Game g, Callback<Integer> cb);
+
+    public abstract void askWhichPlaceToGo(Game g, Callback<Place> cb);
 
     private void changeCash(Game g, int amount, String msg) {
         synchronized (g.lock) {
@@ -270,8 +276,9 @@ public abstract class AbstractPlayer implements Serializable {
             player.changeDeposit(g, amount, msg);
         }
 
-        public final void depositOrWithdraw(AbstractPlayer player, Game g, Callback<Object> cb) {
+        public final void depositOrWithdraw(Game g, Callback<Object> cb) {
             synchronized (g.lock) {
+                AbstractPlayer player = g.getCurrentPlayer();
                 player.askHowMuchToDepositOrWithdraw(g, (amount) -> {
                     if (player.cash - amount >= 0 && player.deposit + amount >= 0) {
                         player.cash -= amount;
@@ -290,6 +297,16 @@ public abstract class AbstractPlayer implements Serializable {
     public static final class CardInterface implements Serializable {
         public final void reverse(AbstractPlayer player) {
             player.reversed = !player.reversed;
+        }
+
+        public final void walk(Game g, int steps) {
+            if (steps > 0 && steps <= (Integer) g.getConfig("dice-sides")) {
+                g.startWalking(steps);
+            }
+        }
+
+        public final void stay(Game g) {
+            g.stay();
         }
     }
 }
