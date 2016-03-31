@@ -35,8 +35,18 @@ public class AIPlayer extends AbstractPlayer {
     }
 
     @Override
-    public void askWhichPlaceToGo(Game g, Callback<Place> cb) {
+    public void askWhomToReverse(Game g, Callback<AbstractPlayer> cb) {
+        cb.run(this);
+    }
+
+    @Override
+    public void askWhereToGo(Game g, Callback<Place> cb) {
         Place cur = getCurrentPlace();
         cb.run(isReversed()? cur.getPrev(): cur.getNext());
+    }
+
+    @Override
+    public void askWhereToSetRoadblock(Game g, Callback<Place> cb) {
+        cb.run(getCurrentPlace());
     }
 }

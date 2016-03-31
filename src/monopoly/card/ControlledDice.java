@@ -9,7 +9,7 @@ import monopoly.async.Callback;
 public class ControlledDice extends Card {
     public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
         AbstractPlayer player = g.getCurrentPlayer();
-        player.askWhichPlaceToGo(g, (place) -> {
+        player.askWhereToGo(g, (place) -> {
             int steps = getDistanceTo(player, g, place);
             if (steps != 0) {
                 ci.walk(g, steps);

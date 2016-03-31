@@ -2,19 +2,18 @@ package monopoly;
 
 import java.io.*;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 
 public class Map implements Serializable {
-    private List<Place> places = new CopyOnWriteArrayList<>();
+    private Place head = null;
     private String name;
+    private int _size = 0;
 
     Map() {}
 
     public int size() {
-        return places.size();
+        return _size;
     }
     
     public String getName() {
@@ -26,19 +25,19 @@ public class Map implements Serializable {
     }
 
     void addPlace(Place place) {
-        Place head, tail;
-        if (places.isEmpty()) {
+        Place tail;
+        if (head == null) {
             head = place;
-            tail = place;
+            head.prev = head;
+            head.next = head;
         } else {
-            head = places.get(0);
-            tail = places.get(places.size() - 1);
+            tail = head.prev;
+            tail.next = place;
+            place.prev = tail;
+            place.next = head;
+            head.prev = place;
         }
-        places.add(place);
-        tail.next = place;
-        place.prev = tail;
-        place.next = head;
-        head.prev = place;
+        ++_size;
     }
 
     public static Map readMap(InputStream is) throws Exception {
@@ -61,7 +60,7 @@ public class Map implements Serializable {
     }
 
     public Place getStartingPoint() {
-        return places.get(0);
+        return head;
     }
 
     private static final java.util.Map<String, PlaceReader> placeReaders = new Hashtable<>();

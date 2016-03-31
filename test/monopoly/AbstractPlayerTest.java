@@ -1,6 +1,5 @@
 package monopoly;
 
-import monopoly.async.Callback;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -18,39 +17,7 @@ public class AbstractPlayerTest {
 
     @Before
     public void setUp() {
-        player = new AbstractPlayer() {
-            @Override
-            public void askWhetherToBuyProperty(Game g, Callback<Boolean> cb) {
-                cb.run(false);
-            }
-
-            @Override
-            public void askWhetherToUpgradeProperty(Game g, Callback<Boolean> cb) {
-                cb.run(false);
-            }
-
-            @Override
-            public void askWhichPropertyToMortgage(Game g, Callback<Property> cb) {
-                cb.run(getProperties().get(0));
-            }
-
-            @Override
-            public void askWhichCardToUse(Game g, Callback<Card> cb) {
-                cb.run(null);
-            }
-
-            @Override
-            public void askHowMuchToDepositOrWithdraw(Game g, Callback<Integer> cb) {
-                cb.run(0);
-            }
-            
-            @Override
-            public void askWhichPlaceToGo(Game g, Callback<Place> cb) {
-                Place cur = getCurrentPlace();
-                cb.run(isReversed()? cur.getPrev(): cur.getNext());
-            }
-        };
-
+        player = new AIPlayer();
         anotherPlayer = new AIPlayer();
         prop = new Property("Prop", 10) {};
         anotherProp = new Property("Prop2", 20) {};

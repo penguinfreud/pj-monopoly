@@ -7,6 +7,7 @@ import java.io.Serializable;
 public abstract class Place implements Serializable {
     private String name;
     Place prev, next;
+    private int roadblocks = 0;
 
     protected Place(String name) {
         this.name = name;
@@ -16,12 +17,24 @@ public abstract class Place implements Serializable {
         return name;
     }
 
-    public Place getPrev() {
+    public final Place getPrev() {
         return prev;
     }
 
-    public Place getNext() {
+    public final Place getNext() {
         return next;
+    }
+
+    public final boolean hasRoadblock() {
+        return roadblocks > 0;
+    }
+
+    final void setRoadblock() {
+        ++roadblocks;
+    }
+
+    final void clearRoadblocks() {
+        roadblocks = 0;
     }
 
     public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {

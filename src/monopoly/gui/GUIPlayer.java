@@ -26,6 +26,11 @@ public class GUIPlayer extends AbstractPlayer {
     }
 
     @Override
+    public void askWhomToReverse(Game g, Callback<AbstractPlayer> cb) {
+        cb.run(this);
+    }
+
+    @Override
     public void askWhichCardToUse(Game g, Callback<Card> cb) {
         cb.run(null);
     }
@@ -36,8 +41,13 @@ public class GUIPlayer extends AbstractPlayer {
     }
 
     @Override
-    public void askWhichPlaceToGo(Game g, Callback<Place> cb) {
+    public void askWhereToGo(Game g, Callback<Place> cb) {
         Place cur = getCurrentPlace();
         cb.run(isReversed()? cur.getPrev(): cur.getNext());
+    }
+
+    @Override
+    public void askWhereToSetRoadblock(Game g, Callback<Place> cb) {
+        cb.run(getCurrentPlace());
     }
 }

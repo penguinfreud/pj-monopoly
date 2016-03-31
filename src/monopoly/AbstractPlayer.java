@@ -106,7 +106,9 @@ public abstract class AbstractPlayer implements Serializable {
     protected abstract void askWhichCardToUse(Game g, Callback<Card> cb);
     protected abstract void askHowMuchToDepositOrWithdraw(Game g, Callback<Integer> cb);
 
-    public abstract void askWhichPlaceToGo(Game g, Callback<Place> cb);
+    public abstract void askWhomToReverse(Game g, Callback<AbstractPlayer> cb);
+    public abstract void askWhereToGo(Game g, Callback<Place> cb);
+    public abstract void askWhereToSetRoadblock(Game g, Callback<Place> cb);
 
     private void changeCash(Game g, int amount, String msg) {
         synchronized (g.lock) {
@@ -258,7 +260,12 @@ public abstract class AbstractPlayer implements Serializable {
             if (g.getState() == Game.State.TURN_WALKING) {
                 System.out.println("endStep " + getCurrentPlace().getName());
                 currentPlace = reversed? currentPlace.getPrev(): currentPlace.getNext();
-                if (--stepsToAdvance == 0) {
+                --stepsToAdvance;
+                if (currentPlace.hasRoadblock()) {
+                    stepsToAdvance = 0;
+                    currentPlace.clearRoadblocks();
+                }
+                if (stepsToAdvance == 0) {
                     g.endWalking();
                 } else {
                     g.passBy(currentPlace, (o) -> startStep(g));
@@ -307,6 +314,10 @@ public abstract class AbstractPlayer implements Serializable {
 
         public final void stay(Game g) {
             g.stay();
+        }
+
+        public final void setRoadblock(Place place) {
+            place.setRoadblock();
         }
     }
 }
