@@ -18,7 +18,11 @@ class GameData implements Serializable {
     Calendar calendar;
     Bank bank;
     Players players = new Players();
+    boolean hadBankrupt = false;
     Game.State state = Game.State.OVER;
+    AbstractPlayer.PlaceInterface placeInterface = new AbstractPlayer.PlaceInterface();
+    AbstractPlayer.CardInterface cardInterface = new AbstractPlayer.CardInterface();
+
 
     java.util.Map<String, Event<Object>> oEvents = new Hashtable<>();
     java.util.Map<String, Event<AbstractPlayer>> pEvents = new Hashtable<>();
@@ -132,9 +136,13 @@ public class Game {
 
     private void startTurn() {
         synchronized (lock) {
+            if (data.players.count() <= 1) {
+                endGame();
+            }
             boolean notFirst = data.state == State.TURN_LANDED;
             if (data.state == State.STARTING || notFirst) {
                 data.state = State.TURN_STARTING;
+                data.hadBankrupt = false;
                 data.onTurn.trigger(null);
                 if (data.players.isNewCycle() && notFirst) {
                     data.onCycle.trigger(null);
@@ -147,7 +155,9 @@ public class Game {
     private Callback<Object> endTurn = (o) -> {
         synchronized (lock) {
             if (data.state == State.TURN_LANDED) {
-                data.players.next();
+                if (!data.hadBankrupt) {
+                    data.players.next();
+                }
                 startTurn();
             }
         }
@@ -183,9 +193,17 @@ public class Game {
         synchronized (lock) {
             if (data.state == State.TURN_WALKING || data.state == State.TURN_STARTING) {
                 data.state = State.TURN_LANDED;
-                data.players.getCurrentPlayer().getCurrentPlace().onLanded(this, endTurn);
+                data.players.getCurrentPlayer().getCurrentPlace().onLanded(this, data.placeInterface, endTurn);
             }
         }
+    }
+
+    void passBy(Place place, Callback<Object> cb) {
+        place.onPassingBy(this, data.placeInterface, cb);
+    }
+
+    void useCard(Card card, Callback<Object> cb) {
+        card.use(this, data.cardInterface, cb);
     }
 
     private void endGame() {
@@ -231,10 +249,8 @@ public class Game {
         synchronized (lock) {
             if (data.state != State.OVER) {
                 data.players.remove(player);
+                data.hadBankrupt = true;
                 data.onBankrupt.trigger(player);
-                if (data.players.count() == 1) {
-                    endGame();
-                }
             }
         }
     }

@@ -24,11 +24,13 @@ public abstract class Place implements Serializable {
         return next;
     }
 
-    public void onLanded(Game g, Callback<Object> cb) {
+    public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
         cb.run(null);
     }
 
-    public void onPassingBy(Game g) {}
+    public void onPassingBy(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
+        cb.run(null);
+    }
     
     public Property asProperty() {
         return null;

@@ -30,13 +30,13 @@ public class GUIPlace extends Place {
     }
 
     @Override
-    public void onLanded(Game g, Callback<Object> cb) {
-        place.onLanded(g, cb);
+    public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
+        place.onLanded(g, pi, cb);
     }
 
     @Override
-    public void onPassingBy(Game g) {
-        place.onPassingBy(g);
+    public void onPassingBy(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
+        place.onPassingBy(g, pi, cb);
     }
 
     @Override

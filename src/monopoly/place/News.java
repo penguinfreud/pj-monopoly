@@ -12,26 +12,36 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class News extends Place {
-    private static List<Callback<Game>> newsTypes = new ArrayList<>();
+    private static class Param {
+        Game game;
+        AbstractPlayer.PlaceInterface pi;
+
+        Param(Game game, AbstractPlayer.PlaceInterface pi) {
+            this.game = game;
+            this.pi = pi;
+        }
+    }
+
+    private static List<Callback<Param>> newsTypes = new ArrayList<>();
 
     static {
         Map.registerPlaceReader("News", (r, sc) -> new News());
-        newsTypes.add((g) -> {
-            List<AbstractPlayer> players = getSortedPlayers(g);
-            players.get(0).changeCash(g, getRandomAward(g), "");
+        newsTypes.add((p) -> {
+            List<AbstractPlayer> players = getSortedPlayers(p.game);
+            p.pi.changeCash(players.get(0), p.game, getRandomAward(p.game), "");
         });
-        newsTypes.add((g) -> {
-            List<AbstractPlayer> players = getSortedPlayers(g);
-            players.get(players.size() - 1).changeCash(g, getRandomAward(g), "");
+        newsTypes.add((p) -> {
+            List<AbstractPlayer> players = getSortedPlayers(p.game);
+            p.pi.changeCash(players.get(players.size() - 1), p.game, getRandomAward(p.game), "");
         });
-        newsTypes.add((g) -> {
-            for (AbstractPlayer player: g.getPlayers()) {
-                player.changeDeposit(g, player.getDeposit() / 10, "");
+        newsTypes.add((p) -> {
+            for (AbstractPlayer player: p.game.getPlayers()) {
+                p.pi.changeDeposit(player, p.game, player.getDeposit() / 10, "");
             }
         });
-        newsTypes.add((g) -> {
-            for (AbstractPlayer player: g.getPlayers()) {
-                player.changeDeposit(g, player.getTotalPossessions() / 10, "");
+        newsTypes.add((p) -> {
+            for (AbstractPlayer player: p.game.getPlayers()) {
+                p.pi.changeDeposit(player, p.game, -player.getDeposit() / 10, "");
             }
         });
     }
@@ -53,7 +63,8 @@ public class News extends Place {
     }
 
     @Override
-    public void onLanded(Game g, Callback<Object> cb) {
-
+    public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
+        newsTypes.get(ThreadLocalRandom.current().nextInt(newsTypes.size())).run(new Param(g, pi));
+        cb.run(null);
     }
 }

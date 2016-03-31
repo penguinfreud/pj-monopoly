@@ -16,16 +16,12 @@ public class Bank extends Place {
     }
 
     @Override
-    public void onPassingBy(Game g) {
-        AbstractPlayer player = g.getCurrentPlayer();
-        player.askHowMuchToDepositOrWithdraw(g, (amount) -> {
-            player.depositOrWithdraw(g, amount);
-        });
+    public void onPassingBy(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
+        pi.depositOrWithdraw(g.getCurrentPlayer(), g, cb);
     }
 
     @Override
-    public void onLanded(Game g, Callback<Object> cb) {
-        onPassingBy(g);
-        cb.run(null);
+    public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
+        onPassingBy(g, pi, cb);
     }
 }

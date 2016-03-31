@@ -1,5 +1,6 @@
 package monopoly.place;
 
+import monopoly.AbstractPlayer;
 import monopoly.Game;
 import monopoly.Map;
 import monopoly.Place;
@@ -15,13 +16,12 @@ public class StopTheGame extends Place {
     }
 
     @Override
-    public void onPassingBy(Game g) {
-        g.getCurrentPlayer().giveUp(g);
+    public void onPassingBy(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
+        pi.pay(g.getCurrentPlayer(), g, g.getCurrentPlayer().getTotalPossessions() + 1, "", cb);
     }
 
     @Override
-    public void onLanded(Game g, Callback<Object> cb) {
-        onPassingBy(g);
-        cb.run(null);
+    public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
+        onPassingBy(g, pi, cb);
     }
 }

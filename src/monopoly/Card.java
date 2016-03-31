@@ -2,7 +2,7 @@ package monopoly;
 
 import monopoly.async.Callback;
 
-public class Card {
+public abstract class Card {
     private String name;
     private AbstractPlayer owner = null;
 
@@ -18,7 +18,7 @@ public class Card {
         owner = newOwner;
     }
 
-    public void use(Game g, Callback<Object> cb) {
+    public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
         cb.run(null);
     }
 }
