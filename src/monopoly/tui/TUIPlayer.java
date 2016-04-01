@@ -26,6 +26,21 @@ public class TUIPlayer extends AbstractPlayer {
         }
     }
 
+    private int getInt(Game g, String question, int min, int max, int noop) {
+        while (true) {
+            System.out.println(question);
+            String str = ((TUIGame) g).getScanner().nextLine();
+            if (str.toLowerCase().equals("q")) {
+                return noop;
+            }
+            int x = Integer.parseInt(str);
+            if (x >= min && x <= max) {
+                return x;
+            }
+            System.out.println(g.getText("input_error"));
+        }
+    }
+
     private <T>T choose(Game g, String question, List<T> options, boolean nullable) {
         while (true) {
             System.out.println(question);
@@ -103,21 +118,14 @@ public class TUIPlayer extends AbstractPlayer {
     }
 
     private void viewPlace(Game g) {
-        String question = g.getText("ask_which_place_to_view");
         while (true) {
-            System.out.print(question);
-            String strSteps = ((TUIGame) g).getScanner().nextLine();
-            if (strSteps.toLowerCase().equals("q")) {
+            int steps = getInt(g, g.getText("ask_which_place_to_view"), 0, 10, -1);
+            if (steps == -1) {
                 break;
             }
-            int steps = Integer.parseInt(strSteps);
             Place place = getCurrentPlace();
-            if (steps >= 0 && steps <= 10) {
-                for (int i = 0; i<steps; i++) {
-                    place = place.getNext();
-                }
-            } else {
-                System.out.println(g.getText("input_error"));
+            for (int i = 0; i<steps; i++) {
+                place = isReversed()? place.getPrev(): place.getNext();
             }
             ((TUIPlace)place).printDetail(g, System.out);
         }
@@ -130,6 +138,7 @@ public class TUIPlayer extends AbstractPlayer {
                     player.getCash(),
                     player.getDeposit(),
                     player.getProperties(),
+                    player.getCoupons(),
                     player.getTotalPossessions()));
         }
     }
@@ -190,21 +199,47 @@ public class TUIPlayer extends AbstractPlayer {
 
     @Override
     protected void askHowMuchToDepositOrWithdraw(Game g, Callback<Integer> cb) {
-
+        System.out.print(g.format("ask_how_much_to_deposit_or_withdraw", getCash(), getDeposit()));
+        cb.run(Integer.parseInt(((TUIGame) g).getScanner().nextLine()));
     }
 
     @Override
     public void askWhomToReverse(Game g, Callback<AbstractPlayer> cb) {
-
+        String question = g.getText("ask_whom_to_reverse");
+        List<AbstractPlayer> players = g.getPlayers();
+        AbstractPlayer player = choose(g, question, players, true);
+        cb.run(player);
     }
 
     @Override
     public void askWhereToGo(Game g, Callback<Place> cb) {
-
+        int steps = getInt(g, g.format("ask_where_to_go", getCurrentPlace().getName()), 1, 6, 0);
+        if (steps == 0) {
+            cb.run(null);
+        }
+        Place place = getCurrentPlace();
+        for (int i = 0; i<steps; i++) {
+            place = isReversed()? place.getPrev(): place.getNext();
+        }
+        cb.run(place);
     }
 
     @Override
     public void askWhereToSetRoadblock(Game g, Callback<Place> cb) {
-
+        int steps = getInt(g, g.format("ask_where_to_set_roadblock", getCurrentPlace().getName()), -8, 8, -9);
+        if (steps == -9) {
+            cb.run(null);
+        }
+        Place place = getCurrentPlace();
+        if (steps > 0) {
+            for (int i = 0; i < steps; i++) {
+                place = isReversed()? place.getPrev(): place.getNext();
+            }
+        } else if (steps < 0) {
+            for (int i = 0; i < steps; i++) {
+                place = isReversed()? place.getNext(): place.getPrev();
+            }
+        }
+        cb.run(place);
     }
 }

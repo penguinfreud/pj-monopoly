@@ -10,11 +10,15 @@ public class ControlledDice extends Card {
     public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
         AbstractPlayer player = g.getCurrentPlayer();
         player.askWhereToGo(g, (place) -> {
-            int steps = getDistanceTo(player, g, place);
-            if (steps != 0) {
-                ci.walk(g, steps);
-            } else {
+            if (place == null) {
                 cb.run(null);
+            } else {
+                int steps = getDistanceTo(player, g, place);
+                if (steps != 0) {
+                    ci.walk(g, steps);
+                } else {
+                    cb.run(null);
+                }
             }
         });
     }

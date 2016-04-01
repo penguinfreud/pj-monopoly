@@ -55,7 +55,7 @@ public class News extends Place {
     private static int getRandomAward(Game g) {
         int awardMin = (Integer) g.getConfig("news-award-min"),
                 awardMax = (Integer) g.getConfig("news-award-max");
-        return ThreadLocalRandom.current().nextInt(awardMax - awardMin) + awardMin;
+        return ThreadLocalRandom.current().nextInt(awardMax - awardMin + 1) + awardMin;
     }
 
     protected News() {

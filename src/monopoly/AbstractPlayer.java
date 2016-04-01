@@ -10,7 +10,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public abstract class AbstractPlayer implements Serializable {
     private String name;
     private Place currentPlace;
-    private int cash, deposit;
+    private int cash, deposit, coupons;
     private boolean reversed = false;
     private List<Property> properties = new CopyOnWriteArrayList<>();
     private List<Card> cards = new CopyOnWriteArrayList<>();
@@ -35,7 +35,16 @@ public abstract class AbstractPlayer implements Serializable {
         cards.clear();
     }
 
+    final void initCoupons(int coupons) {
+        this.coupons = coupons;
+    }
+
     public final String getName() {
+        return name;
+    }
+
+    @Override
+    public String toString() {
         return name;
     }
 
@@ -49,6 +58,10 @@ public abstract class AbstractPlayer implements Serializable {
 
     public final int getDeposit() {
         return deposit;
+    }
+
+    public final int getCoupons() {
+        return coupons;
     }
 
     public Place getCurrentPlace() {
@@ -307,6 +320,10 @@ public abstract class AbstractPlayer implements Serializable {
 
         public final void pay(AbstractPlayer player, Game g, AbstractPlayer receiver, int amount, String msg, Callback<Object> cb) {
             player.pay(g, receiver, amount, msg, cb);
+        }
+
+        public final void addCoupons(AbstractPlayer player, Game g, int amount) {
+            player.coupons += amount;
         }
     }
 

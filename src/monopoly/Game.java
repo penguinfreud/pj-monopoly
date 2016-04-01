@@ -53,6 +53,10 @@ class GameData implements Serializable {
         config.put("init-cash", 2000);
         config.put("init-deposit", 2000);
         config.put("property-max-level", 6);
+        config.put("news-award-min", 100);
+        config.put("news-award-max", 200);
+        config.put("coupon-award-min", 1);
+        config.put("coupon-award-max", 10);
     }
 
     void init(Game g) {

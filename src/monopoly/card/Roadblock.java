@@ -9,9 +9,11 @@ import monopoly.async.Callback;
 public class Roadblock extends Card {
     public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
         g.getCurrentPlayer().askWhereToSetRoadblock(g, (place) -> {
-            if (withinReach(g, g.getCurrentPlayer().getCurrentPlace(), place)) {
+            if (place != null &&
+                    withinReach(g, g.getCurrentPlayer().getCurrentPlace(), place)) {
                 ci.setRoadblock(place);
             }
+            cb.run(null);
         });
     }
 
