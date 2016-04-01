@@ -10,13 +10,21 @@ public class MapReader {
     private java.util.Map<String, Street> streetMap = new Hashtable<>();
 
     public Map readMap(Scanner sc) throws Exception {
-        Map map = new Map();
-        streetMap.clear();
+        Map map = createMap();
+        initStreetMap();
         map.setName(sc.next());
         while (sc.hasNext()) {
             map.addPlace(readPlace(sc));
         }
         return map;
+    }
+
+    protected Map createMap() {
+        return new Map();
+    }
+
+    protected void initStreetMap() {
+        streetMap.clear();
     }
 
     public Place readPlace(Scanner sc) throws Exception {

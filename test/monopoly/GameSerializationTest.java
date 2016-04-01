@@ -22,7 +22,7 @@ public class GameSerializationTest {
         Class.forName("monopoly.MapReader");
         Class.forName("monopoly.place.Land");
         Class.forName("monopoly.place.StopTheGame");
-        map = Map.readMap(new FileInputStream("test_res/test.map"));
+        map = Map.readMap(GameSerializationTest.class.getResourceAsStream("/test.map"));
 
         players = new CopyOnWriteArrayList<>();
         firstPlayer = new AIPlayer("player A");

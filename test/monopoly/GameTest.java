@@ -19,7 +19,7 @@ public class GameTest {
         Class.forName("monopoly.MapReader");
         Class.forName("monopoly.place.Land");
         Class.forName("monopoly.place.StopTheGame");
-        map = Map.readMap(new FileInputStream("test_res/test.map"));
+        map = Map.readMap(GameTest.class.getResourceAsStream("/test.map"));
 
         players = new ArrayList<>();
         firstPlayer = new AIPlayer("player A");

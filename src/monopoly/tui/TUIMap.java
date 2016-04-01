@@ -1,7 +1,52 @@
 package monopoly.tui;
 
-/**
- * Created by wsy on 4/1/16.
- */
-public class TUIMap {
+import monopoly.Game;
+import monopoly.Map;
+import monopoly.MapReader;
+import monopoly.Place;
+
+import java.io.PrintStream;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+public class TUIMap extends Map {
+    static {
+        Map.registerMapReader("TUIMap", new MapReader() {
+            @Override
+            protected Map createMap() {
+                return new TUIMap();
+            }
+        });
+    }
+
+    List<List<TUIPlace>> rows = new CopyOnWriteArrayList<>();
+
+    @Override
+    protected void addPlace(Place place) {
+        super.addPlace(place);
+
+        TUIPlace tuiPlace = (TUIPlace) place;
+        int x = tuiPlace.getX(), y = tuiPlace.getY();
+        while (rows.size() <= x) {
+            rows.add(new CopyOnWriteArrayList<>());
+        }
+        List<TUIPlace> cols = rows.get(x);
+        while (cols.size() <= y) {
+            cols.add(null);
+        }
+        cols.set(y, tuiPlace);
+    }
+
+    void print(Game g, PrintStream out, boolean raw) {
+        for (List<TUIPlace> row: rows) {
+            for (TUIPlace place: row) {
+                if (place == null) {
+                    out.print("  ");
+                } else {
+                    out.print(place.print(g, raw));
+                }
+            }
+            out.println();
+        }
+    }
 }

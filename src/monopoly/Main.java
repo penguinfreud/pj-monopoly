@@ -14,6 +14,8 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         Class.forName("monopoly.MapReader");
+        Class.forName("monopoly.tui.TUIMap");
+        Class.forName("monopoly.tui.TUIPlace");
         Class.forName("monopoly.place.Empty");
         Class.forName("monopoly.place.Land");
         Class.forName("monopoly.place.Bank");

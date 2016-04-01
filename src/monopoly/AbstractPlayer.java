@@ -253,7 +253,6 @@ public abstract class AbstractPlayer implements Serializable {
     final void startWalking(Game g, int steps) {
         synchronized (g.lock) {
             if (g.getState() == Game.State.TURN_WALKING) {
-                System.out.println("start walking");
                 stepsToAdvance = steps;
                 startStep(g);
             }
@@ -268,7 +267,6 @@ public abstract class AbstractPlayer implements Serializable {
         synchronized (g.lock) {
             if (g.getState() == Game.State.TURN_WALKING) {
                 currentPlace = reversed? currentPlace.getPrev(): currentPlace.getNext();
-                System.out.println("endStep " + getCurrentPlace().getName());
                 --stepsToAdvance;
                 if (currentPlace.hasRoadblock()) {
                     stepsToAdvance = 0;

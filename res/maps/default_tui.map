@@ -1,6 +1,6 @@
-Map,
+TUIMap,
 monopoly,
-Land,a,10,s,
-Land,b,20,s,
-Land,c,30,s,
-Land,d,40,s
+TUIPlace,0,0,Land,a,10,s,
+TUIPlace,1,0,Land,b,20,s,
+TUIPlace,1,1,Land,c,30,s,
+TUIPlace,0,1,Land,d,40,s

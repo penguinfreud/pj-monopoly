@@ -4,22 +4,48 @@ import java.io.Serializable;
 import java.util.Hashtable;
 
 public class Config implements Serializable {
-    protected Hashtable<String, Object> configTable = new Hashtable<>();
+    private Hashtable<String, Object> configTable = new Hashtable<>();
+    private Config base;
 
-    public Config() {
-        defaultConfig();
+    Config() {
+        this(null);
     }
 
-    private void defaultConfig() {
-        configTable.put("bundle-name", "messages");
-        configTable.put("locale", "zh-CN");
-        configTable.put("dice-sides", 6);
-        configTable.put("init-cash", 2000);
-        configTable.put("init-deposit", 2000);
-        configTable.put("property-max-level", 6);
+    Config(Config base) {
+        this.base = base;
     }
 
-    void readFile() {
+    Config getBase() {
+        return base;
+    }
 
+    void setBase(Config _base) {
+        if (base == null) {
+            base = _base;
+        } else {
+            base.setBase(_base);
+        }
+    }
+
+    Object get(String key) {
+        if (configTable.containsKey(key)) {
+            return configTable.get(key);
+        } else if (base != null) {
+            return base.get(key);
+        } else {
+            return null;
+        }
+    }
+
+    void put(String key, Object value) {
+        configTable.put(key, value);
+    }
+
+    void remove(String key) {
+        configTable.remove(key);
+    }
+
+    void clear() {
+        configTable.clear();
     }
 }

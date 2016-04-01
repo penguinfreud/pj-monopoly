@@ -7,24 +7,30 @@ import java.util.regex.Pattern;
 
 public class Map implements Serializable {
     private Place head = null;
-    private String name;
+    private String name = null;
     private int _size = 0;
 
-    Map() {}
+    public Map() {}
 
     public int size() {
         return _size;
+    }
+
+    protected void clear() {
+        head = null;
+        name = null;
+        _size = 0;
     }
     
     public String getName() {
         return name;
     }
 
-    void setName(String name) {
+    protected void setName(String name) {
         this.name = name;
     }
 
-    void addPlace(Place place) {
+    protected void addPlace(Place place) {
         Place tail;
         if (head == null) {
             head = place;

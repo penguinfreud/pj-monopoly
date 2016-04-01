@@ -5,13 +5,13 @@ import monopoly.async.Event;
 import monopoly.async.Callback;
 
 import java.io.*;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 
 class GameData implements Serializable {
     Config config;
-    Locale locale;
     transient ResourceBundle messages;
     Map map;
     Calendar calendar;
@@ -35,7 +35,24 @@ class GameData implements Serializable {
     Event<MoneyChangeEvent> onMoneyChange = new Event<>();
 
     GameData(Game g, Config c) {
-        config = c;
+        Config def = new Config();
+        defaultConfig(def);
+        config = new Config();
+        if (c == null) {
+            config.setBase(def);
+        } else {
+            c.setBase(def);
+            config.setBase(c);
+        }
+    }
+
+    private void defaultConfig(Config config) {
+        config.put("bundle-name", "messages");
+        config.put("locale", "zh-CN");
+        config.put("dice-sides", 6);
+        config.put("init-cash", 2000);
+        config.put("init-deposit", 2000);
+        config.put("property-max-level", 6);
     }
 
     void init(Game g) {
@@ -46,13 +63,14 @@ class GameData implements Serializable {
         pEvents.put("bankrupt", onBankrupt);
         mEvents.put("moneyChange", onMoneyChange);
         calendar = new Calendar(g);
-        locale = Locale.forLanguageTag((String) config.configTable.get("locale"));
-        messages = ResourceBundle.getBundle((String) config.configTable.get("bundle-name"), locale);
+        Locale locale = Locale.forLanguageTag((String) config.get("locale"));
+        messages = ResourceBundle.getBundle((String) config.get("bundle-name"), locale);
     }
 
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         ois.defaultReadObject();
-        messages = ResourceBundle.getBundle((String) config.configTable.get("bundle-name"), locale);
+        Locale locale = Locale.forLanguageTag((String) config.get("locale"));
+        messages = ResourceBundle.getBundle((String) config.get("bundle-name"), locale);
     }
 }
 
@@ -79,20 +97,18 @@ public class Game {
 
     public Object getConfig(String key) {
         synchronized (lock) {
-            return data.config.configTable.get(key);
+            return data.config.get(key);
         }
     }
 
     public void putConfig(String key, Object value) {
         synchronized (lock) {
-            if (data.state == State.OVER) {
-                data.config.configTable.put(key, value);
+            data.config.put(key, value);
+            if (key.equals("bundle-name") || key.equals("locale")) {
+                Locale locale = Locale.forLanguageTag((String) data.config.get("locale"));
+                data.messages = ResourceBundle.getBundle((String) data.config .get("bundle-name"), locale);
             }
         }
-    }
-
-    public Locale getLocale() {
-        return data.locale;
     }
 
     public String getText(String key) {
@@ -101,7 +117,13 @@ public class Game {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             return "";
+        } catch(MissingResourceException e) {
+            return "";
         }
+    }
+
+    public String format(String key, Object ...args) {
+        return MessageFormat.format(getText(key), args);
     }
 
     public Map getMap() {

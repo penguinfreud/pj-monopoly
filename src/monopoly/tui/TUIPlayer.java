@@ -3,7 +3,6 @@ package monopoly.tui;
 import monopoly.*;
 import monopoly.async.Callback;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,10 +11,6 @@ public class TUIPlayer extends AbstractPlayer {
 
     public TUIPlayer(String name) {
         setName(name);
-    }
-
-    private String format(Game g, String key, Object ... args) {
-        return MessageFormat.format(g.getText(key), args);
     }
 
     private boolean yesOrNo(Game g, String question) {
@@ -27,7 +22,6 @@ public class TUIPlayer extends AbstractPlayer {
             } else if (answer.equals("n") || answer.equals("no")) {
                 return false;
             }
-            System.out.println(answer);
             System.out.println(g.getText("input_error"));
         }
     }
@@ -72,7 +66,7 @@ public class TUIPlayer extends AbstractPlayer {
     protected void askWhetherToBuyProperty(Game g, Callback<Boolean> cb) {
         AbstractPlayer player = g.getCurrentPlayer();
         Property property = player.getCurrentPlace().asProperty();
-        String question = format(g, "ask_whether_to_buy_property", property.getName(), property.getPurchasePrice(), player.getCash());
+        String question = g.format("ask_whether_to_buy_property", property.getName(), property.getPurchasePrice(), player.getCash());
         cb.run(yesOrNo(g, question));
     }
 
@@ -80,18 +74,18 @@ public class TUIPlayer extends AbstractPlayer {
     protected void askWhetherToUpgradeProperty(Game g, Callback<Boolean> cb) {
         AbstractPlayer player = g.getCurrentPlayer();
         Property property = player.getCurrentPlace().asProperty();
-        String question = format(g, "ask_whether_to_upgrade_property", property.getName(), property.getUpgradePrice(), player.getCash());
+        String question = g.format("ask_whether_to_upgrade_property", property.getName(), property.getUpgradePrice(), player.getCash());
         cb.run(yesOrNo(g, question));
     }
 
     @Override
     protected void askWhichPropertyToMortgage(Game g, Callback<Property> cb) {
-        String question = format(g, "ask_which_property_to_mortgage");
+        String question = g.getText("ask_which_property_to_mortgage");
         cb.run(choose(g, question, g.getCurrentPlayer().getProperties(), false));
     }
 
     private void viewMap(Game g, boolean raw) {
-
+        ((TUIMap) g.getMap()).print(g, System.out, raw);
     }
 
     private Card _askWhichCardToUse(Game g) {
@@ -99,15 +93,45 @@ public class TUIPlayer extends AbstractPlayer {
     }
 
     private void checkAlert(Game g) {
-
+        Place place = getCurrentPlace();
+        for (int i = 0; i<10; i++) {
+            place = place.getNext();
+            if (place.hasRoadblock()) {
+                System.out.println(g.format("has_road_block", i + 1));
+            }
+        }
     }
 
     private void viewPlace(Game g) {
-
+        String question = g.getText("ask_which_place_to_view");
+        while (true) {
+            System.out.print(question);
+            String strSteps = ((TUIGame) g).getScanner().nextLine();
+            if (strSteps.toLowerCase().equals("q")) {
+                break;
+            }
+            int steps = Integer.parseInt(strSteps);
+            Place place = getCurrentPlace();
+            if (steps >= 0 && steps <= 10) {
+                for (int i = 0; i<steps; i++) {
+                    place = place.getNext();
+                }
+            } else {
+                System.out.println(g.getText("input_error"));
+            }
+            ((TUIPlace)place).printDetail(g, System.out);
+        }
     }
 
     private void viewPlayerInfo(Game g) {
-
+        System.out.println(g.getText("player_info_table_head"));
+        for (AbstractPlayer player: g.getPlayers()) {
+            System.out.println(g.format("player_info_table_row",
+                    player.getCash(),
+                    player.getDeposit(),
+                    player.getProperties(),
+                    player.getTotalPossessions()));
+        }
     }
 
     private void tradeStock(Game g) {
@@ -117,7 +141,7 @@ public class TUIPlayer extends AbstractPlayer {
     @Override
     protected void askWhichCardToUse(Game g, Callback<Card> cb) {
         String direction = g.getText(isReversed()? "anticlockwise": "clockwise");
-        System.out.println(format(g, "game_info", g.getDate(), getName(), direction));
+        System.out.println(g.format("game_info", g.getDate(), getName(), direction));
 
         List<String> gameMenuItems = new ArrayList<>();
         gameMenuItems.add(g.getText("menu_view_map"));
