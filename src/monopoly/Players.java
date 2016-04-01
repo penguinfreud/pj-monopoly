@@ -36,11 +36,10 @@ class Players implements Serializable {
 
     void init(Game g) {
         for (AbstractPlayer player : players) {
-            player.initPlace(g.getMap().getStartingPoint());
-            player.initCash((Integer) g.getConfig("init-cash"));
-            player.initDeposit((Integer) g.getConfig("init-deposit"));
-            player.initProperties();
-            player.initCards();
+            player.init((Integer) g.getConfig("init-cash"),
+                    (Integer) g.getConfig("init-deposit"),
+                    (Integer) g.getConfig("init-coupons"),
+                    g.getMap().getStartingPoint());
         }
     }
 

@@ -15,28 +15,14 @@ public abstract class AbstractPlayer implements Serializable {
     private List<Property> properties = new CopyOnWriteArrayList<>();
     private List<Card> cards = new CopyOnWriteArrayList<>();
 
-    final void initPlace(Place place) {
-        currentPlace = place;
-    }
-
-    final void initCash(int cash) {
+    final void init(int cash, int deposit, int coupons, Place place) {
         this.cash = cash;
-    }
-
-    final void initDeposit(int deposit) {
         this.deposit = deposit;
-    }
-
-    final void initProperties() {
-        properties.clear();
-    }
-
-    final void initCards() {
-        cards.clear();
-    }
-
-    final void initCoupons(int coupons) {
         this.coupons = coupons;
+        currentPlace = place;
+        properties.clear();
+        cards.clear();
+        reversed = false;
     }
 
     public final String getName() {
@@ -101,7 +87,8 @@ public abstract class AbstractPlayer implements Serializable {
                 if (g.getState() == Game.State.TURN_STARTING) {
                     if (card == null) {
                         g.rollTheDice();
-                    } else {
+                    } else if (cards.contains(card)) {
+                        cards.remove(card);
                         g.useCard(card, useCardCb);
                     }
                 }
@@ -114,7 +101,11 @@ public abstract class AbstractPlayer implements Serializable {
                 }
             }
         };
-        useCardCb.run(null);
+        if (cards.size() > 0) {
+            useCardCb.run(null);
+        } else {
+            g.rollTheDice();
+        }
     }
 
     protected abstract void askWhetherToBuyProperty(Game g, Callback<Boolean> cb);
@@ -247,8 +238,8 @@ public abstract class AbstractPlayer implements Serializable {
             }
             if (cash <= 0) {
                 if (cash + deposit >= 0) {
-                    cash = 0;
                     deposit += cash;
+                    cash = 0;
                     cb.run(null);
                 } else {
                     cash += deposit;
@@ -323,7 +314,14 @@ public abstract class AbstractPlayer implements Serializable {
         }
 
         public final void addCoupons(AbstractPlayer player, Game g, int amount) {
-            player.coupons += amount;
+            synchronized (g.lock) {
+                player.coupons += amount;
+            }
+        }
+
+        public final void addCard(AbstractPlayer player, Game g, Card card) {
+            player.cards.add(card);
+            card.changeOwner(player);
         }
     }
 

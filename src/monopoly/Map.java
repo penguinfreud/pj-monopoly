@@ -15,12 +15,6 @@ public class Map implements Serializable {
     public int size() {
         return _size;
     }
-
-    protected void clear() {
-        head = null;
-        name = null;
-        _size = 0;
-    }
     
     public String getName() {
         return name;

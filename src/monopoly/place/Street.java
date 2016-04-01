@@ -21,6 +21,10 @@ public class Street implements Serializable {
     }
 
     public int getExtraRent() {
-        return 0;
+        int rent = 0;
+        for (Land land: lands) {
+            rent += land.getPrice();
+        }
+        return rent / 10;
     }
 }
