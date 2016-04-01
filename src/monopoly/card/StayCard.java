@@ -5,7 +5,15 @@ import monopoly.Card;
 import monopoly.Game;
 import monopoly.async.Callback;
 
-public class StayCard extends Card {
+class StayCard extends Card {
+    static {
+        Card.registerCard(new StayCard());
+    }
+
+    private StayCard() {
+        super("StayCard");
+    }
+
     @Override
     public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
         ci.stay(g);

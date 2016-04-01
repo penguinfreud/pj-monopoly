@@ -8,7 +8,7 @@ public class Empty extends Place {
         Map.registerPlaceReader("Empty", (r, sc) -> new Empty());
     }
 
-    protected Empty() {
+    private Empty() {
         super("Empty");
     }
 }

@@ -58,12 +58,16 @@ public class TUIPlace extends DelegatePlace {
         Place place = getPlace();
         if (place instanceof Land) {
             Property prop = place.asProperty();
+            out.println(prop.getName());
             out.print(g.getText("place_type"));
             out.println(g.getText("place_land"));
-            out.print(g.getText("land_name"));
-            out.println(prop.getName());
             out.print(g.getText("land_owner"));
-            out.println(prop.getOwner().getName());
+            AbstractPlayer owner = prop.getOwner();
+            if (owner == null) {
+                out.println(g.getText("none"));
+            } else {
+                out.println(prop.getOwner().getName());
+            }
             out.print(g.getText("land_initial_price"));
             out.println(prop.getPrice());
             out.print(g.getText("land_level"));

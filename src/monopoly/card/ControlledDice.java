@@ -6,7 +6,15 @@ import monopoly.Game;
 import monopoly.Place;
 import monopoly.async.Callback;
 
-public class ControlledDice extends Card {
+class ControlledDice extends Card {
+    static {
+        Card.registerCard(new ControlledDice());
+    }
+
+    private ControlledDice() {
+        super("ControlledDice");
+    }
+
     public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
         AbstractPlayer player = g.getCurrentPlayer();
         player.askWhereToGo(g, (place) -> {

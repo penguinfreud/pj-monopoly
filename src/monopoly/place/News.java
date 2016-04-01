@@ -58,7 +58,7 @@ public class News extends Place {
         return ThreadLocalRandom.current().nextInt(awardMax - awardMin + 1) + awardMin;
     }
 
-    protected News() {
+    private News() {
         super("News");
     }
 

@@ -9,7 +9,7 @@ import monopoly.async.Callback;
 public class DelegatePlace extends Place {
     private Place place;
 
-    public DelegatePlace(Place place) {
+    protected DelegatePlace(Place place) {
         super(place.getName());
         this.place = place;
     }

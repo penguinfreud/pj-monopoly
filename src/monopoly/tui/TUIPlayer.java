@@ -28,15 +28,17 @@ public class TUIPlayer extends AbstractPlayer {
 
     private int getInt(Game g, String question, int min, int max, int noop) {
         while (true) {
-            System.out.println(question);
+            System.out.print(question);
             String str = ((TUIGame) g).getScanner().nextLine();
             if (str.toLowerCase().equals("q")) {
                 return noop;
             }
-            int x = Integer.parseInt(str);
-            if (x >= min && x <= max) {
-                return x;
-            }
+            try {
+                int x = Integer.parseInt(str);
+                if (x >= min && x <= max) {
+                    return x;
+                }
+            } finally {}
             System.out.println(g.getText("input_error"));
         }
     }
@@ -49,15 +51,17 @@ public class TUIPlayer extends AbstractPlayer {
                 System.out.println("[" + (i + 1) + "] " + options.get(i));
             }
             if (nullable) {
-                System.out.println(g.getText("none"));
+                System.out.println("[" + (l + 1) + "] " + g.getText("return"));
             }
             String strChoice = ((TUIGame) g).getScanner().nextLine();
-            int choice = Integer.parseInt(strChoice);
-            if (choice >= 1 && choice <= l) {
-                return options.get(choice - 1);
-            } else if (nullable && choice == l + 1) {
-                return null;
-            }
+            try {
+                int choice = Integer.parseInt(strChoice);
+                if (choice >= 1 && choice <= l) {
+                    return options.get(choice - 1);
+                } else if (nullable && choice == l + 1) {
+                    return null;
+                }
+            } finally {}
             System.out.println(g.getText("input_error"));
         }
     }
@@ -69,34 +73,40 @@ public class TUIPlayer extends AbstractPlayer {
                 System.out.println("[" + (i + 1) + "] " + options.get(i));
             }
             String strChoice = ((TUIGame) g).getScanner().nextLine();
-            int choice = Integer.parseInt(strChoice);
-            if (choice >= 1 && choice <= l) {
-                return choice - 1;
-            }
+            try {
+                int choice = Integer.parseInt(strChoice);
+                if (choice >= 1 && choice <= l) {
+                    return choice - 1;
+                }
+            } finally {}
             System.out.println(g.getText("input_error"));
         }
     }
 
     @Override
     protected void askWhetherToBuyProperty(Game g, Callback<Boolean> cb) {
-        AbstractPlayer player = g.getCurrentPlayer();
-        Property property = player.getCurrentPlace().asProperty();
-        String question = g.format("ask_whether_to_buy_property", property.getName(), property.getPurchasePrice(), player.getCash());
+        Property property = getCurrentPlace().asProperty();
+        String question = g.format("ask_whether_to_buy_property", property.getName(), property.getPurchasePrice(), getCash());
         cb.run(yesOrNo(g, question));
     }
 
     @Override
     protected void askWhetherToUpgradeProperty(Game g, Callback<Boolean> cb) {
-        AbstractPlayer player = g.getCurrentPlayer();
-        Property property = player.getCurrentPlace().asProperty();
-        String question = g.format("ask_whether_to_upgrade_property", property.getName(), property.getUpgradePrice(), player.getCash());
+        Property property = getCurrentPlace().asProperty();
+        String question = g.format("ask_whether_to_upgrade_property", property.getName(), property.getUpgradePrice(), getCash());
         cb.run(yesOrNo(g, question));
     }
 
     @Override
     protected void askWhichPropertyToMortgage(Game g, Callback<Property> cb) {
         String question = g.getText("ask_which_property_to_mortgage");
-        cb.run(choose(g, question, g.getCurrentPlayer().getProperties(), false));
+        cb.run(choose(g, question, getProperties(), false));
+    }
+
+    @Override
+    protected void askWhichCardToBuy(Game g, Callback<Card> cb) {
+        String question = g.getText("ask_which_card_to_buy");
+        cb.run(choose(g, question, Card.getCards(), true));
     }
 
     private void viewMap(Game g, boolean raw) {
@@ -104,16 +114,28 @@ public class TUIPlayer extends AbstractPlayer {
     }
 
     private Card _askWhichCardToUse(Game g) {
-        return null;
+        List<Card> cards = getCards();
+        if (cards.size() == 0) {
+            System.out.println(g.getText("you_have_no_card"));
+            return null;
+        } else {
+            String question = g.getText("ask_which_card_to_use");
+            return choose(g, question, cards, true);
+        }
     }
 
     private void checkAlert(Game g) {
         Place place = getCurrentPlace();
+        boolean hasRoadblock = false;
         for (int i = 0; i<10; i++) {
             place = place.getNext();
             if (place.hasRoadblock()) {
-                System.out.println(g.format("has_road_block", i + 1));
+                hasRoadblock = true;
+                System.out.println(g.format("has_roadblock", i + 1));
             }
+        }
+        if (!hasRoadblock) {
+            System.out.println(g.getText("has_no_roadblock"));
         }
     }
 
@@ -132,12 +154,12 @@ public class TUIPlayer extends AbstractPlayer {
     }
 
     private void viewPlayerInfo(Game g) {
-        System.out.println(g.getText("player_info_table_head"));
+        System.out.print(g.getText("player_info_table_head"));
         for (AbstractPlayer player: g.getPlayers()) {
             System.out.println(g.format("player_info_table_row",
                     player.getCash(),
                     player.getDeposit(),
-                    player.getProperties(),
+                    player.getProperties().size(),
                     player.getCoupons(),
                     player.getTotalPossessions()));
         }
@@ -172,8 +194,13 @@ public class TUIPlayer extends AbstractPlayer {
                     viewMap(g, true);
                     break;
                 case 2:
-                    cb.run(_askWhichCardToUse(g));
-                    break loop;
+                    Card card = _askWhichCardToUse(g);
+                    if (card != null) {
+                        cb.run(card);
+                        break loop;
+                    } else {
+                        break;
+                    }
                 case 3:
                     checkAlert(g);
                     break;
@@ -199,8 +226,9 @@ public class TUIPlayer extends AbstractPlayer {
 
     @Override
     protected void askHowMuchToDepositOrWithdraw(Game g, Callback<Integer> cb) {
-        System.out.print(g.format("ask_how_much_to_deposit_or_withdraw", getCash(), getDeposit()));
-        cb.run(Integer.parseInt(((TUIGame) g).getScanner().nextLine()));
+        int maxTransfer = (Integer) g.getConfig("bank-max-transfer");
+        String question = g.format("ask_how_much_to_deposit_or_withdraw", getCash(), getDeposit());
+        cb.run(getInt(g, question, -maxTransfer, maxTransfer, 0));
     }
 
     @Override

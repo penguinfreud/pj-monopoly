@@ -11,7 +11,7 @@ public class Bank extends Place {
         Map.registerPlaceReader("Bank", (r, sc) -> new Bank());
     }
 
-    protected Bank() {
+    private Bank() {
         super("Bank");
     }
 

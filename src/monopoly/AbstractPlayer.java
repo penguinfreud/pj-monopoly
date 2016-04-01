@@ -1,5 +1,6 @@
 package monopoly;
 
+import jdk.nashorn.internal.codegen.CompilerConstants;
 import monopoly.async.Callback;
 import monopoly.async.MoneyChangeEvent;
 
@@ -101,16 +102,13 @@ public abstract class AbstractPlayer implements Serializable {
                 }
             }
         };
-        if (cards.size() > 0) {
-            useCardCb.run(null);
-        } else {
-            g.rollTheDice();
-        }
+        useCardCb.run(null);
     }
 
     protected abstract void askWhetherToBuyProperty(Game g, Callback<Boolean> cb);
     protected abstract void askWhetherToUpgradeProperty(Game g, Callback<Boolean> cb);
     protected abstract void askWhichPropertyToMortgage(Game g, Callback<Property> cb);
+    protected abstract void askWhichCardToBuy(Game g, Callback<Card> cb);
     protected abstract void askWhichCardToUse(Game g, Callback<Card> cb);
     protected abstract void askHowMuchToDepositOrWithdraw(Game g, Callback<Integer> cb);
 
@@ -163,7 +161,7 @@ public abstract class AbstractPlayer implements Serializable {
             Property prop = currentPlace.asProperty();
             int price = prop.getPurchasePrice();
             if (prop.isFree() && cash >= price) {
-                changeCash(g, -price, g.getText("buy_property"));
+                changeCash(g, -price, "buy_property");
                 properties.add(prop);
                 prop.changeOwner(AbstractPlayer.this);
             }
@@ -175,7 +173,7 @@ public abstract class AbstractPlayer implements Serializable {
             Property prop = currentPlace.asProperty();
             int price = prop.getUpgradePrice();
             if (prop.getOwner() == this && cash >= price) {
-                changeCash(g, -price, g.getText("upgrade_property"));
+                changeCash(g, -price, "upgrade_property");
                 prop.upgrade(g);
             }
         }
@@ -186,7 +184,7 @@ public abstract class AbstractPlayer implements Serializable {
             if (g.getState() == Game.State.TURN_LANDED) {
                 System.out.println("pay rent");
                 Property prop = currentPlace.asProperty();
-                pay(g, prop.getOwner(), prop.getRent(), g.getText("pay_rent"), cb);
+                pay(g, prop.getOwner(), prop.getRent(), "pay_rent", cb);
             }
         }
     }
@@ -234,7 +232,7 @@ public abstract class AbstractPlayer implements Serializable {
             cash -= amount;
             g.triggerMoneyChange(new MoneyChangeEvent(this, -amount, msg));
             if (receiver != null) {
-                receiver.changeCash(g, Math.min(amount, getTotalPossessions()), g.getText("get_rent"));
+                receiver.changeCash(g, Math.min(amount, getTotalPossessions()), "get_" + msg);
             }
             if (cash <= 0) {
                 if (cash + deposit >= 0) {
@@ -300,7 +298,9 @@ public abstract class AbstractPlayer implements Serializable {
             synchronized (g.lock) {
                 AbstractPlayer player = g.getCurrentPlayer();
                 player.askHowMuchToDepositOrWithdraw(g, (amount) -> {
-                    if (player.cash - amount >= 0 && player.deposit + amount >= 0) {
+                    int maxTransfer = (Integer) g.getConfig("bank-max-transfer");
+                    if (-maxTransfer <= amount && amount <= maxTransfer &&
+                            player.cash - amount >= 0 && player.deposit + amount >= 0) {
                         player.cash -= amount;
                         player.deposit += amount;
                     }
@@ -321,7 +321,29 @@ public abstract class AbstractPlayer implements Serializable {
 
         public final void addCard(AbstractPlayer player, Game g, Card card) {
             player.cards.add(card);
-            card.changeOwner(player);
+        }
+
+        private Callback<Card> buyCardCb;
+
+        public final void buyCards(Game g, Callback<Object> cb) {
+            synchronized (g.lock) {
+                AbstractPlayer player = g.getCurrentPlayer();
+                buyCardCb = (card) -> {
+                    synchronized (g.lock) {
+                        if (card == null) {
+                            cb.run(null);
+                        } else {
+                            int price = card.getPrice(g);
+                            if (player.coupons >= price) {
+                                player.cards.add(card);
+                                player.coupons -= price;
+                            }
+                            player.askWhichCardToBuy(g, buyCardCb);
+                        }
+                    }
+                };
+                player.askWhichCardToBuy(g, buyCardCb);
+            }
         }
     }
 

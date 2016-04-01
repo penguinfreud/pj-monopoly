@@ -49,15 +49,27 @@ class GameData implements Serializable {
     private void defaultConfig(Config config) {
         config.put("bundle-name", "messages");
         config.put("locale", "zh-CN");
+
         config.put("dice-sides", 6);
+
         config.put("init-cash", 2000);
         config.put("init-deposit", 2000);
         config.put("init-coupons", 0);
+
         config.put("property-max-level", 6);
+
         config.put("news-award-min", 100);
         config.put("news-award-max", 200);
+
         config.put("coupon-award-min", 1);
         config.put("coupon-award-max", 10);
+
+        config.put("card-controlleddice-price", 5);
+        config.put("card-reversecard-price", 3);
+        config.put("card-roadblock-price", 3);
+        config.put("card-staycard-price", 3);
+
+        config.put("bank-max-transfer", 100000);
     }
 
     void init(Game g) {

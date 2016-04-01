@@ -6,7 +6,15 @@ import monopoly.Game;
 import monopoly.Place;
 import monopoly.async.Callback;
 
-public class Roadblock extends Card {
+class Roadblock extends Card {
+    static {
+        Card.registerCard(new Roadblock());
+    }
+
+    private Roadblock() {
+        super("Roadblock");
+    }
+
     public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
         g.getCurrentPlayer().askWhereToSetRoadblock(g, (place) -> {
             if (place != null &&

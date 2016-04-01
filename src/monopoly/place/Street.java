@@ -20,10 +20,12 @@ public class Street implements Serializable {
         return new CopyOnWriteArrayList<>(lands);
     }
 
-    public int getExtraRent() {
+    public int getExtraRent(Land ref) {
         int rent = 0;
         for (Land land: lands) {
-            rent += land.getPrice();
+            if (land.getOwner() == ref.getOwner()) {
+                rent += land.getPrice();
+            }
         }
         return rent / 10;
     }

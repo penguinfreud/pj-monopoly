@@ -11,7 +11,7 @@ public class StopTheGame extends Place {
         Map.registerPlaceReader("StopTheGame", (r, sc) -> new StopTheGame());
     }
 
-    public StopTheGame() {
+    private StopTheGame() {
         super("StopTheGame");
     }
 

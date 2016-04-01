@@ -2,6 +2,9 @@ package monopoly;
 
 import monopoly.async.Callback;
 
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+
 public class AIPlayer extends AbstractPlayer {
     public AIPlayer() {}
 
@@ -22,6 +25,12 @@ public class AIPlayer extends AbstractPlayer {
     @Override
     public void askWhichPropertyToMortgage(Game g, Callback<Property> cb) {
         cb.run(getProperties().get(0));
+    }
+
+    @Override
+    protected void askWhichCardToBuy(Game g, Callback<Card> cb) {
+        List<Card> cards = Card.getCards();
+        cb.run(cards.get(ThreadLocalRandom.current().nextInt(cards.size())));
     }
 
     @Override

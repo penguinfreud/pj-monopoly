@@ -13,7 +13,7 @@ public class CouponSite extends Place {
         Map.registerPlaceReader("CouponSite", (r, sc) -> new CouponSite());
     }
 
-    protected CouponSite() {
+    private CouponSite() {
         super("CouponSite");
     }
 

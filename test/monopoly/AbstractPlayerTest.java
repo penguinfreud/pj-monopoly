@@ -96,7 +96,7 @@ public class AbstractPlayerTest {
             }
         };
 
-        card = new Card() {
+        card = new Card("Card") {
         };
 
         pi = new AbstractPlayer.PlaceInterface();

@@ -28,7 +28,7 @@ public class Land extends Property {
 
     @Override
     public int getRent() {
-        return getPrice() * 2 / 10 + street.getExtraRent();
+        return getPrice() * 2 / 10 + street.getExtraRent(this);
     }
 
     @Override
