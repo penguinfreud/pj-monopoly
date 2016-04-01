@@ -4,16 +4,15 @@ import monopoly.async.MoneyChangeEvent;
 import monopoly.async.Event;
 import monopoly.async.Callback;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 
 class GameData implements Serializable {
     Config config;
+    Locale locale;
+    transient ResourceBundle messages;
     Map map;
     Calendar calendar;
     Bank bank;
@@ -45,8 +44,15 @@ class GameData implements Serializable {
         oEvents.put("turn", onTurn);
         oEvents.put("cycle", onCycle);
         pEvents.put("bankrupt", onBankrupt);
-        mEvents.put("cashChange", onMoneyChange);
+        mEvents.put("moneyChange", onMoneyChange);
         calendar = new Calendar(g);
+        locale = Locale.forLanguageTag((String) config.configTable.get("locale"));
+        messages = ResourceBundle.getBundle((String) config.configTable.get("bundle-name"), locale);
+    }
+
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        ois.defaultReadObject();
+        messages = ResourceBundle.getBundle((String) config.configTable.get("bundle-name"), locale);
     }
 }
 
@@ -68,9 +74,7 @@ public class Game {
     }
 
     public State getState() {
-        synchronized (lock) {
-            return data.state;
-        }
+        return data.state;
     }
 
     public Object getConfig(String key) {
@@ -84,6 +88,19 @@ public class Game {
             if (data.state == State.OVER) {
                 data.config.configTable.put(key, value);
             }
+        }
+    }
+
+    public Locale getLocale() {
+        return data.locale;
+    }
+
+    public String getText(String key) {
+        try {
+            return new String(data.messages.getString(key).getBytes("ISO-8859-1"), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return "";
         }
     }
 
@@ -108,19 +125,15 @@ public class Game {
     }
 
     public List<AbstractPlayer> getPlayers() {
-        synchronized (lock) {
-            return data.players.getPlayers();
-        }
+        return data.players.getPlayers();
     }
 
     public AbstractPlayer getCurrentPlayer() {
-        synchronized (lock) {
-            return data.players.getCurrentPlayer();
-        }
+        return data.players.getCurrentPlayer();
     }
 
     public String getDate() {
-        return data.calendar.getDate();
+        return data.calendar.getDate(this);
     }
 
     public void start() {
@@ -166,6 +179,9 @@ public class Game {
     void rollTheDice() {
         synchronized (lock) {
             int dice = ThreadLocalRandom.current().nextInt((Integer) getConfig("dice-sides")) + 1;
+            if (data.players.count() <= 1) {
+                endGame();
+            }
             startWalking(dice);
         }
     }
@@ -221,7 +237,7 @@ public class Game {
         data.pEvents.get(id).addListener(callback);
     }
 
-    public void onC(String id, Callback<MoneyChangeEvent> callback) {
+    public void onM(String id, Callback<MoneyChangeEvent> callback) {
         data.mEvents.get(id).addListener(callback);
     }
 
@@ -233,7 +249,7 @@ public class Game {
         data.pEvents.put(id, event);
     }
 
-    void registerCEvent(String id, Event<MoneyChangeEvent> event) {
+    void registerMEvent(String id, Event<MoneyChangeEvent> event) {
         data.mEvents.put(id, event);
     }
 

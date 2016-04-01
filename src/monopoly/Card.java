@@ -10,6 +10,11 @@ public abstract class Card {
         return name;
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
+
     public AbstractPlayer getOwner() {
         return owner;
     }

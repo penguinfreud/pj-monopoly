@@ -66,6 +66,9 @@ public abstract class Property extends Place {
             } else if (owner == p) {
                 if (level < (Integer) g.getConfig("property-max-level")) {
                     p.upgradeProperty(g, cb);
+                } else {
+                    System.out.println("max level reached");
+                    cb.run(null);
                 }
             } else {
                 p.payRent(g, cb);

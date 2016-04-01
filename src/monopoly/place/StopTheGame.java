@@ -17,7 +17,7 @@ public class StopTheGame extends Place {
 
     @Override
     public void onPassingBy(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
-        pi.pay(g.getCurrentPlayer(), g, g.getCurrentPlayer().getTotalPossessions() + 1, "", cb);
+        pi.pay(g.getCurrentPlayer(), g, null, g.getCurrentPlayer().getTotalPossessions() + 1, "", cb);
     }
 
     @Override

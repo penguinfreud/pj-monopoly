@@ -11,6 +11,8 @@ public class Config implements Serializable {
     }
 
     private void defaultConfig() {
+        configTable.put("bundle-name", "messages");
+        configTable.put("locale", "zh-CN");
         configTable.put("dice-sides", 6);
         configTable.put("init-cash", 2000);
         configTable.put("init-deposit", 2000);

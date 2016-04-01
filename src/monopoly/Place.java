@@ -17,6 +17,11 @@ public abstract class Place implements Serializable {
         return name;
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
+
     public final Place getPrev() {
         return prev;
     }

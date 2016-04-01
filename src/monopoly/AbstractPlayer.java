@@ -59,6 +59,10 @@ public abstract class AbstractPlayer implements Serializable {
         return new CopyOnWriteArrayList<>(properties);
     }
 
+    public final List<Card> getCards() {
+        return new CopyOnWriteArrayList<>(cards);
+    }
+
     public int getTotalPossessions() {
         int poss = cash + deposit;
         for (Property prop: properties) {
@@ -111,11 +115,9 @@ public abstract class AbstractPlayer implements Serializable {
     public abstract void askWhereToSetRoadblock(Game g, Callback<Place> cb);
 
     private void changeCash(Game g, int amount, String msg) {
-        synchronized (g.lock) {
-            if (cash + amount >= 0) {
-                cash += amount;
-                g.triggerMoneyChange(new MoneyChangeEvent(this, amount, msg));
-            }
+        if (cash + amount >= 0) {
+            cash += amount;
+            g.triggerMoneyChange(new MoneyChangeEvent(this, amount, msg));
         }
     }
 
@@ -129,7 +131,7 @@ public abstract class AbstractPlayer implements Serializable {
     }
 
     private void sellProperties(Game g, Property prop, Callback<Object> cb) {
-        if (cash < 0) {
+        if (cash <= 0) {
             if (prop != null) {
                 if (properties.contains(prop)) {
                     cash += prop.getMortgagePrice();
@@ -137,7 +139,7 @@ public abstract class AbstractPlayer implements Serializable {
                     prop.mortgage();
                 }
             }
-            if (cash < 0) {
+            if (cash <= 0) {
                 if (properties.size() > 0) {
                     askWhichPropertyToMortgage(g, (nextProp) -> sellProperties(g, nextProp, cb));
                 } else {
@@ -153,28 +155,24 @@ public abstract class AbstractPlayer implements Serializable {
     }
 
     private void _buyProperty(Game g) {
-        synchronized (g.lock) {
-            if (g.getState() == Game.State.TURN_LANDED) {
-                Property prop = currentPlace.asProperty();
-                int price = prop.getPurchasePrice();
-                if (prop.isFree() && cash > price) {
-                    changeCash(g, -price, "");
-                    properties.add(prop);
-                    prop.changeOwner(AbstractPlayer.this);
-                }
+        if (g.getState() == Game.State.TURN_LANDED) {
+            Property prop = currentPlace.asProperty();
+            int price = prop.getPurchasePrice();
+            if (prop.isFree() && cash >= price) {
+                changeCash(g, -price, g.getText("buy_property"));
+                properties.add(prop);
+                prop.changeOwner(AbstractPlayer.this);
             }
         }
     }
 
     private void _upgradeProperty(Game g) {
-        synchronized (g.lock) {
-            if (g.getState() == Game.State.TURN_LANDED) {
-                Property prop = currentPlace.asProperty();
-                int price = prop.getUpgradePrice();
-                if (prop.isFree() && cash > price) {
-                    changeCash(g, -price, "");
-                    prop.upgrade(g);
-                }
+        if (g.getState() == Game.State.TURN_LANDED) {
+            Property prop = currentPlace.asProperty();
+            int price = prop.getUpgradePrice();
+            if (prop.getOwner() == this && cash >= price) {
+                changeCash(g, -price, g.getText("upgrade_property"));
+                prop.upgrade(g);
             }
         }
     }
@@ -183,7 +181,8 @@ public abstract class AbstractPlayer implements Serializable {
         synchronized (g.lock) {
             if (g.getState() == Game.State.TURN_LANDED) {
                 System.out.println("pay rent");
-                pay(g, currentPlace.asProperty().getRent(), "", cb);
+                Property prop = currentPlace.asProperty();
+                pay(g, prop.getOwner(), prop.getRent(), g.getText("pay_rent"), cb);
             }
         }
     }
@@ -193,11 +192,15 @@ public abstract class AbstractPlayer implements Serializable {
             if (g.getState() == Game.State.TURN_LANDED) {
                 Property prop = currentPlace.asProperty();
                 int price = prop.getPurchasePrice();
-                if (prop.isFree() && cash > price) {
+                if (prop.isFree() && cash >= price) {
                     askWhetherToBuyProperty(g, (ok) -> {
-                        _buyProperty(g);
-                        cb.run(null);
+                        synchronized (g.lock) {
+                            _buyProperty(g);
+                            cb.run(null);
+                        }
                     });
+                } else {
+                    cb.run(null);
                 }
             }
         }
@@ -208,33 +211,39 @@ public abstract class AbstractPlayer implements Serializable {
             if (g.getState() == Game.State.TURN_LANDED) {
                 Property prop = currentPlace.asProperty();
                 int price = prop.getUpgradePrice();
-                if (prop.isFree() && cash > price) {
+                if (prop.getOwner() == this && cash >= price) {
                     askWhetherToUpgradeProperty(g, (ok) -> {
-                        _upgradeProperty(g);
-                        cb.run(null);
+                        synchronized (g.lock) {
+                            _upgradeProperty(g);
+                            cb.run(null);
+                        }
                     });
+                } else {
+                    cb.run(null);
                 }
             }
         }
     }
 
-    final void pay(Game g, int amount, String msg, Callback<Object> cb) {
+    final void pay(Game g, AbstractPlayer receiver, int amount, String msg, Callback<Object> cb) {
         synchronized (g.lock) {
             cash -= amount;
             g.triggerMoneyChange(new MoneyChangeEvent(this, -amount, msg));
-            if (cash < 0) {
+            if (receiver != null) {
+                receiver.changeCash(g, Math.min(amount, getTotalPossessions()), g.getText("get_rent"));
+            }
+            if (cash <= 0) {
                 if (cash + deposit >= 0) {
                     cash = 0;
                     deposit += cash;
+                    cb.run(null);
                 } else {
                     cash += deposit;
                     deposit = 0;
                     sellProperties(g, null, cb);
-                    if (cash <= 0) {
-                        g.triggerBankrupt(AbstractPlayer.this);
-                        cb.run(null);
-                    }
                 }
+            } else {
+                cb.run(null);
             }
         }
     }
@@ -258,8 +267,8 @@ public abstract class AbstractPlayer implements Serializable {
     protected final void endStep(Game g) {
         synchronized (g.lock) {
             if (g.getState() == Game.State.TURN_WALKING) {
-                System.out.println("endStep " + getCurrentPlace().getName());
                 currentPlace = reversed? currentPlace.getPrev(): currentPlace.getNext();
+                System.out.println("endStep " + getCurrentPlace().getName());
                 --stepsToAdvance;
                 if (currentPlace.hasRoadblock()) {
                     stepsToAdvance = 0;
@@ -276,7 +285,9 @@ public abstract class AbstractPlayer implements Serializable {
 
     public static final class PlaceInterface implements Serializable {
         public final void changeCash(AbstractPlayer player, Game g, int amount, String msg) {
-            player.changeCash(g, amount, msg);
+            synchronized (g.lock) {
+                player.changeCash(g, amount, msg);
+            }
         }
 
         public final void changeDeposit(AbstractPlayer player, Game g, int amount, String msg) {
@@ -296,8 +307,8 @@ public abstract class AbstractPlayer implements Serializable {
             }
         }
 
-        public final void pay(AbstractPlayer player, Game g, int amount, String msg, Callback<Object> cb) {
-            player.pay(g, amount, msg, cb);
+        public final void pay(AbstractPlayer player, Game g, AbstractPlayer receiver, int amount, String msg, Callback<Object> cb) {
+            player.pay(g, receiver, amount, msg, cb);
         }
     }
 
