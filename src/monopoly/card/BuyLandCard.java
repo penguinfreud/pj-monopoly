@@ -9,7 +9,7 @@ import monopoly.async.Callback;
 public class BuyLandCard extends Card {
     static {
         Card.registerCard(new BuyLandCard());
-        Game.putDefaultConfig("card-buylandcard-price", 7);
+        Game.putDefaultConfig("buylandcard-price", 7);
     }
 
     private BuyLandCard() {

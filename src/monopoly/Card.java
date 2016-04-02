@@ -22,7 +22,7 @@ public abstract class Card implements GameObject {
     }
 
     public int getPrice(Game g) {
-        return (Integer) g.getConfig("card-" + name.toLowerCase() + "-price");
+        return (Integer) g.getConfig(name.toLowerCase() + "-price");
     }
 
     public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {

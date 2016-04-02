@@ -432,6 +432,12 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
             }
         }
 
+        public final void changeCash(AbstractPlayer player, Game g, int amount, String msg) {
+            synchronized (g.lock) {
+                player.changeCash(g, amount, msg);
+            }
+        }
+
         public final void changeDeposit(AbstractPlayer player, Game g, int amount, String msg) {
             synchronized (g.lock) {
                 player.changeDeposit(g, amount, msg);
