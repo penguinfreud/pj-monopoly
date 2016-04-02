@@ -21,6 +21,11 @@ public class Main {
         Class.forName("monopoly.place.CouponSite");
         Class.forName("monopoly.place.CardSite");
         Class.forName("monopoly.place.CardShop");
+        Class.forName("monopoly.card.BuyLandCard");
+        Class.forName("monopoly.card.ControlledDice");
+        Class.forName("monopoly.card.ReverseCard");
+        Class.forName("monopoly.card.Roadblock");
+        Class.forName("monopoly.card.StayCard");
 
         Map map = Map.readMap(Main.class.getResourceAsStream("/maps/default_tui.map"));
 

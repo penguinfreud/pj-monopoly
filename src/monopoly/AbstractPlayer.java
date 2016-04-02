@@ -6,9 +6,19 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public abstract class AbstractPlayer extends GameObject implements Serializable {
+public abstract class AbstractPlayer implements Serializable, GameObject {
+    static {
+        Game.putDefaultConfig("init-cash", 2000);
+        Game.putDefaultConfig("init-deposit", 2000);
+        Game.putDefaultConfig("init-coupons", 0);
+    }
+
     private static final EventDispatcher<Triple<AbstractPlayer, Integer, String>> _onMoneyChange = new EventDispatcher<>();
+    private static final EventDispatcher<Pair<AbstractPlayer, Integer>> _onGetCoupons = new EventDispatcher<>();
+    private static final EventDispatcher<Pair<AbstractPlayer, Card>> _onGetCard = new EventDispatcher<>();
     public static final DelegateEventDispatcher<Triple<AbstractPlayer, Integer, String>> onMoneyChange = new DelegateEventDispatcher<>(_onMoneyChange);
+    public static final DelegateEventDispatcher<Pair<AbstractPlayer, Integer>> onGetCoupons = new DelegateEventDispatcher<>(_onGetCoupons);
+    public static final DelegateEventDispatcher<Pair<AbstractPlayer, Card>> onGetCard = new DelegateEventDispatcher<>(_onGetCard);
 
     private String name;
     private Place currentPlace;
@@ -128,6 +138,8 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
         if (deposit + amount >= 0) {
             deposit += amount;
             _onMoneyChange.trigger(g, new Triple<>(this, amount, msg));
+        } else {
+            g.triggerException("deposit_not_enough");
         }
     }
 
@@ -138,6 +150,8 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
                     cash += prop.getMortgagePrice();
                     properties.remove(prop);
                     prop.mortgage();
+                } else {
+                    g.triggerException("not_your_property");
                 }
             }
             if (cash <= 0) {
@@ -155,24 +169,39 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
         }
     }
 
+    private boolean checkBuyingCondition(Game g, boolean force) {
+        Property prop = currentPlace.asProperty();
+        if (cash >= prop.getPurchasePrice()) {
+            if (prop.isFree()) {
+                return true;
+            } else if (force) {
+                AbstractPlayer owner = prop.getOwner();
+                if (owner != this) {
+                    return true;
+                } else {
+                    g.triggerException("you_cannot_buy_your_own_land");
+                }
+            } else {
+                g.triggerException("cannot_buy_sold_land");
+            }
+        } else {
+            g.triggerException("not_enough_cash");
+        }
+        return false;
+    }
+
     private void _buyProperty(Game g, boolean force) {
         if (g.getState() == Game.State.TURN_LANDED) {
             Property prop = currentPlace.asProperty();
             int price = prop.getPurchasePrice();
-            if (cash >= price) {
-                if (prop.isFree()) {
-                    changeCash(g, -price, "buy_property");
-                    properties.add(prop);
-                    prop.changeOwner(this);
-                } else if (force) {
-                    AbstractPlayer owner = prop.getOwner();
-                    if (owner != this) {
-                        pay(g, owner, price, "buy_property", null);
-                        properties.add(prop);
-                        owner.properties.remove(prop);
-                        prop.changeOwner(this);
-                    }
+            if (checkBuyingCondition(g, force)) {
+                AbstractPlayer owner = prop.getOwner();
+                pay(g, owner, price, "buy_property", null);
+                properties.add(prop);
+                if (owner != null) {
+                    owner.properties.remove(prop);
                 }
+                prop.changeOwner(this);
             }
         }
     }
@@ -181,9 +210,15 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
         if (g.getState() == Game.State.TURN_LANDED) {
             Property prop = currentPlace.asProperty();
             int price = prop.getUpgradePrice();
-            if (prop.getOwner() == this && cash >= price) {
-                changeCash(g, -price, "upgrade_property");
-                prop.upgrade(g);
+            if (prop.getOwner() == this) {
+                if (cash >= price) {
+                    changeCash(g, -price, "upgrade_property");
+                    prop.upgrade(g);
+                } else {
+                    g.triggerException("not_enough_cash");
+                }
+            } else {
+                g.triggerException("not_your_property");
             }
         }
     }
@@ -196,16 +231,18 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
         }
     }
 
-    final void buyProperty(Game g, Callback<Object> cb) {
+    private void buyProperty(Game g, Callback<Object> cb, boolean force) {
         synchronized (g.lock) {
             if (g.getState() == Game.State.TURN_LANDED) {
                 Property prop = currentPlace.asProperty();
                 int price = prop.getPurchasePrice();
                 if (prop.isFree() && cash >= price) {
                     askWhetherToBuyProperty(g, (_g, ok) -> {
-                        synchronized (g.lock) {
-                            _buyProperty(g, false);
-                            cb.run(g, null);
+                        if (ok) {
+                            synchronized (g.lock) {
+                                _buyProperty(g, force);
+                                cb.run(g, null);
+                            }
                         }
                     });
                 } else {
@@ -215,6 +252,10 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
         }
     }
 
+    final void buyProperty(Game g, Callback<Object> cb) {
+        buyProperty(g, cb, false);
+    }
+
     final void upgradeProperty(Game g, Callback<Object> cb) {
         synchronized (g.lock) {
             if (g.getState() == Game.State.TURN_LANDED) {
@@ -222,9 +263,11 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
                 int price = prop.getUpgradePrice();
                 if (prop.getOwner() == this && cash >= price) {
                     askWhetherToUpgradeProperty(g, (_g, ok) -> {
-                        synchronized (_g.lock) {
-                            _upgradeProperty(_g);
-                            cb.run(_g, null);
+                        if (ok) {
+                            synchronized (_g.lock) {
+                                _upgradeProperty(_g);
+                                cb.run(_g, null);
+                            }
                         }
                     });
                 } else {
@@ -276,6 +319,7 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
                 if (currentPlace.hasRoadblock()) {
                     stepsToAdvance = 0;
                     currentPlace.clearRoadblocks();
+                    g.triggerException("met_roadblock", currentPlace.getName());
                 }
                 if (stepsToAdvance == 0) {
                     g.endWalking();
@@ -323,11 +367,15 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
         public final void addCoupons(AbstractPlayer player, Game g, int amount) {
             synchronized (g.lock) {
                 player.coupons += amount;
+                _onGetCoupons.trigger(g, new Pair<>(player, amount));
             }
         }
 
         public final void addCard(AbstractPlayer player, Game g, Card card) {
-            player.cards.add(card);
+            synchronized (g.lock) {
+                player.cards.add(card);
+                _onGetCard.trigger(g, new Pair<>(player, card));
+            }
         }
 
         public final void buyCards(Game g, Callback<Object> cb) {
@@ -379,9 +427,9 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
             }
         }
 
-        public final void buyProperty(Game g) {
+        public final void buyProperty(Game g, Callback<Object> cb) {
             synchronized (g.lock) {
-                g.getCurrentPlayer()._buyProperty(g, true);
+                g.getCurrentPlayer().buyProperty(g, cb, true);
             }
         }
     }

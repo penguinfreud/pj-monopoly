@@ -11,6 +11,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public class CouponSite extends Place {
     static {
         Map.registerPlaceReader("CouponSite", (r, sc) -> new CouponSite());
+        Game.putDefaultConfig("coupon-award-min", 1);
+        Game.putDefaultConfig("coupon-award-max", 10);
     }
 
     private CouponSite() {

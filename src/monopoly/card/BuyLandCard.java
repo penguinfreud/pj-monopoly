@@ -9,6 +9,7 @@ import monopoly.async.Callback;
 public class BuyLandCard extends Card {
     static {
         Card.registerCard(new BuyLandCard());
+        Game.putDefaultConfig("card-buylandcard-price", 7);
     }
 
     private BuyLandCard() {
@@ -20,8 +21,7 @@ public class BuyLandCard extends Card {
         AbstractPlayer player = g.getCurrentPlayer();
         Property prop = player.getCurrentPlace().asProperty();
         if (prop != null && prop.getOwner() != player) {
-            ci.buyProperty(g);
-            cb.run(g, null);
+            ci.buyProperty(g, cb);
         }
     }
 }

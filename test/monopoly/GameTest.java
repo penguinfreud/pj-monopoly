@@ -17,7 +17,7 @@ public class GameTest {
     public void setUp() throws Exception {
         Class.forName("monopoly.MapReader");
         Class.forName("monopoly.place.Land");
-        Class.forName("monopoly.place.StopTheGame");
+        Class.forName("monopoly.place.Trap");
         map = Map.readMap(GameTest.class.getResourceAsStream("/test.map"));
 
         List<AbstractPlayer> players = new ArrayList<>();

@@ -20,6 +20,11 @@ public class DelegatePlace extends Place {
     }
 
     @Override
+    public String toString(Game g) {
+        return place.toString(g);
+    }
+
+    @Override
     public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
         place.onLanded(g, pi, cb);
     }

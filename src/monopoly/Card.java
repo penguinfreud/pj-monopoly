@@ -5,7 +5,7 @@ import monopoly.async.Callback;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public abstract class Card extends GameObject {
+public abstract class Card implements GameObject {
     private final String name;
 
     protected Card(String name) {

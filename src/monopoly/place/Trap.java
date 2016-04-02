@@ -6,18 +6,18 @@ import monopoly.Map;
 import monopoly.Place;
 import monopoly.async.Callback;
 
-public class StopTheGame extends Place {
+public class Trap extends Place {
     static {
-        Map.registerPlaceReader("StopTheGame", (r, sc) -> new StopTheGame());
+        Map.registerPlaceReader("Trap", (r, sc) -> new Trap());
     }
 
-    private StopTheGame() {
-        super("StopTheGame");
+    private Trap() {
+        super("Trap");
     }
 
     @Override
     public void onPassingBy(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
-        pi.pay(g.getCurrentPlayer(), g, null, g.getCurrentPlayer().getTotalPossessions() + 1, "", cb);
+        pi.pay(g.getCurrentPlayer(), g, null, g.getCurrentPlayer().getTotalPossessions() + 1, "trap", cb);
     }
 
     @Override

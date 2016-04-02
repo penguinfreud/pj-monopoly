@@ -1,10 +1,10 @@
 package monopoly.async;
 
-public final class Tuple<A, B> {
+public final class Pair<A, B> {
     private final A first;
     private final B second;
 
-    public Tuple(A a, B b) {
+    public Pair(A a, B b) {
         first = a;
         second = b;
     }

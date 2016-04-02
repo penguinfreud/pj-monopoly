@@ -4,7 +4,7 @@ import monopoly.async.Callback;
 
 import java.io.Serializable;
 
-public abstract class Place extends GameObject implements Serializable {
+public abstract class Place implements Serializable, GameObject {
     private final String name;
     Place prev, next;
     private int roadblocks = 0;

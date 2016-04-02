@@ -34,6 +34,9 @@ public class News extends Place {
                 pi.changeDeposit(player, g, -player.getDeposit() / 10, "news_tax");
             }
         });
+
+        Game.putDefaultConfig("news-award-min", 100);
+        Game.putDefaultConfig("news-award-max", 200);
     }
 
     private static List<AbstractPlayer> getSortedPlayers(Game g) {

@@ -2,6 +2,7 @@ package monopoly.tui;
 
 import monopoly.*;
 import monopoly.async.Callback;
+import monopoly.async.Function;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,12 +44,14 @@ public class TUIPlayer extends AbstractPlayer {
         }
     }
 
-    private <T extends GameObject>T choose(Game g, String question, List<T> options, boolean nullable) {
+    private <T extends GameObject>T choose(Game g, String question, List<T> options, boolean nullable, Function<T, String> stringifier) {
         while (true) {
             System.out.println(question);
             int l = options.size();
             for (int i = 0; i<l; i++) {
-                System.out.println("[" + (i + 1) + "] " + options.get(i).toString(g));
+                T item = options.get(i);
+                String option = stringifier == null? item.toString(g): stringifier.run(g, item);
+                System.out.println("[" + (i + 1) + "] " + option);
             }
             if (nullable) {
                 System.out.println("[" + (l + 1) + "] " + g.getText("return"));
@@ -64,6 +67,10 @@ public class TUIPlayer extends AbstractPlayer {
             } catch (NumberFormatException e) {}
             System.out.println(g.getText("input_error"));
         }
+    }
+
+    private <T extends GameObject>T choose(Game g, String question, List<T> options, boolean nullable) {
+        return choose(g, question, options, nullable, null);
     }
 
     private int chooseInt(Game g, List<String> options, String prompt) {
@@ -105,7 +112,7 @@ public class TUIPlayer extends AbstractPlayer {
 
     @Override
     protected void askWhichCardToBuy(Game g, Callback<Card> cb) {
-        String question = g.getText("ask_which_card_to_buy");
+        String question = g.format("ask_which_card_to_buy", getCoupons());
         cb.run(g, choose(g, question, Card.getCards(), true));
     }
 

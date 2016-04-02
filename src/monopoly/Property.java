@@ -3,6 +3,10 @@ package monopoly;
 import monopoly.async.Callback;
 
 public abstract class Property extends Place {
+    static {
+        Game.putDefaultConfig("property-max-level", 6);
+    }
+
     private AbstractPlayer owner;
     private int price = 0, level = 1;
 

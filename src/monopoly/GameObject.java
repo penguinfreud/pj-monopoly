@@ -1,5 +1,5 @@
 package monopoly;
 
-public abstract class GameObject {
-    public abstract String toString(Game g);
+public interface GameObject {
+    String toString(Game g);
 }

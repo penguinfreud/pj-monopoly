@@ -21,39 +21,8 @@ class GameData implements Serializable {
     final AbstractPlayer.PlaceInterface placeInterface = new AbstractPlayer.PlaceInterface();
     final AbstractPlayer.CardInterface cardInterface = new AbstractPlayer.CardInterface();
 
-    GameData(Config c) {
-        Config def = new Config();
-        defaultConfig(def);
-        config = c;
-        c.setBase(def);
-    }
-
-    private void defaultConfig(Config config) {
-        config.put("bundle-name", "messages");
-        config.put("locale", "zh-CN");
-
-        config.put("dice-sides", 6);
-
-        config.put("init-cash", 2000);
-        config.put("init-deposit", 2000);
-        config.put("init-coupons", 0);
-
-        config.put("property-max-level", 6);
-
-        config.put("news-award-min", 100);
-        config.put("news-award-max", 200);
-
-        config.put("coupon-award-min", 1);
-        config.put("coupon-award-max", 10);
-
-        config.put("card-controlleddice-price", 5);
-        config.put("card-reversecard-price", 3);
-        config.put("card-roadblock-price", 3);
-        config.put("card-staycard-price", 3);
-
-        config.put("bank-max-transfer", 100000);
-
-        config.put("roadblock-reach", 8);
+    GameData(Config config) {
+        this.config = config;
     }
 
     void init(Game g) {
@@ -76,11 +45,28 @@ public class Game {
     final Object lock = new Object();
     private GameData data;
 
+    private static final Config defaultConfig = new Config();
+
+    static {
+        defaultConfig.put("bundle-name", "messages");
+        defaultConfig.put("locale", "zh-CN");
+        defaultConfig.put("dice-sides", 6);
+    }
+
+    public static void putDefaultConfig(String key, Object value) {
+        defaultConfig.put(key, value);
+    }
+
     public Game() {
         this(null);
     }
 
     protected Game(Config c) {
+        if (c == null) {
+            c = defaultConfig;
+        } else {
+            c.setBase(defaultConfig);
+        }
         data = new GameData(new Config(c));
         data.init(this);
     }
@@ -112,6 +98,7 @@ public class Game {
             e.printStackTrace();
             return "";
         } catch(MissingResourceException e) {
+            System.err.println("Unknown key: " + key);
             return "";
         }
     }
@@ -244,13 +231,13 @@ public class Game {
         _onTurn = new EventDispatcher<>(),
         _onLanded = new EventDispatcher<>(),
         _onCycle = new EventDispatcher<>();
-    private static final EventDispatcher<Exception> _onException = new EventDispatcher<>();
+    private static final EventDispatcher<String> _onException = new EventDispatcher<>();
     private static final EventDispatcher<AbstractPlayer> _onBankrupt = new EventDispatcher<>();
     public static final DelegateEventDispatcher<Object> onGameOver = new DelegateEventDispatcher<>(_onGameOver),
         onTurn = new DelegateEventDispatcher<>(_onTurn),
         onLanded = new DelegateEventDispatcher<>(_onLanded),
         onCycle = new DelegateEventDispatcher<>(_onCycle);
-    public static final DelegateEventDispatcher<Exception> onException = new DelegateEventDispatcher<>(_onException);
+    public static final DelegateEventDispatcher<String> onException = new DelegateEventDispatcher<>(_onException);
     public static final DelegateEventDispatcher<AbstractPlayer> onBankrupt = new DelegateEventDispatcher<>(_onBankrupt);
 
     void triggerBankrupt(AbstractPlayer player) {
@@ -261,8 +248,8 @@ public class Game {
         }
     }
 
-    public void triggerException(Exception e) {
-        _onException.trigger(this, e);
+    public void triggerException(String key, Object ...args) {
+        _onException.trigger(this, format(key, args));
     }
 
     protected void readData(ObjectInputStream ois) throws IOException, ClassNotFoundException {

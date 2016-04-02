@@ -9,6 +9,7 @@ import monopoly.async.Callback;
 public class Bank extends Place {
     static {
         Map.registerPlaceReader("Bank", (r, sc) -> new Bank());
+        Game.putDefaultConfig("bank-max-transfer", 100000);
     }
 
     private Bank() {

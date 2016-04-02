@@ -18,7 +18,7 @@ public class GameSerializationTest {
     public void setUp() throws Exception {
         Class.forName("monopoly.MapReader");
         Class.forName("monopoly.place.Land");
-        Class.forName("monopoly.place.StopTheGame");
+        Class.forName("monopoly.place.Trap");
         Map map = Map.readMap(GameSerializationTest.class.getResourceAsStream("/test.map"));
 
         List<AbstractPlayer> players = new CopyOnWriteArrayList<>();
@@ -57,6 +57,8 @@ public class GameSerializationTest {
 
     @After
     public void tearDown() {
-        tempFile.delete();
+        if (tempFile != null) {
+            tempFile.delete();
+        }
     }
 }
