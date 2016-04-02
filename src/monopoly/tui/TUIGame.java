@@ -6,7 +6,7 @@ import monopoly.Game;
 import java.util.Scanner;
 
 public class TUIGame extends Game {
-    private Scanner scanner = new Scanner(System.in);
+    private final Scanner scanner = new Scanner(System.in);
 
     public TUIGame() {
         onO("gameOver", (g, o) ->

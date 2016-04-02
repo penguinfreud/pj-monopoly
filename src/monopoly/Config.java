@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Hashtable;
 
 public class Config implements Serializable {
-    private Hashtable<String, Object> configTable = new Hashtable<>();
+    private final Hashtable<String, Object> configTable = new Hashtable<>();
     private Config base;
 
     Config() {

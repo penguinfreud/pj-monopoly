@@ -12,9 +12,9 @@ public class TUIPlace extends DelegatePlace {
         Map.registerPlaceReader("TUIPlace", (r, sc) -> new TUIPlace(sc.nextInt(), sc.nextInt(), r.readPlace(sc)));
     }
 
-    private int x, y;
+    private final int x, y;
 
-    public TUIPlace(int x, int y, Place place) {
+    private TUIPlace(int x, int y, Place place) {
         super(place);
         this.x = x;
         this.y = y;

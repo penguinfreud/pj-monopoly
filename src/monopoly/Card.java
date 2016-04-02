@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class Card extends GameObject {
-    private String name;
+    private final String name;
 
     protected Card(String name) {
         this.name = name;
@@ -31,11 +31,11 @@ public abstract class Card extends GameObject {
 
     private static final List<Card> cards = new CopyOnWriteArrayList<>();
 
-    public static final void registerCard(Card card) {
+    protected static void registerCard(Card card) {
         cards.add(card);
     }
 
-    public static final List<Card> getCards() {
+    public static List<Card> getCards() {
         return new CopyOnWriteArrayList<>(cards);
     }
 }

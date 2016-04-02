@@ -3,13 +3,12 @@ package monopoly;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
 public class GameTest {
-    private ArrayList<AbstractPlayer> players;
     private Map map;
     private AbstractPlayer firstPlayer, secondPlayer;
     private Game game;
@@ -21,7 +20,7 @@ public class GameTest {
         Class.forName("monopoly.place.StopTheGame");
         map = Map.readMap(GameTest.class.getResourceAsStream("/test.map"));
 
-        players = new ArrayList<>();
+        List<AbstractPlayer> players = new ArrayList<>();
         firstPlayer = new AIPlayer("player A");
         secondPlayer = new AIPlayer("player B");
         players.add(firstPlayer);

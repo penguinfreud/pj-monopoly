@@ -5,7 +5,7 @@ import monopoly.async.Callback;
 import java.io.Serializable;
 
 public abstract class Place extends GameObject implements Serializable {
-    private String name;
+    private final String name;
     Place prev, next;
     private int roadblocks = 0;
 

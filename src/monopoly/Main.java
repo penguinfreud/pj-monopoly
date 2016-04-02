@@ -27,7 +27,6 @@ public class Main {
         players = new ArrayList<>();
 
         TUIGame game = new TUIGame();
-        Scanner scanner = game.getScanner();
         game.setMap(map);
 
         game.onO("gameOver", (_g, o) -> newGame(_g));

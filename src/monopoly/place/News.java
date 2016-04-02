@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class News extends Place {
-    private static List<Callback<AbstractPlayer.PlaceInterface>> newsTypes = new ArrayList<>();
+    private static final List<Callback<AbstractPlayer.PlaceInterface>> newsTypes = new ArrayList<>();
 
     static {
         Map.registerPlaceReader("News", (r, sc) -> new News());

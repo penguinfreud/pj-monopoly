@@ -1,7 +1,6 @@
 package monopoly.gui;
 
 import monopoly.*;
-import monopoly.async.Callback;
 import monopoly.place.DelegatePlace;
 
 import java.awt.Graphics;

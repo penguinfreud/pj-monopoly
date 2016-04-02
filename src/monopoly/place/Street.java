@@ -5,11 +5,15 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Street implements Serializable {
-    private String name;
-    private List<Land> lands = new CopyOnWriteArrayList<>();
+    private final String name;
+    private final List<Land> lands = new CopyOnWriteArrayList<>();
 
     public Street(String name) {
         this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public void addLand(Land land) {

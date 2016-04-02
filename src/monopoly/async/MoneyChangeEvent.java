@@ -3,9 +3,9 @@ package monopoly.async;
 import monopoly.AbstractPlayer;
 
 public class MoneyChangeEvent {
-    private AbstractPlayer player;
-    private int amount;
-    private String msg;
+    private final AbstractPlayer player;
+    private final int amount;
+    private final String msg;
 
     public MoneyChangeEvent(AbstractPlayer player, int amount, String msg) {
         this.player = player;

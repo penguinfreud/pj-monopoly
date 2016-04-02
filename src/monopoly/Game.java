@@ -11,30 +11,30 @@ import java.util.concurrent.ThreadLocalRandom;
 
 
 class GameData implements Serializable {
-    Config config;
+    final Config config;
     transient ResourceBundle messages;
     Map map;
     Calendar calendar;
-    Bank bank;
-    Players players = new Players();
+    private Bank bank;
+    final Players players = new Players();
     boolean hadBankrupt = false;
     Game.State state = Game.State.OVER;
-    AbstractPlayer.PlaceInterface placeInterface = new AbstractPlayer.PlaceInterface();
-    AbstractPlayer.CardInterface cardInterface = new AbstractPlayer.CardInterface();
+    final AbstractPlayer.PlaceInterface placeInterface = new AbstractPlayer.PlaceInterface();
+    final AbstractPlayer.CardInterface cardInterface = new AbstractPlayer.CardInterface();
 
 
-    java.util.Map<String, EventDispatcher<Object>> oEvents = new Hashtable<>();
-    java.util.Map<String, EventDispatcher<Exception>> eEvents = new Hashtable();
-    java.util.Map<String, EventDispatcher<AbstractPlayer>> pEvents = new Hashtable<>();
-    java.util.Map<String, EventDispatcher<MoneyChangeEvent>> mEvents = new Hashtable<>();
+    final java.util.Map<String, EventDispatcher<Object>> oEvents = new Hashtable<>();
+    final java.util.Map<String, EventDispatcher<Exception>> eEvents = new Hashtable<>();
+    final java.util.Map<String, EventDispatcher<AbstractPlayer>> pEvents = new Hashtable<>();
+    final java.util.Map<String, EventDispatcher<MoneyChangeEvent>> mEvents = new Hashtable<>();
 
-    EventDispatcher<Object> onGameOver = new EventDispatcher<>(),
+    final EventDispatcher<Object> onGameOver = new EventDispatcher<>(),
             onTurn = new EventDispatcher<>(),
             onLanded = new EventDispatcher<>(),
             onCycle = new EventDispatcher<>();
-    EventDispatcher<Exception> onException = new EventDispatcher<>();
-    EventDispatcher<AbstractPlayer> onBankrupt = new EventDispatcher<>();
-    EventDispatcher<MoneyChangeEvent> onMoneyChange = new EventDispatcher<>();
+    final EventDispatcher<Exception> onException = new EventDispatcher<>();
+    final EventDispatcher<AbstractPlayer> onBankrupt = new EventDispatcher<>();
+    final EventDispatcher<MoneyChangeEvent> onMoneyChange = new EventDispatcher<>();
 
     GameData(Config c) {
         Config def = new Config();
@@ -203,7 +203,7 @@ public class Game {
         }
     }
 
-    private Callback<Object> endTurn = (g, o) -> {
+    private final Callback<Object> endTurn = (g, o) -> {
         synchronized (lock) {
             if (data.state == State.TURN_LANDED) {
                 if (!data.hadBankrupt) {
@@ -314,7 +314,7 @@ public class Game {
         }
     }
 
-    private static EventDispatcher<Game> _onGameStart = new EventDispatcher<>();
+    private static final EventDispatcher<Game> _onGameStart = new EventDispatcher<>();
 
     public static void onGameStart(Callback<Game> listener) {
         _onGameStart.addListener(listener);

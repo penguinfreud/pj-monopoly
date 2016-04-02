@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 public class MapReader {
     protected MapReader() {}
-    private java.util.Map<String, Street> streetMap = new Hashtable<>();
+    private final java.util.Map<String, Street> streetMap = new Hashtable<>();
 
     public Map readMap(Scanner sc) throws Exception {
         Map map = createMap();

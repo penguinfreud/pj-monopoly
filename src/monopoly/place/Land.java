@@ -8,7 +8,7 @@ public class Land extends Property {
         Map.registerPlaceReader("Land", (r, sc) -> new Land(sc.next(), sc.nextInt(), r.getStreet(sc.next())));
     }
 
-    private Street street;
+    private final Street street;
 
     protected Land(String name, int price, Street street) {
         super(name, price);

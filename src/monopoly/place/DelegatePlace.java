@@ -7,7 +7,7 @@ import monopoly.Property;
 import monopoly.async.Callback;
 
 public class DelegatePlace extends Place {
-    private Place place;
+    private final Place place;
 
     protected DelegatePlace(Place place) {
         super(place.getName());

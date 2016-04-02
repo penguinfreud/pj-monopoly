@@ -20,7 +20,7 @@ public class Map implements Serializable {
         return name;
     }
 
-    protected void setName(String name) {
+    void setName(String name) {
         this.name = name;
     }
 
@@ -73,7 +73,7 @@ public class Map implements Serializable {
         return placeReaders.get(id);
     }
 
-    private static java.util.Map<String, MapReader> mapReaders = new Hashtable<>();
+    private static final java.util.Map<String, MapReader> mapReaders = new Hashtable<>();
 
     public static void registerMapReader(String id, MapReader reader) {
         mapReaders.put(id, reader);

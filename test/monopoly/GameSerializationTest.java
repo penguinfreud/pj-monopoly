@@ -11,9 +11,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import static org.junit.Assert.assertEquals;
 
 public class GameSerializationTest {
-    private List<AbstractPlayer> players;
-    private Map map;
-    private AbstractPlayer firstPlayer, secondPlayer;
     private Game game;
     private File tempFile;
 
@@ -22,13 +19,11 @@ public class GameSerializationTest {
         Class.forName("monopoly.MapReader");
         Class.forName("monopoly.place.Land");
         Class.forName("monopoly.place.StopTheGame");
-        map = Map.readMap(GameSerializationTest.class.getResourceAsStream("/test.map"));
+        Map map = Map.readMap(GameSerializationTest.class.getResourceAsStream("/test.map"));
 
-        players = new CopyOnWriteArrayList<>();
-        firstPlayer = new AIPlayer("player A");
-        secondPlayer = new AIPlayer("player B");
-        players.add(firstPlayer);
-        players.add(secondPlayer);
+        List<AbstractPlayer> players = new CopyOnWriteArrayList<>();
+        players.add(new AIPlayer("player A"));
+        players.add(new AIPlayer("player B"));
 
         game = new Game();
         game.setMap(map);

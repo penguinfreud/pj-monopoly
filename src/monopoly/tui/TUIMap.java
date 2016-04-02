@@ -19,7 +19,7 @@ public class TUIMap extends Map {
         });
     }
 
-    List<List<TUIPlace>> rows = new CopyOnWriteArrayList<>();
+    private final List<List<TUIPlace>> rows = new CopyOnWriteArrayList<>();
 
     @Override
     protected void addPlace(Place place) {

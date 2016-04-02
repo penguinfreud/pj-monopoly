@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 class Players implements Serializable {
-    private List<AbstractPlayer> players = new CopyOnWriteArrayList<>();
+    private final List<AbstractPlayer> players = new CopyOnWriteArrayList<>();
     private int currentPlayerIndex = 0;
 
     int count() {

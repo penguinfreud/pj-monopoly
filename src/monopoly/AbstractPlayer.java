@@ -12,8 +12,8 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
     private Place currentPlace;
     private int cash, deposit, coupons;
     private boolean reversed = false;
-    private List<Property> properties = new CopyOnWriteArrayList<>();
-    private List<Card> cards = new CopyOnWriteArrayList<>();
+    private final List<Property> properties = new CopyOnWriteArrayList<>();
+    private final List<Card> cards = new CopyOnWriteArrayList<>();
 
     final void init(Game g) {
         this.cash = (Integer) g.getConfig("init-cash");

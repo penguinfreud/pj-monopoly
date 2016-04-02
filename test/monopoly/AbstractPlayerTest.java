@@ -15,10 +15,8 @@ import static org.junit.Assert.*;
 public class AbstractPlayerTest {
     private AbstractPlayer player;
     private AbstractPlayer anotherPlayer;
-    private Street street;
     private Property prop;
     private Property anotherProp;
-    private Map map;
     private Game g;
     private Card card;
     private AbstractPlayer.PlaceInterface pi;
@@ -64,7 +62,7 @@ public class AbstractPlayerTest {
         };
 
         anotherPlayer = new AIPlayer();
-        street = new Street("");
+        Street street = new Street("");
         prop = new Land("Prop", 10, street) {};
         anotherProp = new Land("Prop2", 20, street) {};
 
@@ -100,7 +98,7 @@ public class AbstractPlayerTest {
             }
         };
 
-        map = new Map();
+        Map map = new Map();
         map.addPlace(prop);
         map.addPlace(anotherProp);
         g.setMap(map);
@@ -225,22 +223,26 @@ public class AbstractPlayerTest {
     public synchronized void testBuyProperty() {
         player.init(g);
         gameState = Game.State.TURN_LANDED;
+        askWhetherToBuyPropertyCalled = false;
         player.buyProperty(g, cb);
 
         List<Property> properties = player.getProperties();
         assertEquals(1, properties.size());
         assertThat(properties, hasItem(prop));
+        assertTrue(askWhetherToBuyPropertyCalled);
 
         gameState = Game.State.TURN_WALKING;
         player.startWalking(g, 1);
         assertEquals(anotherProp, player.getCurrentPlace());
 
         gameState = Game.State.TURN_LANDED;
+        askWhetherToBuyPropertyCalled = false;
         player.buyProperty(g, cb);
         properties = player.getProperties();
         assertEquals(2, properties.size());
         assertThat(properties, hasItem(prop));
         assertThat(properties, hasItem(anotherProp));
+        assertTrue(askWhetherToBuyPropertyCalled);
 
         prop.mortgage();
         anotherProp.mortgage();
@@ -254,9 +256,11 @@ public class AbstractPlayerTest {
 
         assertEquals(1, prop.getLevel());
         moneyChangeAmount = 0;
+        askWhetherToUpgradePropertyCalled = false;
         player.upgradeProperty(g, cb);
         assertEquals(2, prop.getLevel());
         assertEquals(85, player.getCash());
         assertEquals(-5, moneyChangeAmount);
+        assertTrue(askWhetherToUpgradePropertyCalled);
     }
 }
