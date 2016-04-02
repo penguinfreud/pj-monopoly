@@ -1,13 +1,15 @@
 package monopoly;
 
-import monopoly.async.Callback;
-import monopoly.async.MoneyChangeEvent;
+import monopoly.async.*;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class AbstractPlayer extends GameObject implements Serializable {
+    private static final EventDispatcher<Triple<AbstractPlayer, Integer, String>> _onMoneyChange = new EventDispatcher<>();
+    public static final DelegateEventDispatcher<Triple<AbstractPlayer, Integer, String>> onMoneyChange = new DelegateEventDispatcher<>(_onMoneyChange);
+
     private String name;
     private Place currentPlace;
     private int cash, deposit, coupons;
@@ -118,14 +120,14 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
     private void changeCash(Game g, int amount, String msg) {
         if (cash + amount >= 0) {
             cash += amount;
-            g.triggerMoneyChange(new MoneyChangeEvent(this, amount, msg));
+            _onMoneyChange.trigger(g, new Triple<>(this, amount, msg));
         }
     }
 
     final void changeDeposit(Game g, int amount, String msg) {
         if (deposit + amount >= 0) {
             deposit += amount;
-            g.triggerMoneyChange(new MoneyChangeEvent(this, amount, msg));
+            _onMoneyChange.trigger(g, new Triple<>(this, amount, msg));
         }
     }
 
@@ -234,7 +236,7 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
 
     final void pay(Game g, AbstractPlayer receiver, int amount, String msg, Callback<Object> cb) {
         cash -= amount;
-        g.triggerMoneyChange(new MoneyChangeEvent(this, -amount, msg));
+        _onMoneyChange.trigger(g, new Triple<>(this, -amount, msg));
         if (receiver != null) {
             receiver.changeCash(g, Math.min(amount, getTotalPossessions() + amount), "get_" + msg);
         }

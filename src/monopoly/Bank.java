@@ -1,19 +1,13 @@
 package monopoly;
 
-import java.io.Serializable;
-
-class Bank implements Serializable {
-    public Bank(Game g) {
-        g.onO("month", (_g, o) -> {
-            synchronized (_g.lock) {
-                for (AbstractPlayer player : _g.getPlayers()) {
-                    giveInterest(_g, player);
+final class Bank {
+    static {
+        GameCalendar.onMonth.addListener((g, o) -> {
+            synchronized (g.lock) {
+                for (AbstractPlayer player : g.getPlayers()) {
+                    player.changeDeposit(g, player.getDeposit() / 10, "");
                 }
             }
         });
-    }
-
-    private void giveInterest(Game g, AbstractPlayer player) {
-        player.changeDeposit(g, player.getDeposit() / 10, "");
     }
 }

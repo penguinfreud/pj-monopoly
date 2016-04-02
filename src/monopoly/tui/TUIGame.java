@@ -8,20 +8,20 @@ import java.util.Scanner;
 public class TUIGame extends Game {
     private final Scanner scanner = new Scanner(System.in);
 
-    public TUIGame() {
-        onO("gameOver", (g, o) ->
+    static {
+        onGameOver.addListener((g, o) ->
             System.out.println(g.format("game_over", g.getCurrentPlayer().getName())));
-        onO("landed", (g, o) ->
+        onLanded.addListener ((g, o) ->
             System.out.println(g.format("you_have_arrived",
-                    g.getCurrentPlayer().getCurrentPlace().toString(this))));
-        onM("moneyChange", (g, e) -> {
-            AbstractPlayer player = e.getPlayer();
-            System.out.println(g.format(e.getMessage(),
+                    g.getCurrentPlayer().getCurrentPlace().toString(g))));
+        AbstractPlayer.onMoneyChange.addListener((g, e) -> {
+            AbstractPlayer player = e.getFirst();
+            System.out.println(g.format(e.getThird(),
                     player.getName(),
-                    Math.abs(e.getAmount()),
+                    Math.abs(e.getSecond()),
                     player.getCurrentPlace().getName()));
         });
-        onP("bankrupt", (g, p) ->
+        onBankrupt.addListener((g, p) ->
             System.out.println(g.format("bankrupt", p.getName())));
     }
 

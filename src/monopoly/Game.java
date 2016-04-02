@@ -1,6 +1,6 @@
 package monopoly;
 
-import monopoly.async.MoneyChangeEvent;
+import monopoly.async.DelegateEventDispatcher;
 import monopoly.async.EventDispatcher;
 import monopoly.async.Callback;
 
@@ -14,27 +14,12 @@ class GameData implements Serializable {
     final Config config;
     transient ResourceBundle messages;
     Map map;
-    Calendar calendar;
-    private Bank bank;
+    final GameCalendar calendar = new GameCalendar();
     final Players players = new Players();
     boolean hadBankrupt = false;
     Game.State state = Game.State.OVER;
     final AbstractPlayer.PlaceInterface placeInterface = new AbstractPlayer.PlaceInterface();
     final AbstractPlayer.CardInterface cardInterface = new AbstractPlayer.CardInterface();
-
-
-    final java.util.Map<String, EventDispatcher<Object>> oEvents = new Hashtable<>();
-    final java.util.Map<String, EventDispatcher<Exception>> eEvents = new Hashtable<>();
-    final java.util.Map<String, EventDispatcher<AbstractPlayer>> pEvents = new Hashtable<>();
-    final java.util.Map<String, EventDispatcher<MoneyChangeEvent>> mEvents = new Hashtable<>();
-
-    final EventDispatcher<Object> onGameOver = new EventDispatcher<>(),
-            onTurn = new EventDispatcher<>(),
-            onLanded = new EventDispatcher<>(),
-            onCycle = new EventDispatcher<>();
-    final EventDispatcher<Exception> onException = new EventDispatcher<>();
-    final EventDispatcher<AbstractPlayer> onBankrupt = new EventDispatcher<>();
-    final EventDispatcher<MoneyChangeEvent> onMoneyChange = new EventDispatcher<>();
 
     GameData(Config c) {
         Config def = new Config();
@@ -72,15 +57,6 @@ class GameData implements Serializable {
     }
 
     void init(Game g) {
-        oEvents.put("gameOver", onGameOver);
-        oEvents.put("turn", onTurn);
-        oEvents.put("landed", onLanded);
-        oEvents.put("cycle", onCycle);
-        eEvents.put("exception", onException);
-        pEvents.put("bankrupt", onBankrupt);
-        mEvents.put("moneyChange", onMoneyChange);
-        calendar = new Calendar(g);
-        bank = new Bank(g);
         Locale locale = Locale.forLanguageTag((String) config.get("locale"));
         messages = ResourceBundle.getBundle((String) config.get("bundle-name"), locale);
     }
@@ -172,8 +148,12 @@ public class Game {
         return data.players.getCurrentPlayer();
     }
 
+    GameCalendar getInternalCalendar() {
+        return data.calendar;
+    }
+
     public String getDate() {
-        return data.calendar.getDate(this);
+        return GameCalendar.getDate(this);
     }
 
     public void start() {
@@ -195,9 +175,9 @@ public class Game {
         if (data.state == State.STARTING || notFirst) {
             data.state = State.TURN_STARTING;
             data.hadBankrupt = false;
-            data.onTurn.trigger(this, null);
+            _onTurn.trigger(this, null);
             if (data.players.isNewCycle() && notFirst) {
-                data.onCycle.trigger(this, null);
+                _onCycle.trigger(this, null);
             }
             data.players.getCurrentPlayer().startTurn(this);
         }
@@ -240,7 +220,7 @@ public class Game {
     void endWalking() {
         if (data.state == State.TURN_WALKING || data.state == State.TURN_STARTING) {
             data.state = State.TURN_LANDED;
-            data.onLanded.trigger(this, null);
+            _onLanded.trigger(this, null);
             data.players.getCurrentPlayer().getCurrentPlace().onLanded(this, data.placeInterface, endTurn);
         }
     }
@@ -256,50 +236,33 @@ public class Game {
     private void endGame() {
         if (data.state != State.OVER) {
             data.state = State.OVER;
-            data.onGameOver.trigger(this, null);
+            _onGameOver.trigger(this, null);
         }
     }
 
-    public void onO(String id, Callback<Object> callback) {
-        data.oEvents.get(id).addListener(callback);
-    }
-
-    public void onP(String id, Callback<AbstractPlayer> callback) {
-        data.pEvents.get(id).addListener(callback);
-    }
-
-    public void onM(String id, Callback<MoneyChangeEvent> callback) {
-        data.mEvents.get(id).addListener(callback);
-    }
-
-    void registerOEvent(String id, EventDispatcher<Object> eventDispatcher) {
-        data.oEvents.put(id, eventDispatcher);
-    }
-
-    void registerPEvent(String id, EventDispatcher<AbstractPlayer> eventDispatcher) {
-        data.pEvents.put(id, eventDispatcher);
-    }
-
-    void registerMEvent(String id, EventDispatcher<MoneyChangeEvent> eventDispatcher) {
-        data.mEvents.put(id, eventDispatcher);
-    }
-
-    void triggerMoneyChange(MoneyChangeEvent event) {
-        if (data.state != State.OVER) {
-            data.onMoneyChange.trigger(this, event);
-        }
-    }
+    private static final EventDispatcher<Object> _onGameOver = new EventDispatcher<>(),
+        _onTurn = new EventDispatcher<>(),
+        _onLanded = new EventDispatcher<>(),
+        _onCycle = new EventDispatcher<>();
+    private static final EventDispatcher<Exception> _onException = new EventDispatcher<>();
+    private static final EventDispatcher<AbstractPlayer> _onBankrupt = new EventDispatcher<>();
+    public static final DelegateEventDispatcher<Object> onGameOver = new DelegateEventDispatcher<>(_onGameOver),
+        onTurn = new DelegateEventDispatcher<>(_onTurn),
+        onLanded = new DelegateEventDispatcher<>(_onLanded),
+        onCycle = new DelegateEventDispatcher<>(_onCycle);
+    public static final DelegateEventDispatcher<Exception> onException = new DelegateEventDispatcher<>(_onException);
+    public static final DelegateEventDispatcher<AbstractPlayer> onBankrupt = new DelegateEventDispatcher<>(_onBankrupt);
 
     void triggerBankrupt(AbstractPlayer player) {
         if (data.state != State.OVER) {
             data.players.remove(player);
             data.hadBankrupt = true;
-            data.onBankrupt.trigger(this, player);
+            _onBankrupt.trigger(this, player);
         }
     }
 
     public void triggerException(Exception e) {
-        data.onException.trigger(this, e);
+        _onException.trigger(this, e);
     }
 
     protected void readData(ObjectInputStream ois) throws IOException, ClassNotFoundException {
@@ -314,9 +277,7 @@ public class Game {
         }
     }
 
-    private static final EventDispatcher<Game> _onGameStart = new EventDispatcher<>();
+    private static final EventDispatcher<Object> _onGameStart = new EventDispatcher<>();
 
-    public static void onGameStart(Callback<Game> listener) {
-        _onGameStart.addListener(listener);
-    }
+    public static final DelegateEventDispatcher<Object> onGameStart = new DelegateEventDispatcher<>(_onGameStart);
 }

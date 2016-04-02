@@ -1,7 +1,6 @@
 package monopoly;
 
 import monopoly.async.Callback;
-import monopoly.async.MoneyChangeEvent;
 import monopoly.place.Land;
 import monopoly.place.Street;
 import org.junit.Before;
@@ -61,7 +60,12 @@ public class AbstractPlayerTest {
             }
         };
 
+        AbstractPlayer.onMoneyChange.addListener((g, e) -> {
+            moneyChangeAmount = e.getSecond();
+        });
+
         anotherPlayer = new AIPlayer();
+
         Street street = new Street("");
         prop = new Land("Prop", 10, street) {};
         anotherProp = new Land("Prop2", 20, street) {};
@@ -85,11 +89,6 @@ public class AbstractPlayerTest {
             @Override
             void useCard(Card card, Callback<Object> cb) {
                 cardUsed = card;
-            }
-
-            @Override
-            void triggerMoneyChange(MoneyChangeEvent event) {
-                moneyChangeAmount = event.getAmount();
             }
 
             @Override

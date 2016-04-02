@@ -29,7 +29,7 @@ public class Main {
         TUIGame game = new TUIGame();
         game.setMap(map);
 
-        game.onO("gameOver", (_g, o) -> newGame(_g));
+        Game.onGameOver.addListener((g, o) -> newGame(g));
 
         newGame(game);
     }

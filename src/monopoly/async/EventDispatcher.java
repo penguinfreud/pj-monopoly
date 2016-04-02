@@ -5,11 +5,15 @@ import monopoly.Game;
 import java.io.Serializable;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class EventDispatcher<T> implements Serializable {
+public final class EventDispatcher<T> implements Serializable {
     private final CopyOnWriteArrayList<Callback<T>> listeners = new CopyOnWriteArrayList<>();
 
-    public synchronized void addListener(Callback<T> callback) {
-        listeners.add(callback);
+    public synchronized void addListener(Callback<T> listener) {
+        listeners.add(listener);
+    }
+
+    public synchronized void removeListener(Callback<T> listener) {
+        listeners.remove(listener);
     }
 
     public synchronized void trigger(Game g, T arg) {
