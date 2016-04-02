@@ -39,13 +39,8 @@ class GameData implements Serializable {
     GameData(Config c) {
         Config def = new Config();
         defaultConfig(def);
-        config = new Config();
-        if (c == null) {
-            config.setBase(def);
-        } else {
-            c.setBase(def);
-            config.setBase(c);
-        }
+        config = c;
+        c.setBase(def);
     }
 
     private void defaultConfig(Config config) {
@@ -106,12 +101,12 @@ public class Game {
     private GameData data;
 
     public Game() {
-        data = new GameData(new Config());
-        data.init(this);
+        this(null);
     }
 
     protected Game(Config c) {
-        data = new GameData(c);
+        data = new GameData(new Config(c));
+        data.init(this);
     }
 
     public State getState() {
@@ -193,20 +188,18 @@ public class Game {
     }
 
     private void startTurn() {
-        synchronized (lock) {
-            if (data.players.count() <= 1) {
-                endGame();
+        if (data.players.count() <= 1) {
+            endGame();
+        }
+        boolean notFirst = data.state == State.TURN_LANDED;
+        if (data.state == State.STARTING || notFirst) {
+            data.state = State.TURN_STARTING;
+            data.hadBankrupt = false;
+            data.onTurn.trigger(this, null);
+            if (data.players.isNewCycle() && notFirst) {
+                data.onCycle.trigger(this, null);
             }
-            boolean notFirst = data.state == State.TURN_LANDED;
-            if (data.state == State.STARTING || notFirst) {
-                data.state = State.TURN_STARTING;
-                data.hadBankrupt = false;
-                data.onTurn.trigger(this, null);
-                if (data.players.isNewCycle() && notFirst) {
-                    data.onCycle.trigger(this, null);
-                }
-                data.players.getCurrentPlayer().startTurn(this);
-            }
+            data.players.getCurrentPlayer().startTurn(this);
         }
     }
 
@@ -222,41 +215,33 @@ public class Game {
     };
 
     void rollTheDice() {
-        synchronized (lock) {
-            int dice = ThreadLocalRandom.current().nextInt((Integer) getConfig("dice-sides")) + 1;
-            if (data.players.count() <= 1) {
-                endGame();
-            }
-            startWalking(dice);
+        int dice = ThreadLocalRandom.current().nextInt((Integer) getConfig("dice-sides")) + 1;
+        if (data.players.count() <= 1) {
+            endGame();
         }
+        startWalking(dice);
     }
 
     void startWalking(int steps) {
-        synchronized (lock) {
-            if (data.state == State.TURN_STARTING) {
-                data.state = State.TURN_WALKING;
-                data.players.getCurrentPlayer().startWalking(this, steps);
-            }
+        if (data.state == State.TURN_STARTING) {
+            data.state = State.TURN_WALKING;
+            data.players.getCurrentPlayer().startWalking(this, steps);
         }
     }
 
     void stay() {
-        synchronized (lock) {
-            if (data.state == State.TURN_STARTING) {
-                data.state = State.TURN_LANDED;
-                data.players.next();
-                startTurn();
-            }
+        if (data.state == State.TURN_STARTING) {
+            data.state = State.TURN_LANDED;
+            data.players.next();
+            startTurn();
         }
     }
 
     void endWalking() {
-        synchronized (lock) {
-            if (data.state == State.TURN_WALKING || data.state == State.TURN_STARTING) {
-                data.state = State.TURN_LANDED;
-                data.onLanded.trigger(this, null);
-                data.players.getCurrentPlayer().getCurrentPlace().onLanded(this, data.placeInterface, endTurn);
-            }
+        if (data.state == State.TURN_WALKING || data.state == State.TURN_STARTING) {
+            data.state = State.TURN_LANDED;
+            data.onLanded.trigger(this, null);
+            data.players.getCurrentPlayer().getCurrentPlace().onLanded(this, data.placeInterface, endTurn);
         }
     }
 
@@ -300,37 +285,21 @@ public class Game {
     }
 
     void triggerMoneyChange(MoneyChangeEvent event) {
-        synchronized (lock) {
-            if (data.state != State.OVER) {
-                data.onMoneyChange.trigger(this, event);
-            }
+        if (data.state != State.OVER) {
+            data.onMoneyChange.trigger(this, event);
         }
     }
 
     void triggerBankrupt(AbstractPlayer player) {
-        synchronized (lock) {
-            if (data.state != State.OVER) {
-                data.players.remove(player);
-                data.hadBankrupt = true;
-                data.onBankrupt.trigger(this, player);
-            }
+        if (data.state != State.OVER) {
+            data.players.remove(player);
+            data.hadBankrupt = true;
+            data.onBankrupt.trigger(this, player);
         }
     }
 
     public void triggerException(Exception e) {
-        synchronized (lock) {
-            data.onException.trigger(this, e);
-        }
-    }
-
-    private static java.util.Map<Object, Object> storage = new Hashtable<>();
-
-    public Object getData(Object key) {
-        return storage.get(key);
-    }
-
-    public void putData(Object key, Object val) {
-        storage.put(key, val);
+        data.onException.trigger(this, e);
     }
 
     protected void readData(ObjectInputStream ois) throws IOException, ClassNotFoundException {

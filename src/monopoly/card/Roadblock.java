@@ -20,7 +20,7 @@ class Roadblock extends Card {
             int reach = (Integer) _g.getConfig("roadblock-reach");
             if (place != null &&
                     Place.withinReach(_g.getCurrentPlayer().getCurrentPlace(), place, reach) >= 0) {
-                ci.setRoadblock(place);
+                ci.setRoadblock(_g, place);
             }
             cb.run(_g, null);
         });

@@ -50,7 +50,7 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
         return coupons;
     }
 
-    public Place getCurrentPlace() {
+    public final Place getCurrentPlace() {
         return currentPlace;
     }
 
@@ -62,7 +62,7 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
         return new CopyOnWriteArrayList<>(cards);
     }
 
-    public int getTotalPossessions() {
+    public final int getTotalPossessions() {
         int poss = cash + deposit;
         for (Property prop: properties) {
             poss += prop.getMortgagePrice();
@@ -70,7 +70,7 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
         return poss;
     }
 
-    public boolean isReversed() {
+    public final boolean isReversed() {
         return reversed;
     }
 
@@ -78,29 +78,29 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
         g.triggerBankrupt(this);
     }
 
-    private Callback<Object> useCardCb;
-    private Callback<Card> selectCardCb;
+    private final Callback<Object> useCardCb = new Callback<Object>() {
+        @Override
+        public void run(Game g, Object o) {
+            synchronized (g.lock) {
+                if (g.getState() == Game.State.TURN_STARTING) {
+                    askWhichCardToUse(g, (_g, card) -> {
+                        synchronized (g.lock) {
+                            if (_g.getState() == Game.State.TURN_STARTING) {
+                                if (card == null || !cards.contains(card)) {
+                                    _g.rollTheDice();
+                                } else {
+                                    cards.remove(card);
+                                    _g.useCard(card, this);
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    };
 
     final void startTurn(Game g) {
-        selectCardCb = (_g, card) -> {
-            synchronized (g.lock) {
-                if (_g.getState() == Game.State.TURN_STARTING) {
-                    if (card == null || !cards.contains(card)) {
-                        _g.rollTheDice();
-                    } else {
-                        cards.remove(card);
-                        _g.useCard(card, useCardCb);
-                    }
-                }
-            }
-        };
-        useCardCb = (_g, o) -> {
-            synchronized (_g.lock) {
-                if (g.getState() == Game.State.TURN_STARTING) {
-                    askWhichCardToUse(_g, selectCardCb);
-                }
-            }
-        };
         useCardCb.run(g, null);
     }
 
@@ -123,11 +123,9 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
     }
 
     final void changeDeposit(Game g, int amount, String msg) {
-        synchronized (g.lock) {
-            if (deposit + amount >= 0) {
-                deposit += amount;
-                g.triggerMoneyChange(new MoneyChangeEvent(this, amount, msg));
-            }
+        if (deposit + amount >= 0) {
+            deposit += amount;
+            g.triggerMoneyChange(new MoneyChangeEvent(this, amount, msg));
         }
     }
 
@@ -189,12 +187,10 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
     }
 
     final void payRent(Game g, Callback<Object> cb) {
-        synchronized (g.lock) {
-            if (g.getState() == Game.State.TURN_LANDED) {
-                System.out.println("pay rent");
-                Property prop = currentPlace.asProperty();
-                pay(g, prop.getOwner(), prop.getRent(), "pay_rent", cb);
-            }
+        if (g.getState() == Game.State.TURN_LANDED) {
+            System.out.println("pay rent");
+            Property prop = currentPlace.asProperty();
+            pay(g, prop.getOwner(), prop.getRent(), "pay_rent", cb);
         }
     }
 
@@ -237,36 +233,32 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
     }
 
     final void pay(Game g, AbstractPlayer receiver, int amount, String msg, Callback<Object> cb) {
-        synchronized (g.lock) {
-            cash -= amount;
-            g.triggerMoneyChange(new MoneyChangeEvent(this, -amount, msg));
-            if (receiver != null) {
-                receiver.changeCash(g, Math.min(amount, getTotalPossessions() + amount), "get_" + msg);
-            }
-            if (cash <= 0) {
-                if (cash + deposit >= 0) {
-                    deposit += cash;
-                    cash = 0;
-                    cb.run(g, null);
-                } else {
-                    cash += deposit;
-                    deposit = 0;
-                    sellProperties(g, null, cb);
-                }
-            } else if (cb != null) {
+        cash -= amount;
+        g.triggerMoneyChange(new MoneyChangeEvent(this, -amount, msg));
+        if (receiver != null) {
+            receiver.changeCash(g, Math.min(amount, getTotalPossessions() + amount), "get_" + msg);
+        }
+        if (cash <= 0) {
+            if (cash + deposit >= 0) {
+                deposit += cash;
+                cash = 0;
                 cb.run(g, null);
+            } else {
+                cash += deposit;
+                deposit = 0;
+                sellProperties(g, null, cb);
             }
+        } else if (cb != null) {
+            cb.run(g, null);
         }
     }
 
     private int stepsToAdvance;
 
     final void startWalking(Game g, int steps) {
-        synchronized (g.lock) {
-            if (g.getState() == Game.State.TURN_WALKING) {
-                stepsToAdvance = steps;
-                startStep(g);
-            }
+        if (g.getState() == Game.State.TURN_WALKING) {
+            stepsToAdvance = steps;
+            startStep(g);
         }
     }
 
@@ -300,7 +292,9 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
         }
 
         public final void changeDeposit(AbstractPlayer player, Game g, int amount, String msg) {
-            player.changeDeposit(g, amount, msg);
+            synchronized (g.lock) {
+                player.changeDeposit(g, amount, msg);
+            }
         }
 
         public final void depositOrWithdraw(Game g, Callback<Object> cb) {
@@ -319,7 +313,9 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
         }
 
         public final void pay(AbstractPlayer player, Game g, AbstractPlayer receiver, int amount, String msg, Callback<Object> cb) {
-            player.pay(g, receiver, amount, msg, cb);
+            synchronized (g.lock) {
+                player.pay(g, receiver, amount, msg, cb);
+            }
         }
 
         public final void addCoupons(AbstractPlayer player, Game g, int amount) {
@@ -332,26 +328,26 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
             player.cards.add(card);
         }
 
-        private Callback<Card> buyCardCb;
-
         public final void buyCards(Game g, Callback<Object> cb) {
             synchronized (g.lock) {
                 AbstractPlayer player = g.getCurrentPlayer();
-                buyCardCb = (_g, card) -> {
-                    synchronized (_g.lock) {
-                        if (card == null) {
-                            cb.run(_g, null);
-                        } else {
-                            int price = card.getPrice(_g);
-                            if (player.coupons >= price) {
-                                player.cards.add(card);
-                                player.coupons -= price;
+                player.askWhichCardToBuy(g, new Callback<Card>() {
+                    @Override
+                    public void run(Game g, Card card) {
+                        synchronized (g.lock) {
+                            if (card == null) {
+                                cb.run(g, null);
+                            } else {
+                                int price = card.getPrice(g);
+                                if (player.coupons >= price) {
+                                    player.cards.add(card);
+                                    player.coupons -= price;
+                                }
+                                player.askWhichCardToBuy(g, this);
                             }
-                            player.askWhichCardToBuy(_g, buyCardCb);
                         }
                     }
-                };
-                player.askWhichCardToBuy(g, buyCardCb);
+                });
             }
         }
     }
@@ -362,21 +358,29 @@ public abstract class AbstractPlayer extends GameObject implements Serializable 
         }
 
         public final void walk(Game g, int steps) {
-            if (steps > 0 && steps <= (Integer) g.getConfig("dice-sides")) {
-                g.startWalking(steps);
+            synchronized (g.lock) {
+                if (steps > 0 && steps <= (Integer) g.getConfig("dice-sides")) {
+                    g.startWalking(steps);
+                }
             }
         }
 
         public final void stay(Game g) {
-            g.stay();
+            synchronized (g.lock) {
+                g.stay();
+            }
         }
 
-        public final void setRoadblock(Place place) {
-            place.setRoadblock();
+        public final void setRoadblock(Game g, Place place) {
+            synchronized (g.lock) {
+                place.setRoadblock();
+            }
         }
 
         public final void buyProperty(Game g) {
-            g.getCurrentPlayer()._buyProperty(g, true);
+            synchronized (g.lock) {
+                g.getCurrentPlayer()._buyProperty(g, true);
+            }
         }
     }
 }
