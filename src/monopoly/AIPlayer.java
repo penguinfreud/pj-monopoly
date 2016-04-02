@@ -44,18 +44,23 @@ public class AIPlayer extends AbstractPlayer {
     }
 
     @Override
-    public void askWhomToReverse(Game g, Callback<AbstractPlayer> cb) {
-        cb.run(g, this);
+    public void askForPlayer(Game g, String reason, Callback<AbstractPlayer> cb) {
+        if (reason.equals("ReverseCard")) {
+            cb.run(g, this);
+        } else {
+            List<AbstractPlayer> players = g.getPlayers();
+            AbstractPlayer first = players.get(0);
+            cb.run(g, first == this? players.get(1): first);
+        }
     }
 
     @Override
-    public void askWhereToGo(Game g, Callback<Place> cb) {
+    public void askForPlace(Game g, String reason, Callback<Place> cb) {
         Place cur = getCurrentPlace();
-        cb.run(g, isReversed()? cur.getPrev(): cur.getNext());
-    }
-
-    @Override
-    public void askWhereToSetRoadblock(Game g, Callback<Place> cb) {
-        cb.run(g, getCurrentPlace());
+        if (reason.equals("Roadblock")) {
+            cb.run(g, cur);
+        } else {
+            cb.run(g, isReversed() ? cur.getPrev() : cur.getNext());
+        }
     }
 }

@@ -16,6 +16,9 @@ public class TUIGame extends Game {
                     g.getCurrentPlayer().getCurrentPlace().toString(g))));
         onBankrupt.addListener((g, p) ->
             System.out.println(g.format("bankrupt", p.getName())));
+        onException.addListener((g, msg) -> {
+            System.out.println(msg);
+        });
         AbstractPlayer.onMoneyChange.addListener((g, e) -> {
             AbstractPlayer player = e.getFirst();
             System.out.println(g.format(e.getThird(),

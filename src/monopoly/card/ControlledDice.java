@@ -18,7 +18,7 @@ class ControlledDice extends Card {
 
     public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
         AbstractPlayer player = g.getCurrentPlayer();
-        player.askWhereToGo(g, (_g, place) -> {
+        player.askForPlace(g, getName(), (_g, place) -> {
             if (place == null) {
                 cb.run(_g, null);
             } else {

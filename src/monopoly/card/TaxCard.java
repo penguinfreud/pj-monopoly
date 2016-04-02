@@ -6,26 +6,27 @@ import monopoly.Game;
 import monopoly.Place;
 import monopoly.async.Callback;
 
-class ReverseCard extends Card {
+public class TaxCard extends Card {
     static {
-        Card.registerCard(new ReverseCard());
-        Game.putDefaultConfig("card-reversecard-price", 3);
+        Card.registerCard(new TaxCard());
+        Game.putDefaultConfig("card-taxcard-price", 7);
+        Game.putDefaultConfig("taxcard-reach", 5);
     }
 
-    private ReverseCard() {
-        super("ReverseCard");
+    private TaxCard() {
+        super("TaxCard");
     }
 
     @Override
     public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
         AbstractPlayer current = g.getCurrentPlayer();
         current.askForPlayer(g, getName(), (_g, player) -> {
-            int reach = (Integer) _g.getConfig("reversecard-reach");
+            int reach = (Integer) g.getConfig("taxcard-reach");
             if (player != null &&
                     Place.withinReach(current.getCurrentPlace(), player.getCurrentPlace(), reach) >= 0) {
-                ci.reverse(player);
+                ci.changeDeposit(player, g, player.getDeposit() * 3 / 10, "pay_tax");
             }
-            cb.run(_g, null);
+            cb.run(g, null);
         });
     }
 }

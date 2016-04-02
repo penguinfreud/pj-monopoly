@@ -23,5 +23,6 @@ public class BuyLandCard extends Card {
         if (prop != null && prop.getOwner() != player) {
             ci.buyProperty(g, cb);
         }
+        cb.run(g, null);
     }
 }

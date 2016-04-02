@@ -239,42 +239,47 @@ public class TUIPlayer extends AbstractPlayer {
     }
 
     @Override
-    public void askWhomToReverse(Game g, Callback<AbstractPlayer> cb) {
-        String question = g.getText("ask_whom_to_reverse");
-        List<AbstractPlayer> players = g.getPlayers();
-        AbstractPlayer player = choose(g, question, players, true);
-        cb.run(g, player);
+    public void askForPlayer(Game g, String reason, Callback<AbstractPlayer> cb) {
+        if (reason.equals("ReverseCard")) {
+            String question = g.getText("ask_whom_to_reverse");
+            List<AbstractPlayer> players = g.getPlayers();
+            AbstractPlayer player = choose(g, question, players, true);
+            cb.run(g, player);
+        } else {
+            cb.run(g, null);
+        }
     }
 
     @Override
-    public void askWhereToGo(Game g, Callback<Place> cb) {
-        int steps = getInt(g, g.format("ask_where_to_go", getCurrentPlace().getName()), 1, 6, 0);
-        if (steps == 0) {
-            cb.run(g, null);
-        }
-        Place place = getCurrentPlace();
-        for (int i = 0; i<steps; i++) {
-            place = isReversed()? place.getPrev(): place.getNext();
-        }
-        cb.run(g, place);
-    }
-
-    @Override
-    public void askWhereToSetRoadblock(Game g, Callback<Place> cb) {
-        int steps = getInt(g, g.format("ask_where_to_set_roadblock", getCurrentPlace().getName()), -8, 8, -9);
-        if (steps == -9) {
-            cb.run(g, null);
-        }
-        Place place = getCurrentPlace();
-        if (steps > 0) {
-            for (int i = 0; i < steps; i++) {
+    public void askForPlace(Game g, String reason, Callback<Place> cb) {
+        if (reason.equals("ControlledDice")) {
+            int steps = getInt(g, g.format("ask_where_to_go", getCurrentPlace().getName()), 1, 6, 0);
+            if (steps == 0) {
+                cb.run(g, null);
+            }
+            Place place = getCurrentPlace();
+            for (int i = 0; i<steps; i++) {
                 place = isReversed()? place.getPrev(): place.getNext();
             }
-        } else if (steps < 0) {
-            for (int i = 0; i < steps; i++) {
-                place = isReversed()? place.getNext(): place.getPrev();
+            cb.run(g, place);
+        } else if (reason.equals("Roadblock")) {
+            int steps = getInt(g, g.format("ask_where_to_set_roadblock", getCurrentPlace().getName()), -8, 8, -9);
+            if (steps == -9) {
+                cb.run(g, null);
             }
+            Place place = getCurrentPlace();
+            if (steps > 0) {
+                for (int i = 0; i < steps; i++) {
+                    place = isReversed()? place.getPrev(): place.getNext();
+                }
+            } else if (steps < 0) {
+                for (int i = 0; i < steps; i++) {
+                    place = isReversed()? place.getNext(): place.getPrev();
+                }
+            }
+            cb.run(g, place);
+        } else {
+            cb.run(g, null);
         }
-        cb.run(g, place);
     }
 }

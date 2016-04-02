@@ -26,6 +26,7 @@ public class Main {
         Class.forName("monopoly.card.ReverseCard");
         Class.forName("monopoly.card.Roadblock");
         Class.forName("monopoly.card.StayCard");
+        Class.forName("monopoly.card.TaxCard");
 
         Map map = Map.readMap(Main.class.getResourceAsStream("/maps/default_tui.map"));
 

@@ -18,7 +18,7 @@ class Roadblock extends Card {
     }
 
     public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
-        g.getCurrentPlayer().askWhereToSetRoadblock(g, (_g, place) -> {
+        g.getCurrentPlayer().askForPlace(g, getName(), (_g, place) -> {
             int reach = (Integer) _g.getConfig("roadblock-reach");
             if (place != null &&
                     Place.withinReach(_g.getCurrentPlayer().getCurrentPlace(), place, reach) >= 0) {
