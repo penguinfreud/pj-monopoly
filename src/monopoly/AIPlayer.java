@@ -14,48 +14,48 @@ public class AIPlayer extends AbstractPlayer {
 
     @Override
     public void askWhetherToBuyProperty(Game g, Callback<Boolean> cb) {
-        cb.run(true);
+        cb.run(g, true);
     }
 
     @Override
     public void askWhetherToUpgradeProperty(Game g, Callback<Boolean> cb) {
-        cb.run(true);
+        cb.run(g, true);
     }
 
     @Override
     public void askWhichPropertyToMortgage(Game g, Callback<Property> cb) {
-        cb.run(getProperties().get(0));
+        cb.run(g, getProperties().get(0));
     }
 
     @Override
     protected void askWhichCardToBuy(Game g, Callback<Card> cb) {
         List<Card> cards = Card.getCards();
-        cb.run(cards.get(ThreadLocalRandom.current().nextInt(cards.size())));
+        cb.run(g, cards.get(ThreadLocalRandom.current().nextInt(cards.size())));
     }
 
     @Override
     public void askWhichCardToUse(Game g, Callback<Card> cb) {
-        cb.run(null);
+        cb.run(g, null);
     }
 
     @Override
     public void askHowMuchToDepositOrWithdraw(Game g, Callback<Integer> cb) {
-        cb.run(0);
+        cb.run(g, 0);
     }
 
     @Override
     public void askWhomToReverse(Game g, Callback<AbstractPlayer> cb) {
-        cb.run(this);
+        cb.run(g, this);
     }
 
     @Override
     public void askWhereToGo(Game g, Callback<Place> cb) {
         Place cur = getCurrentPlace();
-        cb.run(isReversed()? cur.getPrev(): cur.getNext());
+        cb.run(g, isReversed()? cur.getPrev(): cur.getNext());
     }
 
     @Override
     public void askWhereToSetRoadblock(Game g, Callback<Place> cb) {
-        cb.run(getCurrentPlace());
+        cb.run(g, getCurrentPlace());
     }
 }

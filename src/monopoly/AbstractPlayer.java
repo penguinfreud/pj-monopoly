@@ -1,6 +1,5 @@
 package monopoly;
 
-import jdk.nashorn.internal.codegen.CompilerConstants;
 import monopoly.async.Callback;
 import monopoly.async.MoneyChangeEvent;
 
@@ -8,7 +7,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public abstract class AbstractPlayer implements Serializable {
+public abstract class AbstractPlayer extends GameObject implements Serializable {
     private String name;
     private Place currentPlace;
     private int cash, deposit, coupons;
@@ -16,11 +15,11 @@ public abstract class AbstractPlayer implements Serializable {
     private List<Property> properties = new CopyOnWriteArrayList<>();
     private List<Card> cards = new CopyOnWriteArrayList<>();
 
-    final void init(int cash, int deposit, int coupons, Place place) {
-        this.cash = cash;
-        this.deposit = deposit;
-        this.coupons = coupons;
-        currentPlace = place;
+    final void init(Game g) {
+        this.cash = (Integer) g.getConfig("init-cash");
+        this.deposit = (Integer) g.getConfig("init-deposit");
+        this.coupons = (Integer) g.getConfig("init-coupons");
+        currentPlace = g.getMap().getStartingPoint();
         properties.clear();
         cards.clear();
         reversed = false;
@@ -31,7 +30,7 @@ public abstract class AbstractPlayer implements Serializable {
     }
 
     @Override
-    public String toString() {
+    public String toString(Game g) {
         return name;
     }
 
@@ -83,26 +82,26 @@ public abstract class AbstractPlayer implements Serializable {
     private Callback<Card> selectCardCb;
 
     final void startTurn(Game g) {
-        selectCardCb = (card) -> {
+        selectCardCb = (_g, card) -> {
             synchronized (g.lock) {
-                if (g.getState() == Game.State.TURN_STARTING) {
-                    if (card == null) {
-                        g.rollTheDice();
-                    } else if (cards.contains(card)) {
+                if (_g.getState() == Game.State.TURN_STARTING) {
+                    if (card == null || !cards.contains(card)) {
+                        _g.rollTheDice();
+                    } else {
                         cards.remove(card);
-                        g.useCard(card, useCardCb);
+                        _g.useCard(card, useCardCb);
                     }
                 }
             }
         };
-        useCardCb = (o) -> {
-            synchronized (g.lock) {
+        useCardCb = (_g, o) -> {
+            synchronized (_g.lock) {
                 if (g.getState() == Game.State.TURN_STARTING) {
-                    askWhichCardToUse(g, selectCardCb);
+                    askWhichCardToUse(_g, selectCardCb);
                 }
             }
         };
-        useCardCb.run(null);
+        useCardCb.run(g, null);
     }
 
     protected abstract void askWhetherToBuyProperty(Game g, Callback<Boolean> cb);
@@ -143,27 +142,37 @@ public abstract class AbstractPlayer implements Serializable {
             }
             if (cash <= 0) {
                 if (properties.size() > 0) {
-                    askWhichPropertyToMortgage(g, (nextProp) -> sellProperties(g, nextProp, cb));
+                    askWhichPropertyToMortgage(g, (_g, nextProp) -> sellProperties(_g, nextProp, cb));
                 } else {
                     g.triggerBankrupt(this);
-                    cb.run(null);
+                    cb.run(g, null);
                 }
             } else {
-                cb.run(null);
+                cb.run(g, null);
             }
         } else {
-            cb.run(null);
+            cb.run(g, null);
         }
     }
 
-    private void _buyProperty(Game g) {
+    private void _buyProperty(Game g, boolean force) {
         if (g.getState() == Game.State.TURN_LANDED) {
             Property prop = currentPlace.asProperty();
             int price = prop.getPurchasePrice();
-            if (prop.isFree() && cash >= price) {
-                changeCash(g, -price, "buy_property");
-                properties.add(prop);
-                prop.changeOwner(AbstractPlayer.this);
+            if (cash >= price) {
+                if (prop.isFree()) {
+                    changeCash(g, -price, "buy_property");
+                    properties.add(prop);
+                    prop.changeOwner(this);
+                } else if (force) {
+                    AbstractPlayer owner = prop.getOwner();
+                    if (owner != this) {
+                        pay(g, owner, price, "buy_property", null);
+                        properties.add(prop);
+                        owner.properties.remove(prop);
+                        prop.changeOwner(this);
+                    }
+                }
             }
         }
     }
@@ -195,14 +204,14 @@ public abstract class AbstractPlayer implements Serializable {
                 Property prop = currentPlace.asProperty();
                 int price = prop.getPurchasePrice();
                 if (prop.isFree() && cash >= price) {
-                    askWhetherToBuyProperty(g, (ok) -> {
+                    askWhetherToBuyProperty(g, (_g, ok) -> {
                         synchronized (g.lock) {
-                            _buyProperty(g);
-                            cb.run(null);
+                            _buyProperty(g, false);
+                            cb.run(g, null);
                         }
                     });
                 } else {
-                    cb.run(null);
+                    cb.run(g, null);
                 }
             }
         }
@@ -214,14 +223,14 @@ public abstract class AbstractPlayer implements Serializable {
                 Property prop = currentPlace.asProperty();
                 int price = prop.getUpgradePrice();
                 if (prop.getOwner() == this && cash >= price) {
-                    askWhetherToUpgradeProperty(g, (ok) -> {
-                        synchronized (g.lock) {
-                            _upgradeProperty(g);
-                            cb.run(null);
+                    askWhetherToUpgradeProperty(g, (_g, ok) -> {
+                        synchronized (_g.lock) {
+                            _upgradeProperty(_g);
+                            cb.run(_g, null);
                         }
                     });
                 } else {
-                    cb.run(null);
+                    cb.run(g, null);
                 }
             }
         }
@@ -232,20 +241,20 @@ public abstract class AbstractPlayer implements Serializable {
             cash -= amount;
             g.triggerMoneyChange(new MoneyChangeEvent(this, -amount, msg));
             if (receiver != null) {
-                receiver.changeCash(g, Math.min(amount, getTotalPossessions()), "get_" + msg);
+                receiver.changeCash(g, Math.min(amount, getTotalPossessions() + amount), "get_" + msg);
             }
             if (cash <= 0) {
                 if (cash + deposit >= 0) {
                     deposit += cash;
                     cash = 0;
-                    cb.run(null);
+                    cb.run(g, null);
                 } else {
                     cash += deposit;
                     deposit = 0;
                     sellProperties(g, null, cb);
                 }
-            } else {
-                cb.run(null);
+            } else if (cb != null) {
+                cb.run(g, null);
             }
         }
     }
@@ -277,7 +286,7 @@ public abstract class AbstractPlayer implements Serializable {
                 if (stepsToAdvance == 0) {
                     g.endWalking();
                 } else {
-                    g.passBy(currentPlace, (o) -> startStep(g));
+                    g.passBy(currentPlace, (_g, o) -> startStep(_g));
                 }
             }
         }
@@ -297,14 +306,14 @@ public abstract class AbstractPlayer implements Serializable {
         public final void depositOrWithdraw(Game g, Callback<Object> cb) {
             synchronized (g.lock) {
                 AbstractPlayer player = g.getCurrentPlayer();
-                player.askHowMuchToDepositOrWithdraw(g, (amount) -> {
-                    int maxTransfer = (Integer) g.getConfig("bank-max-transfer");
+                player.askHowMuchToDepositOrWithdraw(g, (_g, amount) -> {
+                    int maxTransfer = (Integer) _g.getConfig("bank-max-transfer");
                     if (-maxTransfer <= amount && amount <= maxTransfer &&
                             player.cash - amount >= 0 && player.deposit + amount >= 0) {
                         player.cash -= amount;
                         player.deposit += amount;
                     }
-                    cb.run(null);
+                    cb.run(_g, null);
                 });
             }
         }
@@ -328,17 +337,17 @@ public abstract class AbstractPlayer implements Serializable {
         public final void buyCards(Game g, Callback<Object> cb) {
             synchronized (g.lock) {
                 AbstractPlayer player = g.getCurrentPlayer();
-                buyCardCb = (card) -> {
-                    synchronized (g.lock) {
+                buyCardCb = (_g, card) -> {
+                    synchronized (_g.lock) {
                         if (card == null) {
-                            cb.run(null);
+                            cb.run(_g, null);
                         } else {
-                            int price = card.getPrice(g);
+                            int price = card.getPrice(_g);
                             if (player.coupons >= price) {
                                 player.cards.add(card);
                                 player.coupons -= price;
                             }
-                            player.askWhichCardToBuy(g, buyCardCb);
+                            player.askWhichCardToBuy(_g, buyCardCb);
                         }
                     }
                 };
@@ -364,6 +373,10 @@ public abstract class AbstractPlayer implements Serializable {
 
         public final void setRoadblock(Place place) {
             place.setRoadblock();
+        }
+
+        public final void buyProperty(Game g) {
+            g.getCurrentPlayer()._buyProperty(g, true);
         }
     }
 }

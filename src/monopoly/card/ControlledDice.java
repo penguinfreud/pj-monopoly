@@ -17,29 +17,18 @@ class ControlledDice extends Card {
 
     public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
         AbstractPlayer player = g.getCurrentPlayer();
-        player.askWhereToGo(g, (place) -> {
+        player.askWhereToGo(g, (_g, place) -> {
             if (place == null) {
-                cb.run(null);
+                cb.run(_g, null);
             } else {
-                int steps = getDistanceTo(player, g, place);
+                int reach = (Integer) _g.getConfig("dice-sides");
+                int steps = Place.withPlayersReach(player, place, reach);
                 if (steps != 0) {
-                    ci.walk(g, steps);
+                    ci.walk(_g, steps);
                 } else {
-                    cb.run(null);
+                    cb.run(_g, null);
                 }
             }
         });
-    }
-
-    private int getDistanceTo(AbstractPlayer player, Game g, Place place) {
-        Place cur = player.getCurrentPlace();
-        int diceSides = (Integer) g.getConfig("dice-sides");
-        for (int i = 0; i<diceSides; i++) {
-            cur = player.isReversed()? cur.getPrev(): cur.getNext();
-            if (cur == place) {
-                return i + 1;
-            }
-        }
-        return 0;
     }
 }

@@ -11,6 +11,11 @@ public abstract class Property extends Place {
         this.price = price;
     }
 
+    @Override
+    public String toString(Game g) {
+        return getName();
+    }
+
     public boolean isFree() {
         return owner == null;
     }
@@ -72,7 +77,7 @@ public abstract class Property extends Place {
                     p.upgradeProperty(g, cb);
                 } else {
                     System.out.println("max level reached");
-                    cb.run(null);
+                    cb.run(g, null);
                 }
             } else {
                 p.payRent(g, cb);

@@ -38,17 +38,17 @@ public class TUIPlayer extends AbstractPlayer {
                 if (x >= min && x <= max) {
                     return x;
                 }
-            } finally {}
+            } catch (NumberFormatException e) {}
             System.out.println(g.getText("input_error"));
         }
     }
 
-    private <T>T choose(Game g, String question, List<T> options, boolean nullable) {
+    private <T extends GameObject>T choose(Game g, String question, List<T> options, boolean nullable) {
         while (true) {
             System.out.println(question);
             int l = options.size();
             for (int i = 0; i<l; i++) {
-                System.out.println("[" + (i + 1) + "] " + options.get(i));
+                System.out.println("[" + (i + 1) + "] " + options.get(i).toString(g));
             }
             if (nullable) {
                 System.out.println("[" + (l + 1) + "] " + g.getText("return"));
@@ -61,7 +61,7 @@ public class TUIPlayer extends AbstractPlayer {
                 } else if (nullable && choice == l + 1) {
                     return null;
                 }
-            } finally {}
+            } catch (NumberFormatException e) {}
             System.out.println(g.getText("input_error"));
         }
     }
@@ -78,7 +78,7 @@ public class TUIPlayer extends AbstractPlayer {
                 if (choice >= 1 && choice <= l) {
                     return choice - 1;
                 }
-            } finally {}
+            } catch (NumberFormatException e) {}
             System.out.println(g.getText("input_error"));
         }
     }
@@ -87,26 +87,26 @@ public class TUIPlayer extends AbstractPlayer {
     protected void askWhetherToBuyProperty(Game g, Callback<Boolean> cb) {
         Property property = getCurrentPlace().asProperty();
         String question = g.format("ask_whether_to_buy_property", property.getName(), property.getPurchasePrice(), getCash());
-        cb.run(yesOrNo(g, question));
+        cb.run(g, yesOrNo(g, question));
     }
 
     @Override
     protected void askWhetherToUpgradeProperty(Game g, Callback<Boolean> cb) {
         Property property = getCurrentPlace().asProperty();
         String question = g.format("ask_whether_to_upgrade_property", property.getName(), property.getUpgradePrice(), getCash());
-        cb.run(yesOrNo(g, question));
+        cb.run(g, yesOrNo(g, question));
     }
 
     @Override
     protected void askWhichPropertyToMortgage(Game g, Callback<Property> cb) {
         String question = g.getText("ask_which_property_to_mortgage");
-        cb.run(choose(g, question, getProperties(), false));
+        cb.run(g, choose(g, question, getProperties(), false));
     }
 
     @Override
     protected void askWhichCardToBuy(Game g, Callback<Card> cb) {
         String question = g.getText("ask_which_card_to_buy");
-        cb.run(choose(g, question, Card.getCards(), true));
+        cb.run(g, choose(g, question, Card.getCards(), true));
     }
 
     private void viewMap(Game g, boolean raw) {
@@ -154,7 +154,7 @@ public class TUIPlayer extends AbstractPlayer {
     }
 
     private void viewPlayerInfo(Game g) {
-        System.out.print(g.getText("player_info_table_head"));
+        System.out.println(g.getText("player_info_table_head"));
         for (AbstractPlayer player: g.getPlayers()) {
             System.out.println(g.format("player_info_table_row",
                     player.getCash(),
@@ -196,7 +196,7 @@ public class TUIPlayer extends AbstractPlayer {
                 case 2:
                     Card card = _askWhichCardToUse(g);
                     if (card != null) {
-                        cb.run(card);
+                        cb.run(g, card);
                         break loop;
                     } else {
                         break;
@@ -211,11 +211,11 @@ public class TUIPlayer extends AbstractPlayer {
                     viewPlayerInfo(g);
                     break;
                 case 6:
-                    cb.run(null);
+                    cb.run(g, null);
                     break loop;
                 case 7:
                     giveUp(g);
-                    cb.run(null);
+                    cb.run(g, null);
                     break loop;
                 case 8:
                     tradeStock(g);
@@ -228,7 +228,7 @@ public class TUIPlayer extends AbstractPlayer {
     protected void askHowMuchToDepositOrWithdraw(Game g, Callback<Integer> cb) {
         int maxTransfer = (Integer) g.getConfig("bank-max-transfer");
         String question = g.format("ask_how_much_to_deposit_or_withdraw", getCash(), getDeposit());
-        cb.run(getInt(g, question, -maxTransfer, maxTransfer, 0));
+        cb.run(g, getInt(g, question, -maxTransfer, maxTransfer, 0));
     }
 
     @Override
@@ -236,27 +236,27 @@ public class TUIPlayer extends AbstractPlayer {
         String question = g.getText("ask_whom_to_reverse");
         List<AbstractPlayer> players = g.getPlayers();
         AbstractPlayer player = choose(g, question, players, true);
-        cb.run(player);
+        cb.run(g, player);
     }
 
     @Override
     public void askWhereToGo(Game g, Callback<Place> cb) {
         int steps = getInt(g, g.format("ask_where_to_go", getCurrentPlace().getName()), 1, 6, 0);
         if (steps == 0) {
-            cb.run(null);
+            cb.run(g, null);
         }
         Place place = getCurrentPlace();
         for (int i = 0; i<steps; i++) {
             place = isReversed()? place.getPrev(): place.getNext();
         }
-        cb.run(place);
+        cb.run(g, place);
     }
 
     @Override
     public void askWhereToSetRoadblock(Game g, Callback<Place> cb) {
         int steps = getInt(g, g.format("ask_where_to_set_roadblock", getCurrentPlace().getName()), -8, 8, -9);
         if (steps == -9) {
-            cb.run(null);
+            cb.run(g, null);
         }
         Place place = getCurrentPlace();
         if (steps > 0) {
@@ -268,6 +268,6 @@ public class TUIPlayer extends AbstractPlayer {
                 place = isReversed()? place.getNext(): place.getPrev();
             }
         }
-        cb.run(place);
+        cb.run(g, place);
     }
 }

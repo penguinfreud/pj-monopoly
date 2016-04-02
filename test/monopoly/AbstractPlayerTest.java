@@ -18,6 +18,7 @@ public class AbstractPlayerTest {
     private Street street;
     private Property prop;
     private Property anotherProp;
+    private Map map;
     private Game g;
     private Card card;
     private AbstractPlayer.PlaceInterface pi;
@@ -43,22 +44,22 @@ public class AbstractPlayerTest {
             public void askWhichCardToUse(Game g, Callback<Card> cb) {
                 askWhichCardToUseCalled = true;
                 if (!doNotUseCard) {
-                    cb.run(card);
+                    cb.run(g, card);
                 } else {
-                    cb.run(null);
+                    cb.run(g, null);
                 }
             }
 
             @Override
             public void askWhetherToBuyProperty(Game g, Callback<Boolean> cb) {
                 askWhetherToBuyPropertyCalled = true;
-                cb.run(true);
+                cb.run(g, true);
             }
 
             @Override
             public void askWhetherToUpgradeProperty(Game g, Callback<Boolean> cb) {
                 askWhetherToUpgradePropertyCalled = true;
-                cb.run(true);
+                cb.run(g, true);
             }
         };
 
@@ -66,10 +67,13 @@ public class AbstractPlayerTest {
         street = new Street("");
         prop = new Land("Prop", 10, street) {};
         anotherProp = new Land("Prop2", 20, street) {};
-        prop.next = prop.prev = anotherProp;
-        anotherProp.next = anotherProp.prev = prop;
 
         g = new Game() {
+            {
+                putConfig("init-cash", 100);
+                putConfig("init-deposit", 20);
+            }
+
             @Override
             public State getState() {
                 return gameState;
@@ -96,13 +100,18 @@ public class AbstractPlayerTest {
             }
         };
 
+        map = new Map();
+        map.addPlace(prop);
+        map.addPlace(anotherProp);
+        g.setMap(map);
+
         card = new Card("Card") {
         };
 
         pi = new AbstractPlayer.PlaceInterface();
         ci = new AbstractPlayer.CardInterface();
 
-        cb = (o) -> {};
+        cb = (_g, o) -> {};
     }
 
     @Test
@@ -120,7 +129,7 @@ public class AbstractPlayerTest {
 
     @Test
     public synchronized void testPossessions() {
-        player.init(100, 20, 0, prop);
+        player.init(g);
         assertEquals(120, player.getTotalPossessions());
         gameState = Game.State.TURN_LANDED;
         player.buyProperty(g, cb);
@@ -135,8 +144,9 @@ public class AbstractPlayerTest {
         cardUsed = null;
         gameState = Game.State.TURN_STARTING;
 
+        doNotUseCard = true;
         player.startTurn(g);
-        assertFalse(askWhichCardToUseCalled);
+        assertTrue(askWhichCardToUseCalled);
         assertTrue(rollTheDiceCalled);
         assertNull(cardUsed);
 
@@ -164,38 +174,38 @@ public class AbstractPlayerTest {
     @Test
     public synchronized void testChangeCash() {
         moneyChangeAmount = 0;
-        player.init(0, 0, 0, prop);
+        player.init(g);
         pi.changeCash(player, g, 100, "");
-        assertEquals(100, player.getCash());
+        assertEquals(200, player.getCash());
         assertEquals(100, moneyChangeAmount);
-        assertEquals(100, player.getTotalPossessions());
+        assertEquals(220, player.getTotalPossessions());
     }
 
     @Test
     public synchronized void testChangeDeposit() {
         moneyChangeAmount = 0;
-        player.init(0, 0, 0, prop);
+        player.init(g);
         pi.changeDeposit(player, g, 100, "");
-        assertEquals(100, player.getDeposit());
+        assertEquals(120, player.getDeposit());
         assertEquals(100, moneyChangeAmount);
-        assertEquals(100, player.getTotalPossessions());
+        assertEquals(220, player.getTotalPossessions());
     }
 
     @Test
     public synchronized void testPay() {
         bankruptTriggered = false;
         moneyChangeAmount = 0;
-        player.init(20, 20, 0, prop);
-        anotherPlayer.init(0, 0, 0, prop);
+        player.init(g);
+        anotherPlayer.init(g);
         gameState = Game.State.TURN_LANDED;
         player.buyProperty(g, cb);
-        assertEquals(10, player.getCash());
+        assertEquals(90, player.getCash());
         assertFalse(bankruptTriggered);
 
-        player.pay(g, anotherPlayer, 20, "", cb);
+        player.pay(g, anotherPlayer, 100, "", cb);
         assertEquals(0, player.getCash());
         assertEquals(10, player.getDeposit());
-        assertEquals(20, anotherPlayer.getCash());
+        assertEquals(200, anotherPlayer.getCash());
         assertFalse(bankruptTriggered);
 
         player.pay(g, null, 15, "", cb);
@@ -205,7 +215,7 @@ public class AbstractPlayerTest {
         assertFalse(bankruptTriggered);
 
         player.pay(g, anotherPlayer, 10, "", cb);
-        assertEquals(15, anotherPlayer.getCash());
+        assertEquals(205, anotherPlayer.getCash());
         assertTrue(bankruptTriggered);
 
         prop.mortgage();
@@ -213,7 +223,7 @@ public class AbstractPlayerTest {
 
     @Test
     public synchronized void testBuyProperty() {
-        player.init(1000, 0, 0, prop);
+        player.init(g);
         gameState = Game.State.TURN_LANDED;
         player.buyProperty(g, cb);
 
@@ -238,7 +248,7 @@ public class AbstractPlayerTest {
 
     @Test
     public synchronized void testUpgradeProperty() {
-        player.init(100, 0, 0, prop);
+        player.init(g);
         gameState = Game.State.TURN_LANDED;
         player.buyProperty(g, cb);
 

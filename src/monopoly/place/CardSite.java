@@ -34,10 +34,10 @@ public class CardSite extends Place {
             index = -index - 1;
         }
         if (index == l) {
-            cb.run(null);
+            cb.run(g, null);
         } else {
             pi.addCard(g.getCurrentPlayer(), g, cards.get(index));
-            cb.run(null);
+            cb.run(g, null);
         }
     }
 }

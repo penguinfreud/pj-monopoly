@@ -1,7 +1,7 @@
 package monopoly;
 
 import monopoly.async.MoneyChangeEvent;
-import monopoly.async.Event;
+import monopoly.async.EventDispatcher;
 import monopoly.async.Callback;
 
 import java.io.*;
@@ -23,18 +23,20 @@ class GameData implements Serializable {
     AbstractPlayer.CardInterface cardInterface = new AbstractPlayer.CardInterface();
 
 
-    java.util.Map<String, Event<Object>> oEvents = new Hashtable<>();
-    java.util.Map<String, Event<AbstractPlayer>> pEvents = new Hashtable<>();
-    java.util.Map<String, Event<MoneyChangeEvent>> mEvents = new Hashtable<>();
+    java.util.Map<String, EventDispatcher<Object>> oEvents = new Hashtable<>();
+    java.util.Map<String, EventDispatcher<Exception>> eEvents = new Hashtable();
+    java.util.Map<String, EventDispatcher<AbstractPlayer>> pEvents = new Hashtable<>();
+    java.util.Map<String, EventDispatcher<MoneyChangeEvent>> mEvents = new Hashtable<>();
 
-    Event<Object> onGameStart = new Event<>(),
-            onGameOver = new Event<>(),
-            onTurn = new Event<>(),
-            onCycle = new Event<>();
-    Event<AbstractPlayer> onBankrupt = new Event<>();
-    Event<MoneyChangeEvent> onMoneyChange = new Event<>();
+    EventDispatcher<Object> onGameOver = new EventDispatcher<>(),
+            onTurn = new EventDispatcher<>(),
+            onLanded = new EventDispatcher<>(),
+            onCycle = new EventDispatcher<>();
+    EventDispatcher<Exception> onException = new EventDispatcher<>();
+    EventDispatcher<AbstractPlayer> onBankrupt = new EventDispatcher<>();
+    EventDispatcher<MoneyChangeEvent> onMoneyChange = new EventDispatcher<>();
 
-    GameData(Game g, Config c) {
+    GameData(Config c) {
         Config def = new Config();
         defaultConfig(def);
         config = new Config();
@@ -70,16 +72,20 @@ class GameData implements Serializable {
         config.put("card-staycard-price", 3);
 
         config.put("bank-max-transfer", 100000);
+
+        config.put("roadblock-reach", 8);
     }
 
     void init(Game g) {
-        oEvents.put("gameStart", onGameStart);
         oEvents.put("gameOver", onGameOver);
         oEvents.put("turn", onTurn);
+        oEvents.put("landed", onLanded);
         oEvents.put("cycle", onCycle);
+        eEvents.put("exception", onException);
         pEvents.put("bankrupt", onBankrupt);
         mEvents.put("moneyChange", onMoneyChange);
         calendar = new Calendar(g);
+        bank = new Bank(g);
         Locale locale = Locale.forLanguageTag((String) config.get("locale"));
         messages = ResourceBundle.getBundle((String) config.get("bundle-name"), locale);
     }
@@ -100,12 +106,12 @@ public class Game {
     private GameData data;
 
     public Game() {
-        data = new GameData(this, new Config());
+        data = new GameData(new Config());
         data.init(this);
     }
 
     protected Game(Config c) {
-        data = new GameData(this, c);
+        data = new GameData(c);
     }
 
     public State getState() {
@@ -180,7 +186,7 @@ public class Game {
             if (data.state == State.OVER) {
                 data.state = State.STARTING;
                 data.players.init(this);
-                data.onGameStart.trigger(null);
+                _onGameStart.trigger(this, null);
                 startTurn();
             }
         }
@@ -195,16 +201,16 @@ public class Game {
             if (data.state == State.STARTING || notFirst) {
                 data.state = State.TURN_STARTING;
                 data.hadBankrupt = false;
-                data.onTurn.trigger(null);
+                data.onTurn.trigger(this, null);
                 if (data.players.isNewCycle() && notFirst) {
-                    data.onCycle.trigger(null);
+                    data.onCycle.trigger(this, null);
                 }
                 data.players.getCurrentPlayer().startTurn(this);
             }
         }
     }
 
-    private Callback<Object> endTurn = (o) -> {
+    private Callback<Object> endTurn = (g, o) -> {
         synchronized (lock) {
             if (data.state == State.TURN_LANDED) {
                 if (!data.hadBankrupt) {
@@ -248,6 +254,7 @@ public class Game {
         synchronized (lock) {
             if (data.state == State.TURN_WALKING || data.state == State.TURN_STARTING) {
                 data.state = State.TURN_LANDED;
+                data.onLanded.trigger(this, null);
                 data.players.getCurrentPlayer().getCurrentPlace().onLanded(this, data.placeInterface, endTurn);
             }
         }
@@ -264,7 +271,7 @@ public class Game {
     private void endGame() {
         if (data.state != State.OVER) {
             data.state = State.OVER;
-            data.onGameOver.trigger(null);
+            data.onGameOver.trigger(this, null);
         }
     }
 
@@ -280,22 +287,22 @@ public class Game {
         data.mEvents.get(id).addListener(callback);
     }
 
-    void registerOEvent(String id, Event<Object> event) {
-        data.oEvents.put(id, event);
+    void registerOEvent(String id, EventDispatcher<Object> eventDispatcher) {
+        data.oEvents.put(id, eventDispatcher);
     }
 
-    void registerPEvent(String id, Event<AbstractPlayer> event) {
-        data.pEvents.put(id, event);
+    void registerPEvent(String id, EventDispatcher<AbstractPlayer> eventDispatcher) {
+        data.pEvents.put(id, eventDispatcher);
     }
 
-    void registerMEvent(String id, Event<MoneyChangeEvent> event) {
-        data.mEvents.put(id, event);
+    void registerMEvent(String id, EventDispatcher<MoneyChangeEvent> eventDispatcher) {
+        data.mEvents.put(id, eventDispatcher);
     }
 
     void triggerMoneyChange(MoneyChangeEvent event) {
         synchronized (lock) {
             if (data.state != State.OVER) {
-                data.onMoneyChange.trigger(event);
+                data.onMoneyChange.trigger(this, event);
             }
         }
     }
@@ -305,8 +312,14 @@ public class Game {
             if (data.state != State.OVER) {
                 data.players.remove(player);
                 data.hadBankrupt = true;
-                data.onBankrupt.trigger(player);
+                data.onBankrupt.trigger(this, player);
             }
+        }
+    }
+
+    public void triggerException(Exception e) {
+        synchronized (lock) {
+            data.onException.trigger(this, e);
         }
     }
 
@@ -330,5 +343,11 @@ public class Game {
         synchronized (lock) {
             oos.writeObject(data);
         }
+    }
+
+    private static EventDispatcher<Game> _onGameStart = new EventDispatcher<>();
+
+    public static void onGameStart(Callback<Game> listener) {
+        _onGameStart.addListener(listener);
     }
 }

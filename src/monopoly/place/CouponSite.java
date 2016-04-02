@@ -22,5 +22,6 @@ public class CouponSite extends Place {
         int min = (Integer) g.getConfig("coupon-award-min"),
                 max = (Integer) g.getConfig("coupon-award-max");
         pi.addCoupons(g.getCurrentPlayer(), g, ThreadLocalRandom.current().nextInt(max - min + 1) + min);
+        cb.run(g, null);
     }
 }

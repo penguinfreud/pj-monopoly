@@ -32,17 +32,17 @@ public class TUIPlace extends DelegatePlace {
         Place place = getPlace();
         List<AbstractPlayer> players = g.getPlayers();
         if (!raw && this == players.get(0).getCurrentPlace()) {
-            return "□";
+            return "□ ";
         } else if (!raw && this == players.get(1).getCurrentPlace()) {
-            return "■";
+            return "■ ";
         } else if (place instanceof Property) {
             Property prop = place.asProperty();
             if (raw || prop.getOwner() == null) {
-                return "◎";
+                return "◎ ";
             } else if (prop.getOwner() == players.get(0)) {
-                return "○";
+                return "○ ";
             } else {
-                return "●";
+                return "● ";
             }
         } else if (place instanceof Bank) {
             return "银";
@@ -50,6 +50,12 @@ public class TUIPlace extends DelegatePlace {
             return "新";
         } else if (place instanceof Empty) {
             return "空";
+        } else if (place instanceof CouponSite) {
+            return "券";
+        } else if (place instanceof CardSite) {
+            return "卡";
+        } else if (place instanceof CardShop) {
+            return "店";
         }
         return "  ";
     }
@@ -76,7 +82,7 @@ public class TUIPlace extends DelegatePlace {
             out.println(prop.getRent());
         } else {
             out.print(g.getText("place_type"));
-            out.println(g.getText("place_" + place.getName().toLowerCase()));
+            out.println(place.toString(g));
         }
     }
 }

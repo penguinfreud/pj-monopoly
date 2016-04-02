@@ -12,36 +12,26 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class News extends Place {
-    private static class Param {
-        Game game;
-        AbstractPlayer.PlaceInterface pi;
-
-        Param(Game game, AbstractPlayer.PlaceInterface pi) {
-            this.game = game;
-            this.pi = pi;
-        }
-    }
-
-    private static List<Callback<Param>> newsTypes = new ArrayList<>();
+    private static List<Callback<AbstractPlayer.PlaceInterface>> newsTypes = new ArrayList<>();
 
     static {
         Map.registerPlaceReader("News", (r, sc) -> new News());
-        newsTypes.add((p) -> {
-            List<AbstractPlayer> players = getSortedPlayers(p.game);
-            p.pi.changeCash(players.get(0), p.game, getRandomAward(p.game), "");
+        newsTypes.add((g, pi) -> {
+            List<AbstractPlayer> players = getSortedPlayers(g);
+            pi.changeCash(players.get(0), g, getRandomAward(g), "news_poorest_player");
         });
-        newsTypes.add((p) -> {
-            List<AbstractPlayer> players = getSortedPlayers(p.game);
-            p.pi.changeCash(players.get(players.size() - 1), p.game, getRandomAward(p.game), "");
+        newsTypes.add((g, pi) -> {
+            List<AbstractPlayer> players = getSortedPlayers(g);
+            pi.changeCash(players.get(players.size() - 1), g, getRandomAward(g), "news_biggest_landlord");
         });
-        newsTypes.add((p) -> {
-            for (AbstractPlayer player: p.game.getPlayers()) {
-                p.pi.changeDeposit(player, p.game, player.getDeposit() / 10, "");
+        newsTypes.add((g, pi) -> {
+            for (AbstractPlayer player: g.getPlayers()) {
+                pi.changeDeposit(player, g, player.getDeposit() / 10, "news_interest");
             }
         });
-        newsTypes.add((p) -> {
-            for (AbstractPlayer player: p.game.getPlayers()) {
-                p.pi.changeDeposit(player, p.game, -player.getDeposit() / 10, "");
+        newsTypes.add((g, pi) -> {
+            for (AbstractPlayer player: g.getPlayers()) {
+                pi.changeDeposit(player, g, -player.getDeposit() / 10, "news_tax");
             }
         });
     }
@@ -64,7 +54,7 @@ public class News extends Place {
 
     @Override
     public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
-        newsTypes.get(ThreadLocalRandom.current().nextInt(newsTypes.size())).run(new Param(g, pi));
-        cb.run(null);
+        newsTypes.get(ThreadLocalRandom.current().nextInt(newsTypes.size())).run(g, pi);
+        cb.run(g, null);
     }
 }

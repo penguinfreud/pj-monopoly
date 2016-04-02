@@ -5,7 +5,7 @@ import monopoly.async.Callback;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public abstract class Card {
+public abstract class Card extends GameObject {
     private String name;
 
     protected Card(String name) {
@@ -17,8 +17,8 @@ public abstract class Card {
     }
 
     @Override
-    public String toString() {
-        return name;
+    public String toString(Game g) {
+        return g.getText("card_" + name.toLowerCase());
     }
 
     public int getPrice(Game g) {
@@ -26,7 +26,7 @@ public abstract class Card {
     }
 
     public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
-        cb.run(null);
+        cb.run(g, null);
     }
 
     private static final List<Card> cards = new CopyOnWriteArrayList<>();

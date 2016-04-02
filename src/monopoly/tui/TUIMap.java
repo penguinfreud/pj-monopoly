@@ -27,14 +27,14 @@ public class TUIMap extends Map {
 
         TUIPlace tuiPlace = (TUIPlace) place;
         int x = tuiPlace.getX(), y = tuiPlace.getY();
-        while (rows.size() <= x) {
+        while (rows.size() <= y) {
             rows.add(new CopyOnWriteArrayList<>());
         }
-        List<TUIPlace> cols = rows.get(x);
-        while (cols.size() <= y) {
+        List<TUIPlace> cols = rows.get(y);
+        while (cols.size() <= x) {
             cols.add(null);
         }
-        cols.set(y, tuiPlace);
+        cols.set(x, tuiPlace);
     }
 
     void print(Game g, PrintStream out, boolean raw) {

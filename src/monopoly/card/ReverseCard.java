@@ -3,6 +3,7 @@ package monopoly.card;
 import monopoly.AbstractPlayer;
 import monopoly.Card;
 import monopoly.Game;
+import monopoly.Place;
 import monopoly.async.Callback;
 
 class ReverseCard extends Card {
@@ -16,11 +17,14 @@ class ReverseCard extends Card {
 
     @Override
     public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
-        g.getCurrentPlayer().askWhomToReverse(g, (player) -> {
-            if (player != null) {
+        AbstractPlayer current = g.getCurrentPlayer();
+        current.askWhomToReverse(g, (_g, player) -> {
+            int reach = (Integer) _g.getConfig("reversecard-reach");
+            if (player != null &&
+                    Place.withinReach(current.getCurrentPlace(), player.getCurrentPlace(), reach) >= 0) {
                 ci.reverse(player);
             }
-            cb.run(null);
+            cb.run(_g, null);
         });
     }
 }

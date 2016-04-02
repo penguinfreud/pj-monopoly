@@ -43,7 +43,7 @@ public class Map implements Serializable {
     public static Map readMap(InputStream is) throws Exception {
         InputStreamReader isr = new InputStreamReader(is, "UTF-8");
         Scanner sc = new Scanner(isr);
-        sc.useDelimiter(Pattern.compile("\\s*,\\s*"));
+        sc.useDelimiter(Pattern.compile("\\s*(,|[\r\n]+)\\s*"));
         String mapType = sc.next();
         MapReader reader = mapReaders.get(mapType);
         Map map;

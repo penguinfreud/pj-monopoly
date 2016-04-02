@@ -5,21 +5,21 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class EventTest {
-    private Event<Integer> event;
+public class EventDispatcherTest {
+    private EventDispatcher<Integer> eventDispatcher;
     private int x;
 
     @Before
     public void setUp() {
-        event = new Event<>();
+        eventDispatcher = new EventDispatcher<>();
         x = 0;
     }
 
     @Test
     public void testEvent() {
-        event.addListener((i) -> x = i);
+        eventDispatcher.addListener((g, i) -> x = i);
 
-        event.trigger(13);
+        eventDispatcher.trigger(null, 13);
         assertEquals(13, x);
     }
 }

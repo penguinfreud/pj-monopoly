@@ -9,19 +9,20 @@ public class TUIGame extends Game {
     private Scanner scanner = new Scanner(System.in);
 
     public TUIGame() {
-        onO("gameOver", (o) -> {
-            System.out.println(format("game_over", getCurrentPlayer().getName()));
-        });
-        onM("moneyChange", (e) -> {
+        onO("gameOver", (g, o) ->
+            System.out.println(g.format("game_over", g.getCurrentPlayer().getName())));
+        onO("landed", (g, o) ->
+            System.out.println(g.format("you_have_arrived",
+                    g.getCurrentPlayer().getCurrentPlace().toString(this))));
+        onM("moneyChange", (g, e) -> {
             AbstractPlayer player = e.getPlayer();
-            System.out.println(format(e.getMessage(),
+            System.out.println(g.format(e.getMessage(),
                     player.getName(),
                     Math.abs(e.getAmount()),
                     player.getCurrentPlace().getName()));
         });
-        onP("bankrupt", (p) -> {
-            System.out.println(format("bankrupt", p.getName()));
-        });
+        onP("bankrupt", (g, p) ->
+            System.out.println(g.format("bankrupt", p.getName())));
     }
 
     public Scanner getScanner() {

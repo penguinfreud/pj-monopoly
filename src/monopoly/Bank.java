@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 public class Bank implements Serializable {
     public Bank(Game g) {
-        g.onO("month", (o) -> {
-            for (AbstractPlayer player: g.getPlayers()) {
-                giveInterest(g, player);
+        g.onO("month", (_g, o) -> {
+            for (AbstractPlayer player: _g.getPlayers()) {
+                giveInterest(_g, player);
             }
         });
     }

@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Main {
-    private static TUIGame game;
-    private static Scanner scanner;
     private static List<AbstractPlayer> players;
 
     public static void main(String[] args) throws Exception {
@@ -20,28 +18,32 @@ public class Main {
         Class.forName("monopoly.place.Land");
         Class.forName("monopoly.place.Bank");
         Class.forName("monopoly.place.News");
+        Class.forName("monopoly.place.CouponSite");
+        Class.forName("monopoly.place.CardSite");
+        Class.forName("monopoly.place.CardShop");
 
         Map map = Map.readMap(Main.class.getResourceAsStream("/maps/default_tui.map"));
 
         players = new ArrayList<>();
 
-        game = new TUIGame();
-        scanner = game.getScanner();
+        TUIGame game = new TUIGame();
+        Scanner scanner = game.getScanner();
         game.setMap(map);
 
-        game.onO("gameOver", (o) -> newGame());
+        game.onO("gameOver", (_g, o) -> newGame(_g));
 
-        newGame();
+        newGame(game);
     }
 
-    private static void newGame() {
+    private static void newGame(Game g) {
         players.clear();
-        System.out.println(game.getText("ask_player_names"));
+        System.out.println(g.getText("ask_player_names"));
+        Scanner scanner = ((TUIGame) g).getScanner();
         players.add(new TUIPlayer(scanner.nextLine()));
         players.add(new TUIPlayer(scanner.nextLine()));
         try {
-            game.setPlayers(players);
-            game.start();
+            g.setPlayers(players);
+            g.start();
         } catch (Exception e) {
             e.printStackTrace();
         }
