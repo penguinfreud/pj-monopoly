@@ -1,4 +1,4 @@
-package monopoly.async;
+package monopoly.util;
 
 import monopoly.Game;
 

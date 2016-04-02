@@ -3,7 +3,7 @@ package monopoly.card;
 import monopoly.AbstractPlayer;
 import monopoly.Card;
 import monopoly.Game;
-import monopoly.async.Callback;
+import monopoly.util.Callback;
 
 import java.util.List;
 

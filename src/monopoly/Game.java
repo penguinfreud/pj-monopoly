@@ -1,12 +1,14 @@
 package monopoly;
 
-import monopoly.async.DelegateEventDispatcher;
-import monopoly.async.EventDispatcher;
-import monopoly.async.Callback;
+import monopoly.util.Event;
+import monopoly.util.EventWrapper;
+import monopoly.util.Callback;
+import monopoly.util.SerializableObject;
 
 import java.io.*;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 
@@ -14,26 +16,28 @@ class GameData implements Serializable {
     final Config config;
     transient ResourceBundle messages;
     Map map;
-    final GameCalendar calendar = new GameCalendar();
     final Players players = new Players();
     boolean hadBankrupt = false;
     Game.State state = Game.State.OVER;
     final AbstractPlayer.PlaceInterface placeInterface = new AbstractPlayer.PlaceInterface();
-    final AbstractPlayer.CardInterface cardInterface = new AbstractPlayer.CardInterface();
+    final AbstractPlayer.CardInterface cardInterface;
+    final java.util.Map<Object, Object> storage = new Hashtable<>();
 
-    GameData(Config config) {
+
+    GameData(Game g, Config config) {
         this.config = config;
+        cardInterface = new AbstractPlayer.CardInterface(g);
+        updateMessages();
     }
 
-    void init(Game g) {
+    void updateMessages() {
         Locale locale = Locale.forLanguageTag((String) config.get("locale"));
         messages = ResourceBundle.getBundle((String) config.get("bundle-name"), locale);
     }
 
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         ois.defaultReadObject();
-        Locale locale = Locale.forLanguageTag((String) config.get("locale"));
-        messages = ResourceBundle.getBundle((String) config.get("bundle-name"), locale);
+        updateMessages();
     }
 }
 
@@ -42,7 +46,12 @@ public class Game {
         OVER, STARTING, TURN_STARTING, TURN_WALKING, TURN_LANDED
     }
 
-    final Object lock = new Object();
+    final SerializableObject lock = new SerializableObject();
+    private static final SerializableObject staticLock = new SerializableObject();
+
+    private static final List<Callback<Object>> _onGameInit = new CopyOnWriteArrayList<>();
+    private static final List<Game> games = new CopyOnWriteArrayList<>();
+
     private GameData data;
 
     private static final Config defaultConfig = new Config();
@@ -62,22 +71,26 @@ public class Game {
     }
 
     protected Game(Config c) {
-        if (c == null) {
-            c = defaultConfig;
-        } else {
-            c.setBase(defaultConfig);
+        synchronized (staticLock) {
+            if (c == null) {
+                c = defaultConfig;
+            } else {
+                c.setBase(defaultConfig);
+            }
+            data = new GameData(this, new Config(c));
+            triggerGameInit(this);
+            games.add(this);
         }
-        data = new GameData(new Config(c));
-        data.init(this);
     }
 
     public State getState() {
         return data.state;
     }
 
-    public Object getConfig(String key) {
+    @SuppressWarnings("unchecked")
+    public <T> T getConfig(String key) {
         synchronized (lock) {
-            return data.config.get(key);
+            return (T) data.config.get(key);
         }
     }
 
@@ -85,8 +98,7 @@ public class Game {
         synchronized (lock) {
             data.config.put(key, value);
             if (key.equals("bundle-name") || key.equals("locale")) {
-                Locale locale = Locale.forLanguageTag((String) data.config.get("locale"));
-                data.messages = ResourceBundle.getBundle((String) data.config .get("bundle-name"), locale);
+                data.updateMessages();
             }
         }
     }
@@ -133,10 +145,6 @@ public class Game {
 
     public AbstractPlayer getCurrentPlayer() {
         return data.players.getCurrentPlayer();
-    }
-
-    GameCalendar getInternalCalendar() {
-        return data.calendar;
     }
 
     public String getDate() {
@@ -227,18 +235,37 @@ public class Game {
         }
     }
 
-    private static final EventDispatcher<Object> _onGameOver = new EventDispatcher<>(),
-        _onTurn = new EventDispatcher<>(),
-        _onLanded = new EventDispatcher<>(),
-        _onCycle = new EventDispatcher<>();
-    private static final EventDispatcher<String> _onException = new EventDispatcher<>();
-    private static final EventDispatcher<AbstractPlayer> _onBankrupt = new EventDispatcher<>();
-    public static final DelegateEventDispatcher<Object> onGameOver = new DelegateEventDispatcher<>(_onGameOver),
-        onTurn = new DelegateEventDispatcher<>(_onTurn),
-        onLanded = new DelegateEventDispatcher<>(_onLanded),
-        onCycle = new DelegateEventDispatcher<>(_onCycle);
-    public static final DelegateEventDispatcher<String> onException = new DelegateEventDispatcher<>(_onException);
-    public static final DelegateEventDispatcher<AbstractPlayer> onBankrupt = new DelegateEventDispatcher<>(_onBankrupt);
+    public static void onGameInit(Callback<Object> listener) {
+        synchronized (staticLock) {
+            _onGameInit.add(listener);
+            for (Game game: games) {
+                listener.run(game, null);
+            }
+        }
+    }
+
+    private static void triggerGameInit(Game g) {
+        synchronized (staticLock) {
+            for (Callback<Object> listener : _onGameInit) {
+                listener.run(g, null);
+            }
+        }
+    }
+
+    private static final Event<Object> _onGameStart = new Event<>(),
+            _onGameOver = new Event<>(),
+            _onTurn = new Event<>(),
+            _onLanded = new Event<>(),
+            _onCycle = new Event<>();
+    private static final Event<String> _onException = new Event<>();
+    private static final Event<AbstractPlayer> _onBankrupt = new Event<>();
+    public static final EventWrapper<Object> onGameStart = new EventWrapper<>(_onGameStart),
+            onGameOver = new EventWrapper<>(_onGameOver),
+            onTurn = new EventWrapper<>(_onTurn),
+            onLanded = new EventWrapper<>(_onLanded),
+            onCycle = new EventWrapper<>(_onCycle);
+    public static final EventWrapper<String> onException = new EventWrapper<>(_onException);
+    public static final EventWrapper<AbstractPlayer> onBankrupt = new EventWrapper<>(_onBankrupt);
 
     void triggerBankrupt(AbstractPlayer player) {
         if (data.state != State.OVER) {
@@ -252,6 +279,19 @@ public class Game {
         _onException.trigger(this, format(key, args));
     }
 
+    @SuppressWarnings("unchecked")
+    public final <T> T getStorage(Object key) {
+        synchronized (lock) {
+            return (T) data.storage.get(key);
+        }
+    }
+
+    public final void store(Object key, Object value) {
+        synchronized (lock) {
+            data.storage.put(key, value);
+        }
+    }
+
     protected void readData(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         synchronized (lock) {
             data = (GameData) ois.readObject();
@@ -263,8 +303,4 @@ public class Game {
             oos.writeObject(data);
         }
     }
-
-    private static final EventDispatcher<Object> _onGameStart = new EventDispatcher<>();
-
-    public static final DelegateEventDispatcher<Object> onGameStart = new DelegateEventDispatcher<>(_onGameStart);
 }

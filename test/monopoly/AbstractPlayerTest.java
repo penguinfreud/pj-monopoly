@@ -1,6 +1,6 @@
 package monopoly;
 
-import monopoly.async.Callback;
+import monopoly.util.Callback;
 import monopoly.place.Land;
 import monopoly.place.Street;
 import org.junit.Before;
@@ -60,10 +60,6 @@ public class AbstractPlayerTest {
             }
         };
 
-        AbstractPlayer.onMoneyChange.addListener((g, e) -> {
-            moneyChangeAmount = e.getSecond();
-        });
-
         anotherPlayer = new AIPlayer();
 
         Street street = new Street("");
@@ -97,6 +93,10 @@ public class AbstractPlayerTest {
             }
         };
 
+        AbstractPlayer.onMoneyChange.addListener(g, (g, e) -> {
+            moneyChangeAmount = e.getSecond();
+        });
+
         Map map = new Map();
         map.addPlace(prop);
         map.addPlace(anotherProp);
@@ -106,7 +106,7 @@ public class AbstractPlayerTest {
         };
 
         pi = new AbstractPlayer.PlaceInterface();
-        ci = new AbstractPlayer.CardInterface();
+        ci = new AbstractPlayer.CardInterface(g);
 
         cb = (_g, o) -> {};
     }

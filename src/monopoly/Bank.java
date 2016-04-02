@@ -2,12 +2,13 @@ package monopoly;
 
 final class Bank {
     static {
-        GameCalendar.onMonth.addListener((g, o) -> {
-            synchronized (g.lock) {
-                for (AbstractPlayer player : g.getPlayers()) {
-                    player.changeDeposit(g, player.getDeposit() / 10, "give_interest");
+        Game.onGameInit((g, o) ->
+            GameCalendar.onMonth.addListener(g, (_g, _o) -> {
+                synchronized (_g.lock) {
+                    for (AbstractPlayer player: _g.getPlayers()) {
+                        player.changeDeposit(_g, player.getDeposit() / 10, "give_interest");
+                    }
                 }
-            }
-        });
+            }));
     }
 }

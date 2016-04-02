@@ -27,6 +27,7 @@ public class Main {
         Class.forName("monopoly.card.Roadblock");
         Class.forName("monopoly.card.StayCard");
         Class.forName("monopoly.card.TaxCard");
+        Class.forName("monopoly.card.LandGodCard");
 
         Map map = Map.readMap(Main.class.getResourceAsStream("/maps/default_tui.map"));
 
@@ -35,7 +36,7 @@ public class Main {
         TUIGame game = new TUIGame();
         game.setMap(map);
 
-        Game.onGameOver.addListener((g, o) -> newGame(g));
+        Game.onGameOver.addListener(game, (g, o) -> newGame(g));
 
         newGame(game);
     }

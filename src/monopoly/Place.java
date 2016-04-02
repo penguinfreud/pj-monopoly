@@ -1,6 +1,6 @@
 package monopoly;
 
-import monopoly.async.Callback;
+import monopoly.util.Callback;
 
 import java.io.Serializable;
 

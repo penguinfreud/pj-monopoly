@@ -1,7 +1,7 @@
 package monopoly.place;
 
 import monopoly.*;
-import monopoly.async.Callback;
+import monopoly.util.Callback;
 
 import java.util.Arrays;
 import java.util.List;

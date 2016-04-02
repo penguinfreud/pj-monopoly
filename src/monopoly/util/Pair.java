@@ -1,4 +1,4 @@
-package monopoly.async;
+package monopoly.util;
 
 public final class Pair<A, B> {
     private final A first;

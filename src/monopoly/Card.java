@@ -1,11 +1,12 @@
 package monopoly;
 
-import monopoly.async.Callback;
+import monopoly.util.Callback;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public abstract class Card implements GameObject {
+public abstract class Card implements Serializable, GameObject {
     private final String name;
 
     protected Card(String name) {

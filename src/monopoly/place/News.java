@@ -4,7 +4,7 @@ import monopoly.AbstractPlayer;
 import monopoly.Game;
 import monopoly.Map;
 import monopoly.Place;
-import monopoly.async.Callback;
+import monopoly.util.Callback;
 
 import java.util.ArrayList;
 import java.util.Collections;

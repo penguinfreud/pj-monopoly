@@ -1,6 +1,6 @@
 package monopoly;
 
-import monopoly.async.*;
+import monopoly.util.*;
 
 import java.io.Serializable;
 import java.util.List;
@@ -13,12 +13,12 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
         Game.putDefaultConfig("init-coupons", 0);
     }
 
-    private static final EventDispatcher<Triple<AbstractPlayer, Integer, String>> _onMoneyChange = new EventDispatcher<>();
-    private static final EventDispatcher<Pair<AbstractPlayer, Integer>> _onGetCoupons = new EventDispatcher<>();
-    private static final EventDispatcher<Pair<AbstractPlayer, Card>> _onGetCard = new EventDispatcher<>();
-    public static final DelegateEventDispatcher<Triple<AbstractPlayer, Integer, String>> onMoneyChange = new DelegateEventDispatcher<>(_onMoneyChange);
-    public static final DelegateEventDispatcher<Pair<AbstractPlayer, Integer>> onGetCoupons = new DelegateEventDispatcher<>(_onGetCoupons);
-    public static final DelegateEventDispatcher<Pair<AbstractPlayer, Card>> onGetCard = new DelegateEventDispatcher<>(_onGetCard);
+    private static final Event<Triple<AbstractPlayer, Integer, String>> _onMoneyChange = new Event<>();
+    private static final Event<Pair<AbstractPlayer, Integer>> _onGetCoupons = new Event<>();
+    private static final Event<Pair<AbstractPlayer, Card>> _onGetCard = new Event<>();
+    public static final EventWrapper<Triple<AbstractPlayer, Integer, String>> onMoneyChange = new EventWrapper<>(_onMoneyChange);
+    public static final EventWrapper<Pair<AbstractPlayer, Integer>> onGetCoupons = new EventWrapper<>(_onGetCoupons);
+    public static final EventWrapper<Pair<AbstractPlayer, Card>> onGetCard = new EventWrapper<>(_onGetCard);
 
     private String name;
     private Place currentPlace;
@@ -224,7 +224,6 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
 
     final void payRent(Game g, Callback<Object> cb) {
         if (g.getState() == Game.State.TURN_LANDED) {
-            System.out.println("pay rent");
             Property prop = currentPlace.asProperty();
             pay(g, prop.getOwner(), prop.getRent(), "pay_rent", cb);
         }
@@ -402,8 +401,14 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
     }
 
     public static final class CardInterface implements Serializable {
+        public final SerializableObject lock;
+
         public final void reverse(AbstractPlayer player) {
             player.reversed = !player.reversed;
+        }
+
+        public CardInterface(Game g) {
+            lock = g.lock;
         }
 
         public final void walk(Game g, int steps) {
@@ -441,6 +446,21 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
         public final void changeDeposit(AbstractPlayer player, Game g, int amount, String msg) {
             synchronized (g.lock) {
                 player.changeDeposit(g, amount, msg);
+            }
+        }
+
+        public final void robLand(Game g) {
+            synchronized (g.lock) {
+                AbstractPlayer player = g.getCurrentPlayer();
+                Place place = player.getCurrentPlace();
+                Property prop = place.asProperty();
+                if (prop != null) {
+                    AbstractPlayer owner = prop.getOwner();
+                    if (owner != null) {
+                        owner.properties.remove(prop);
+                    }
+                    prop.changeOwner(player);
+                }
             }
         }
     }

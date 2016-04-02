@@ -1,4 +1,4 @@
-package monopoly.async;
+package monopoly.util;
 
 public final class Triple<A, B, C> {
     private final A first;

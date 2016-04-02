@@ -4,7 +4,7 @@ import monopoly.AbstractPlayer;
 import monopoly.Card;
 import monopoly.Game;
 import monopoly.Property;
-import monopoly.async.Callback;
+import monopoly.util.Callback;
 
 public class BuyLandCard extends Card {
     static {

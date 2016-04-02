@@ -1,8 +1,8 @@
 package monopoly.tui;
 
 import monopoly.*;
-import monopoly.async.Callback;
-import monopoly.async.Function;
+import monopoly.util.Callback;
+import monopoly.util.Function;
 
 import java.util.ArrayList;
 import java.util.List;

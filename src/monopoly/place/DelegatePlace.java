@@ -4,7 +4,7 @@ import monopoly.AbstractPlayer;
 import monopoly.Game;
 import monopoly.Place;
 import monopoly.Property;
-import monopoly.async.Callback;
+import monopoly.util.Callback;
 
 public class DelegatePlace extends Place {
     private final Place place;
