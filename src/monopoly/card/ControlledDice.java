@@ -8,7 +8,7 @@ import monopoly.util.Callback;
 
 class ControlledDice extends Card {
     static {
-        Card.registerCard(new ControlledDice());
+        registerCard(new ControlledDice());
         Game.putDefaultConfig("controlleddice-price", 5);
     }
 

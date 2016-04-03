@@ -24,6 +24,7 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
     private Place currentPlace;
     private int cash, deposit, coupons;
     private boolean reversed = false;
+    private boolean rentFree = false;
     private final List<Property> properties = new CopyOnWriteArrayList<>();
     private final List<Card> cards = new CopyOnWriteArrayList<>();
 
@@ -224,8 +225,12 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
 
     final void payRent(Game g, Callback<Object> cb) {
         if (g.getState() == Game.State.TURN_LANDED) {
-            Property prop = currentPlace.asProperty();
-            pay(g, prop.getOwner(), prop.getRent(), "pay_rent", cb);
+            if (rentFree) {
+                rentFree = false;
+            } else {
+                Property prop = currentPlace.asProperty();
+                pay(g, prop.getOwner(), prop.getRent(), "pay_rent", cb);
+            }
         }
     }
 
@@ -473,6 +478,27 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
         public final void resetOwner(Game g, Property prop) {
             synchronized (g.lock) {
                 prop.resetOwner();
+            }
+        }
+
+        public final void addCard(AbstractPlayer player, Game g, Card card) {
+            synchronized (g.lock) {
+                player.cards.add(card);
+                _onGetCard.trigger(g, new Pair<>(player, card));
+            }
+        }
+
+        public final void removeCard(AbstractPlayer player, Game g, Card card) {
+            synchronized (g.lock) {
+                if (player.cards.contains(card)) {
+                    player.cards.remove(card);
+                }
+            }
+        }
+
+        public final void setRentFree(AbstractPlayer player, Game g) {
+            synchronized (g.lock) {
+                player.rentFree = true;
             }
         }
     }

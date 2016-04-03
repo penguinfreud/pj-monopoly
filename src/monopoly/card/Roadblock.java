@@ -8,7 +8,7 @@ import monopoly.util.Callback;
 
 class Roadblock extends Card {
     static {
-        Card.registerCard(new Roadblock());
+        registerCard(new Roadblock());
         Game.putDefaultConfig("roadblock-price", 5);
         Game.putDefaultConfig("roadblock-reach", 8);
     }

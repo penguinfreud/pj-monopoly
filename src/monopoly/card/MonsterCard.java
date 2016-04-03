@@ -5,28 +5,22 @@ import monopoly.place.Land;
 import monopoly.place.Street;
 import monopoly.util.Callback;
 
-public class TeardownCard extends Card {
+public class MonsterCard extends Card {
     static {
-        registerCard(new TeardownCard());
-        Game.putDefaultConfig("teardowncard-price", 11);
+        registerCard(new MonsterCard());
+        Game.putDefaultConfig("monstercard-price", 9);
     }
 
-    private TeardownCard() {
-        super("TeardownCard");
+    private MonsterCard() {
+        super("MonsterCard");
     }
 
     @Override
     public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
-        Place place = g.getCurrentPlayer().getCurrentPlace();
-        Property prop = place.asProperty();
+        Property prop = g.getCurrentPlayer().getCurrentPlace().asProperty();
         if (prop != null && prop instanceof Land) {
             Street street = ((Land) prop).getStreet();
             for (Land land: street.getLands()) {
-                AbstractPlayer owner = land.getOwner();
-                if (owner != null) {
-                    ci.changeCash(owner, g, land.getMortgagePrice() * 3/2, "teardown");
-                    ci.resetOwner(g, land);
-                }
                 ci.resetLevel(g, land);
             }
         } else {

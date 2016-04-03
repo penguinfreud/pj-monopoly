@@ -7,7 +7,7 @@ import monopoly.util.Callback;
 
 class StayCard extends Card {
     static {
-        Card.registerCard(new StayCard());
+        registerCard(new StayCard());
         Game.putDefaultConfig("staycard-price", 3);
     }
 

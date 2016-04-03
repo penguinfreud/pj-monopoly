@@ -27,7 +27,10 @@ public class Main {
         Class.forName("monopoly.card.Roadblock");
         Class.forName("monopoly.card.StayCard");
         Class.forName("monopoly.card.TaxCard");
-        Class.forName("monopoly.card.LandGodCard");
+        Class.forName("monopoly.card.GodOfLandCard");
+        Class.forName("monopoly.card.TeardownCard");
+        Class.forName("monopoly.card.RobCard");
+        Class.forName("monopoly.card.GodOfLuckCard");
 
         Map map = Map.readMap(Main.class.getResourceAsStream("/maps/default_tui.map"));
 

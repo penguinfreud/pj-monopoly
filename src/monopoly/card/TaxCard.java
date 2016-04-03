@@ -8,7 +8,7 @@ import monopoly.util.Callback;
 
 public class TaxCard extends Card {
     static {
-        Card.registerCard(new TaxCard());
+        registerCard(new TaxCard());
         Game.putDefaultConfig("taxcard-price", 7);
         Game.putDefaultConfig("taxcard-reach", 5);
     }

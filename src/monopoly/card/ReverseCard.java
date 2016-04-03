@@ -8,7 +8,7 @@ import monopoly.util.Callback;
 
 class ReverseCard extends Card {
     static {
-        Card.registerCard(new ReverseCard());
+        registerCard(new ReverseCard());
         Game.putDefaultConfig("reversecard-price", 3);
     }
 

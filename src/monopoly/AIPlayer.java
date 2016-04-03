@@ -35,7 +35,12 @@ public class AIPlayer extends AbstractPlayer {
 
     @Override
     public void askWhichCardToUse(Game g, Callback<Card> cb) {
-        cb.run(g, null);
+        List<Card> cards = Card.getCards();
+        if (cards.isEmpty()) {
+            cb.run(g, null);
+        } else {
+            cb.run(g, cards.get(ThreadLocalRandom.current().nextInt(cards.size())));
+        }
     }
 
     @Override

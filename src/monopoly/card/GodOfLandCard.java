@@ -5,21 +5,21 @@ import monopoly.Card;
 import monopoly.Game;
 import monopoly.util.Callback;
 
-public class LandGodCard extends Card {
+public class GodOfLandCard extends Card {
     static {
-        Card.registerCard(new LandGodCard());
-        Game.putDefaultConfig("landgodcard-price", 15);
-        Game.putDefaultConfig("landgodcard-duration", 5);
+        registerCard(new GodOfLandCard());
+        Game.putDefaultConfig("godoflandcard-price", 15);
+        Game.putDefaultConfig("godoflandcard-duration", 5);
     }
 
-    private LandGodCard() {
-        super("LandGodCard");
+    private GodOfLandCard() {
+        super("GodOfLandCard");
     }
 
     @Override
     public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
-        g.onTurn.addListener(g, new Callback<Object>() {
-            private int duration = (Integer) g.getConfig("landgodcard-duration");
+        Game.onTurn.addListener(g, new Callback<Object>() {
+            private int duration = (Integer) g.getConfig("godoflandcard-duration");
             private final AbstractPlayer player = g.getCurrentPlayer();
 
             @Override
@@ -29,11 +29,12 @@ public class LandGodCard extends Card {
                         ci.robLand(g);
                         duration--;
                         if (duration == 0) {
-                            g.onTurn.removeListener(g, this);
+                            Game.onTurn.removeListener(g, this);
                         }
                     }
                 }
             }
         });
+        cb.run(g, null);
     }
 }
