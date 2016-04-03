@@ -148,7 +148,7 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
                 if (properties.contains(prop)) {
                     cash += prop.getMortgagePrice();
                     properties.remove(prop);
-                    prop.mortgage();
+                    prop.resetOwner();
                 } else {
                     g.triggerException("not_your_property");
                 }
@@ -461,6 +461,18 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
                     }
                     prop.changeOwner(player);
                 }
+            }
+        }
+
+        public final void resetLevel(Game g, Property prop) {
+            synchronized (g.lock) {
+                prop.resetLevel();
+            }
+        }
+
+        public final void resetOwner(Game g, Property prop) {
+            synchronized (g.lock) {
+                prop.resetOwner();
             }
         }
     }

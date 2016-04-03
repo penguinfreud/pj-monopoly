@@ -16,6 +16,10 @@ public class Land extends Property {
         street.addLand(this);
     }
 
+    public Street getStreet() {
+        return street;
+    }
+
     @Override
     public int getPurchasePrice() {
         return getPrice() * getLevel();

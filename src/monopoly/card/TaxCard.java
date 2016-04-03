@@ -22,7 +22,7 @@ public class TaxCard extends Card {
         AbstractPlayer current = g.getCurrentPlayer();
         current.askForPlayer(g, getName(), (_g, player) -> {
             synchronized (ci.lock) {
-                int reach = (Integer) g.getConfig("taxcard-reach");
+                int reach = g.getConfig("taxcard-reach");
                 if (player != null &&
                         Place.withinReach(current.getCurrentPlace(), player.getCurrentPlace(), reach) >= 0) {
                     ci.changeDeposit(player, g, player.getDeposit() * 3 / 10, "pay_tax");

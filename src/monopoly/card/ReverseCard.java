@@ -21,7 +21,7 @@ class ReverseCard extends Card {
         AbstractPlayer current = g.getCurrentPlayer();
         current.askForPlayer(g, getName(), (_g, player) -> {
             synchronized (ci.lock) {
-                int reach = (Integer) _g.getConfig("reversecard-reach");
+                int reach = _g.getConfig("reversecard-reach");
                 if (player != null &&
                         Place.withinReach(current.getCurrentPlace(), player.getCurrentPlace(), reach) >= 0) {
                     ci.reverse(player);

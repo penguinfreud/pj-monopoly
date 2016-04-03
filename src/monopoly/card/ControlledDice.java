@@ -23,7 +23,7 @@ class ControlledDice extends Card {
                 if (place == null) {
                     cb.run(_g, null);
                 } else {
-                    int reach = (Integer) _g.getConfig("dice-sides");
+                    int reach = _g.getConfig("dice-sides");
                     int steps = Place.withPlayersReach(player, place, reach);
                     if (steps != 0) {
                         ci.walk(_g, steps);

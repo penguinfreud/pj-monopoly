@@ -62,11 +62,11 @@ public abstract class Property extends Place {
         }
     }
 
-    void clearLevel(Game g) {
+    void resetLevel() {
         level = 1;
     }
 
-    void mortgage() {
+    void resetOwner() {
         owner = null;
     }
 

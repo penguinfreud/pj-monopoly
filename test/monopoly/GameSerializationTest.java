@@ -24,8 +24,7 @@ public class GameSerializationTest {
         }
     }
 
-    @Before
-    public void setUp() throws Exception {
+    public GameSerializationTest() throws Exception {
         Class.forName("monopoly.MapReader");
         Class.forName("monopoly.place.Empty");
         Class.forName("monopoly.place.Land");
