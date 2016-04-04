@@ -9,6 +9,7 @@ import java.util.Scanner;
 
 public class Main {
     private static List<AbstractPlayer> players;
+    private static TUIGame game;
 
     public static void main(String[] args) throws Exception {
         Class.forName("monopoly.MapReader");
@@ -36,23 +37,23 @@ public class Main {
 
         players = new ArrayList<>();
 
-        TUIGame game = new TUIGame();
+        game = new TUIGame();
         game.setMap(map);
 
-        Game.onGameOver.addListener(game, (g, o) -> newGame(g));
+        Game.onGameOver.addListener(game, Main::newGame);
 
-        newGame(game);
+        newGame();
     }
 
-    private static void newGame(Game g) {
+    private static void newGame() {
         players.clear();
-        System.out.println(g.getText("ask_player_names"));
-        Scanner scanner = ((TUIGame) g).getScanner();
+        System.out.println(game.getText("ask_player_names"));
+        Scanner scanner = game.getScanner();
         players.add(new AIPlayer(scanner.nextLine()));
         players.add(new AIPlayer(scanner.nextLine()));
         try {
-            g.setPlayers(players);
-            g.start();
+            game.setPlayers(players);
+            game.start();
         } catch (Exception e) {
             e.printStackTrace();
         }

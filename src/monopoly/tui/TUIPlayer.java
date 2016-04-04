@@ -1,8 +1,10 @@
 package monopoly.tui;
 
 import monopoly.*;
-import monopoly.util.Callback;
-import monopoly.util.Function;
+import monopoly.card.Card;
+import monopoly.util.Consumer0;
+import monopoly.util.Consumer1;
+import monopoly.util.Function1;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,13 +46,13 @@ public class TUIPlayer extends AbstractPlayer {
         }
     }
 
-    private <T extends GameObject>T choose(Game g, String question, List<T> options, boolean nullable, Function<T, String> stringifier) {
+    private <T extends GameObject>T choose(Game g, String question, List<T> options, boolean nullable, Function1<T, String> stringifier) {
         while (true) {
             System.out.println(question);
             int l = options.size();
             for (int i = 0; i<l; i++) {
                 T item = options.get(i);
-                String option = stringifier == null? item.toString(g): stringifier.run(g, item);
+                String option = stringifier == null? item.toString(g): stringifier.run(item);
                 System.out.println("[" + (i + 1) + "] " + option);
             }
             if (nullable) {
@@ -79,6 +81,7 @@ public class TUIPlayer extends AbstractPlayer {
             for (int i = 0; i<l; i++) {
                 System.out.println("[" + (i + 1) + "] " + options.get(i));
             }
+            System.out.print(prompt);
             String strChoice = ((TUIGame) g).getScanner().nextLine();
             try {
                 int choice = Integer.parseInt(strChoice);
@@ -91,29 +94,29 @@ public class TUIPlayer extends AbstractPlayer {
     }
 
     @Override
-    protected void askWhetherToBuyProperty(Game g, Callback<Boolean> cb) {
+    protected void askWhetherToBuyProperty(Game g, Consumer1<Boolean> cb) {
         Property property = getCurrentPlace().asProperty();
         String question = g.format("ask_whether_to_buy_property", property.getName(), property.getPurchasePrice(), getCash());
-        cb.run(g, yesOrNo(g, question));
+        cb.run(yesOrNo(g, question));
     }
 
     @Override
-    protected void askWhetherToUpgradeProperty(Game g, Callback<Boolean> cb) {
+    protected void askWhetherToUpgradeProperty(Game g, Consumer1<Boolean> cb) {
         Property property = getCurrentPlace().asProperty();
         String question = g.format("ask_whether_to_upgrade_property", property.getName(), property.getUpgradePrice(), getCash());
-        cb.run(g, yesOrNo(g, question));
+        cb.run(yesOrNo(g, question));
     }
 
     @Override
-    protected void askWhichPropertyToMortgage(Game g, Callback<Property> cb) {
+    protected void askWhichPropertyToMortgage(Game g, Consumer1<Property> cb) {
         String question = g.getText("ask_which_property_to_mortgage");
-        cb.run(g, choose(g, question, getProperties(), false));
+        cb.run(choose(g, question, getProperties(), false));
     }
 
     @Override
-    protected void askWhichCardToBuy(Game g, Callback<Card> cb) {
+    protected void askWhichCardToBuy(Game g, Consumer1<Card> cb) {
         String question = g.format("ask_which_card_to_buy", getCoupons());
-        cb.run(g, choose(g, question, Card.getCards(), true));
+        cb.run(choose(g, question, Card.getCards(), true));
     }
 
     private void viewMap(Game g, boolean raw) {
@@ -177,7 +180,7 @@ public class TUIPlayer extends AbstractPlayer {
     }
 
     @Override
-    protected void startTurn(Game g, Callback<Object> cb) {
+    protected void startTurn(Game g, Consumer0 cb) {
         String direction = g.getText(isReversed()? "anticlockwise": "clockwise");
         System.out.println(g.format("game_info", g.getDate(), getName(), direction));
 
@@ -203,7 +206,7 @@ public class TUIPlayer extends AbstractPlayer {
                 case 2:
                     Card card = _askWhichCardToUse(g);
                     if (card != null) {
-                        useCard(g, card, (_g, o) -> startTurn(_g, cb));
+                        useCard(g, card, () -> startTurn(g, cb));
                         break loop;
                     } else {
                         break;
@@ -218,11 +221,11 @@ public class TUIPlayer extends AbstractPlayer {
                     viewPlayerInfo(g);
                     break;
                 case 6:
-                    cb.run(g, null);
+                    cb.run();
                     break loop;
                 case 7:
                     giveUp(g);
-                    cb.run(g, null);
+                    cb.run();
                     break loop;
                 case 8:
                     tradeStock(g);
@@ -232,40 +235,40 @@ public class TUIPlayer extends AbstractPlayer {
     }
 
     @Override
-    protected void askHowMuchToDepositOrWithdraw(Game g, Callback<Integer> cb) {
+    protected void askHowMuchToDepositOrWithdraw(Game g, Consumer1<Integer> cb) {
         int maxTransfer = g.getConfig("bank-max-transfer");
         String question = g.format("ask_how_much_to_deposit_or_withdraw", getCash(), getDeposit());
-        cb.run(g, getInt(g, question, -maxTransfer, maxTransfer, 0));
+        cb.run(getInt(g, question, -maxTransfer, maxTransfer, 0));
     }
 
     @Override
-    public void askForPlayer(Game g, String reason, Callback<AbstractPlayer> cb) {
+    public void askForPlayer(Game g, String reason, Consumer1<AbstractPlayer> cb) {
         if (reason.equals("ReverseCard")) {
             String question = g.getText("ask_whom_to_reverse");
             List<AbstractPlayer> players = g.getPlayers();
             AbstractPlayer player = choose(g, question, players, true);
-            cb.run(g, player);
+            cb.run(player);
         } else {
-            cb.run(g, null);
+            cb.run(null);
         }
     }
 
     @Override
-    public void askForPlace(Game g, String reason, Callback<Place> cb) {
+    public void askForPlace(Game g, String reason, Consumer1<Place> cb) {
         if (reason.equals("ControlledDice")) {
             int steps = getInt(g, g.format("ask_where_to_go", getCurrentPlace().getName()), 1, 6, 0);
             if (steps == 0) {
-                cb.run(g, null);
+                cb.run(null);
             }
             Place place = getCurrentPlace();
             for (int i = 0; i<steps; i++) {
                 place = isReversed()? place.getPrev(): place.getNext();
             }
-            cb.run(g, place);
+            cb.run(place);
         } else if (reason.equals("Roadblock")) {
             int steps = getInt(g, g.format("ask_where_to_set_roadblock", getCurrentPlace().getName()), -8, 8, -9);
             if (steps == -9) {
-                cb.run(g, null);
+                cb.run(null);
             }
             Place place = getCurrentPlace();
             if (steps > 0) {
@@ -277,9 +280,9 @@ public class TUIPlayer extends AbstractPlayer {
                     place = isReversed()? place.getNext(): place.getPrev();
                 }
             }
-            cb.run(g, place);
+            cb.run(place);
         } else {
-            cb.run(g, null);
+            cb.run(null);
         }
     }
 }

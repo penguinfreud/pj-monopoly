@@ -3,7 +3,7 @@ package monopoly.card;
 import monopoly.*;
 import monopoly.place.Land;
 import monopoly.place.Street;
-import monopoly.util.Callback;
+import monopoly.util.Consumer0;
 
 public class TeardownCard extends Card {
     static {
@@ -16,7 +16,7 @@ public class TeardownCard extends Card {
     }
 
     @Override
-    public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
+    public void use(Game g, AbstractPlayer.CardInterface ci, Consumer0 cb) {
         Place place = g.getCurrentPlayer().getCurrentPlace();
         Property prop = place.asProperty();
         if (prop != null && prop instanceof Land) {
@@ -24,14 +24,14 @@ public class TeardownCard extends Card {
             for (Land land: street.getLands()) {
                 AbstractPlayer owner = land.getOwner();
                 if (owner != null) {
-                    ci.changeCash(owner, g, land.getMortgagePrice() * 3/2, "teardown");
-                    ci.resetOwner(g, land);
+                    ci.changeCash(owner, land.getMortgagePrice() * 3/2, "teardown");
+                    ci.resetOwner(land);
                 }
-                ci.resetLevel(g, land);
+                ci.resetLevel(land);
             }
         } else {
             g.triggerException("not_on_a_removable_land");
         }
-        cb.run(g, null);
+        cb.run();
     }
 }

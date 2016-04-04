@@ -1,10 +1,9 @@
 package monopoly.card;
 
 import monopoly.AbstractPlayer;
-import monopoly.Card;
 import monopoly.Game;
 import monopoly.Place;
-import monopoly.util.Callback;
+import monopoly.util.Consumer0;
 
 public class TaxCard extends Card {
     static {
@@ -18,16 +17,16 @@ public class TaxCard extends Card {
     }
 
     @Override
-    public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
+    public void use(Game g, AbstractPlayer.CardInterface ci, Consumer0 cb) {
         AbstractPlayer current = g.getCurrentPlayer();
-        current.askForPlayer(g, getName(), (_g, player) -> {
+        current.askForPlayer(g, getName(), (player) -> {
             synchronized (ci.lock) {
                 int reach = g.getConfig("tax-card-reach");
                 if (player != null &&
                         Place.withinReach(current.getCurrentPlace(), player.getCurrentPlace(), reach) >= 0) {
-                    ci.changeDeposit(player, g, player.getDeposit() * 3 / 10, "pay_tax");
+                    ci.changeDeposit(player, player.getDeposit() * 3 / 10, "pay_tax");
                 }
-                cb.run(g, null);
+                cb.run();
             }
         });
     }

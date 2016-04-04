@@ -4,7 +4,8 @@ import monopoly.AbstractPlayer;
 import monopoly.Game;
 import monopoly.Map;
 import monopoly.Place;
-import monopoly.util.Callback;
+import monopoly.util.Consumer0;
+import monopoly.util.Consumer2;
 
 public class Trap extends Place {
     static {
@@ -16,12 +17,12 @@ public class Trap extends Place {
     }
 
     @Override
-    public void onPassingBy(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
-        pi.pay(g.getCurrentPlayer(), g, null, g.getCurrentPlayer().getTotalPossessions() + 1, "trap", cb);
+    public void onPassingBy(Game g, AbstractPlayer.PlaceInterface pi, Consumer0 cb) {
+        pi.pay(g.getCurrentPlayer(), null, g.getCurrentPlayer().getTotalPossessions() + 1, "trap", cb);
     }
 
     @Override
-    public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
+    public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Consumer0 cb) {
         onPassingBy(g, pi, cb);
     }
 }

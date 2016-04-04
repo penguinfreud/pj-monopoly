@@ -1,9 +1,8 @@
 package monopoly.card;
 
 import monopoly.AbstractPlayer;
-import monopoly.Card;
 import monopoly.Game;
-import monopoly.util.Callback;
+import monopoly.util.Consumer0;
 
 import java.util.List;
 
@@ -18,7 +17,7 @@ public class EqualWealthCard extends Card {
     }
 
     @Override
-    public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
+    public void use(Game g, AbstractPlayer.CardInterface ci, Consumer0 cb) {
         int sum = 0;
         List<AbstractPlayer> players = g.getPlayers();
         for (AbstractPlayer player: players) {
@@ -27,8 +26,8 @@ public class EqualWealthCard extends Card {
         sum /= players.size();
         for (AbstractPlayer player: players) {
             int amount = sum - player.getCash();
-            ci.changeCash(player, g, amount, amount >= 0? "equal_wealth_get": "equal_wealth_give");
+            ci.changeCash(player, amount, amount >= 0? "equal_wealth_get": "equal_wealth_give");
         }
-        cb.run(g, null);
+        cb.run();
     }
 }

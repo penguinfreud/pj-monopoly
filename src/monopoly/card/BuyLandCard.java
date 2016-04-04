@@ -1,10 +1,9 @@
 package monopoly.card;
 
 import monopoly.AbstractPlayer;
-import monopoly.Card;
 import monopoly.Game;
 import monopoly.Property;
-import monopoly.util.Callback;
+import monopoly.util.Consumer0;
 
 public class BuyLandCard extends Card {
     static {
@@ -17,12 +16,12 @@ public class BuyLandCard extends Card {
     }
 
     @Override
-    public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
+    public void use(Game g, AbstractPlayer.CardInterface ci, Consumer0 cb) {
         AbstractPlayer player = g.getCurrentPlayer();
         Property prop = player.getCurrentPlace().asProperty();
         if (prop != null && prop.getOwner() != player) {
-            ci.buyProperty(g, cb);
+            ci.buyProperty(cb);
         }
-        cb.run(g, null);
+        cb.run();
     }
 }

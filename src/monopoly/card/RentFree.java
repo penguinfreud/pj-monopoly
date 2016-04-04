@@ -2,14 +2,16 @@ package monopoly.card;
 
 import monopoly.AbstractPlayer;
 import monopoly.Game;
-import monopoly.util.Callback;
+import monopoly.util.Consumer0;
 
-class RentFree implements Callback<Object> {
+class RentFree implements Consumer0 {
+    private final Game game;
     private int duration;
-    private AbstractPlayer player;
-    private AbstractPlayer.CardInterface ci;
+    private final AbstractPlayer player;
+    private final AbstractPlayer.CardInterface ci;
 
     RentFree(Game g, AbstractPlayer player, AbstractPlayer.CardInterface ci, int duration) {
+        game = g;
         this.player = player;
         this.ci = ci;
         this.duration = duration;
@@ -17,13 +19,13 @@ class RentFree implements Callback<Object> {
     }
 
     @Override
-    public void run(Game g, Object o) {
-        if (g.getCurrentPlayer() == player) {
+    public void run() {
+        if (game.getCurrentPlayer() == player) {
             if (duration > 0) {
-                ci.setRentFree(player, g);
+                ci.setRentFree(player);
                 duration--;
                 if (duration == 0) {
-                    Game.onTurn.removeListener(g, this);
+                    Game.onTurn.removeListener(game, this);
                 }
             }
         }

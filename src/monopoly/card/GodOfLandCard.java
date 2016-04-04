@@ -1,9 +1,8 @@
 package monopoly.card;
 
 import monopoly.AbstractPlayer;
-import monopoly.Card;
 import monopoly.Game;
-import monopoly.util.Callback;
+import monopoly.util.Consumer0;
 
 public class GodOfLandCard extends Card {
     static {
@@ -17,16 +16,16 @@ public class GodOfLandCard extends Card {
     }
 
     @Override
-    public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
-        Game.onTurn.addListener(g, new Callback<Object>() {
+    public void use(Game g, AbstractPlayer.CardInterface ci, Consumer0 cb) {
+        Game.onTurn.addListener(g, new Consumer0() {
             private int duration = (Integer) g.getConfig("god-of-land-card-duration");
             private final AbstractPlayer player = g.getCurrentPlayer();
 
             @Override
-            public void run(Game g, Object arg) {
+            public void run() {
                 if (g.getCurrentPlayer() == player) {
                     if (duration > 0) {
-                        ci.robLand(g);
+                        ci.robLand();
                         duration--;
                         if (duration == 0) {
                             Game.onTurn.removeListener(g, this);
@@ -35,6 +34,6 @@ public class GodOfLandCard extends Card {
                 }
             }
         });
-        cb.run(g, null);
+        cb.run();
     }
 }

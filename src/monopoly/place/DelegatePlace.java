@@ -4,7 +4,7 @@ import monopoly.AbstractPlayer;
 import monopoly.Game;
 import monopoly.Place;
 import monopoly.Property;
-import monopoly.util.Callback;
+import monopoly.util.Consumer0;
 
 public class DelegatePlace extends Place {
     private final Place place;
@@ -25,12 +25,12 @@ public class DelegatePlace extends Place {
     }
 
     @Override
-    public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
+    public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Consumer0 cb) {
         place.onLanded(g, pi, cb);
     }
 
     @Override
-    public void onPassingBy(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
+    public void onPassingBy(Game g, AbstractPlayer.PlaceInterface pi, Consumer0 cb) {
         place.onPassingBy(g, pi, cb);
     }
 

@@ -1,25 +1,14 @@
 package monopoly.util;
 
-public final class Triple<A, B, C> {
-    private final A first;
-    private final B second;
+public class Triple<A, B, C> extends Pair<A, B> {
     private final C third;
 
     public Triple(A a, B b, C c) {
-        first = a;
-        second = b;
+        super(a, b);
         third = c;
     }
 
-    public A getFirst() {
-        return first;
-    }
-
-    public B getSecond() {
-        return second;
-    }
-
-    public C getThird() {
+    public final C getThird() {
         return third;
     }
 }

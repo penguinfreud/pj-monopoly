@@ -1,6 +1,8 @@
 package monopoly;
 
-import monopoly.util.Callback;
+import monopoly.card.Card;
+import monopoly.util.Consumer0;
+import monopoly.util.Consumer1;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -14,25 +16,25 @@ public class AIPlayer extends AbstractPlayer {
     }
 
     @Override
-    public void askWhetherToBuyProperty(Game g, Callback<Boolean> cb) {
-        cb.run(g, true);
+    public void askWhetherToBuyProperty(Game g, Consumer1<Boolean> cb) {
+        cb.run(true);
     }
 
     @Override
-    public void askWhetherToUpgradeProperty(Game g, Callback<Boolean> cb) {
-        cb.run(g, true);
+    public void askWhetherToUpgradeProperty(Game g, Consumer1<Boolean> cb) {
+        cb.run(true);
     }
 
     @Override
-    public void askWhichPropertyToMortgage(Game g, Callback<Property> cb) {
-        cb.run(g, getProperties().get(0));
+    public void askWhichPropertyToMortgage(Game g, Consumer1<Property> cb) {
+        cb.run(getProperties().get(0));
     }
 
     @Override
-    protected void askWhichCardToBuy(Game g, Callback<Card> cb) {
+    protected void askWhichCardToBuy(Game g, Consumer1<Card> cb) {
         int coupons = getCoupons();
         if (coupons == 0) {
-            cb.run(g, null);
+            cb.run(null);
         } else {
             List<Card> cards = Card.getCards();
             List<Card> buyableCards = new CopyOnWriteArrayList<>();
@@ -42,47 +44,47 @@ public class AIPlayer extends AbstractPlayer {
                 }
             }
             if (buyableCards.isEmpty()) {
-                cb.run(g, null);
+                cb.run(null);
             } else {
-                cb.run(g, buyableCards.get(ThreadLocalRandom.current().nextInt(buyableCards.size())));
+                cb.run(buyableCards.get(ThreadLocalRandom.current().nextInt(buyableCards.size())));
             }
         }
     }
 
     @Override
-    public void startTurn(Game g, Callback<Object> cb) {
+    public void startTurn(Game g, Consumer0 cb) {
         List<Card> cards = getCards();
         if (cards.isEmpty()) {
-            cb.run(g, null);
+            cb.run();
         } else {
             Card card = cards.get(ThreadLocalRandom.current().nextInt(cards.size()));
-            useCard(g, card, (_g, o) -> startTurn(_g, cb));
+            useCard(g, card, () -> startTurn(g, cb));
         }
     }
 
     @Override
-    public void askHowMuchToDepositOrWithdraw(Game g, Callback<Integer> cb) {
-        cb.run(g, -getDeposit());
+    public void askHowMuchToDepositOrWithdraw(Game g, Consumer1<Integer> cb) {
+        cb.run(-getDeposit());
     }
 
     @Override
-    public void askForPlayer(Game g, String reason, Callback<AbstractPlayer> cb) {
+    public void askForPlayer(Game g, String reason, Consumer1<AbstractPlayer> cb) {
         if (reason.equals("ReverseCard")) {
-            cb.run(g, this);
+            cb.run(this);
         } else {
             List<AbstractPlayer> players = g.getPlayers();
             AbstractPlayer first = players.get(0);
-            cb.run(g, first == this? players.get(1): first);
+            cb.run(first == this? players.get(1): first);
         }
     }
 
     @Override
-    public void askForPlace(Game g, String reason, Callback<Place> cb) {
+    public void askForPlace(Game g, String reason, Consumer1<Place> cb) {
         Place cur = getCurrentPlace();
         if (reason.equals("Roadblock")) {
-            cb.run(g, cur);
+            cb.run(cur);
         } else {
-            cb.run(g, isReversed() ? cur.getPrev() : cur.getNext());
+            cb.run(isReversed() ? cur.getPrev() : cur.getNext());
         }
     }
 }

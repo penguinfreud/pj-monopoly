@@ -1,10 +1,9 @@
 package monopoly.card;
 
 import monopoly.AbstractPlayer;
-import monopoly.Card;
 import monopoly.Game;
 import monopoly.Place;
-import monopoly.util.Callback;
+import monopoly.util.Consumer0;
 
 public class Roadblock extends Card {
     static {
@@ -17,15 +16,15 @@ public class Roadblock extends Card {
         super("Roadblock");
     }
 
-    public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
-        g.getCurrentPlayer().askForPlace(g, getName(), (_g, place) -> {
+    public void use(Game g, AbstractPlayer.CardInterface ci, Consumer0 cb) {
+        g.getCurrentPlayer().askForPlace(g, getName(), (place) -> {
             synchronized (ci.lock) {
-                int reach = _g.getConfig("roadblock-reach");
+                int reach = g.getConfig("roadblock-reach");
                 if (place != null &&
-                        Place.withinReach(_g.getCurrentPlayer().getCurrentPlace(), place, reach) >= 0) {
-                    ci.setRoadblock(_g, place);
+                        Place.withinReach(g.getCurrentPlayer().getCurrentPlace(), place, reach) >= 0) {
+                    ci.setRoadblock(place);
                 }
-                cb.run(_g, null);
+                cb.run();
             }
         });
     }

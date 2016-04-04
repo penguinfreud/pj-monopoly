@@ -1,19 +1,27 @@
 package monopoly.stock;
 
 import monopoly.Game;
+import monopoly.util.Parasite;
 
+import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class StockMarket {
-    public static class StockPrices {
+public class StockMarket implements Serializable {
+    private static Parasite<Game, StockMarket> markets = new Parasite<>(Game::onInit, StockMarket::new);
+
+    public static StockMarket getMarket(Game g) {
+        return markets.get(g);
+    }
+
+    public static class StockTrend {
         private List<Double> prices = new CopyOnWriteArrayList<>();
 
-        private StockPrices(Game g) {
-            Game.onTurn.addListener(g, (_g, o) -> prices.add(calcNextPrice()));
+        private StockTrend(Game g) {
+            Game.onTurn.addListener(g, () -> prices.add(calcNextPrice()));
         }
 
         public double getPrice(int daysAgo) {
@@ -36,23 +44,32 @@ public class StockMarket {
         }
     }
 
-    private Map<Stock, StockPrices> priceMap = new Hashtable<>();
+    private final Game game;
+    private final Map<Stock, StockTrend> priceMap = new Hashtable<>();
 
-    public void addStock(Game g, Stock stock) {
+    private StockMarket(Game g) {
+        game = g;
+    }
+
+    public void addStock(Stock stock) {
         if (!priceMap.containsKey(stock)) {
-            priceMap.put(stock, new StockPrices(g));
+            priceMap.put(stock, new StockTrend(game));
         }
     }
 
-    public StockPrices getPrices(Stock stock) {
+    public StockTrend getPrices(Stock stock) {
         return priceMap.get(stock);
     }
 
     public double getPrice(Stock stock, int daysAgo) {
-        StockPrices prices = priceMap.get(stock);
+        StockTrend prices = priceMap.get(stock);
         if (prices == null) {
             return Double.NaN;
         }
         return prices.getPrice(daysAgo);
+    }
+
+    public double getPrice(Stock stock) {
+        return getPrice(stock, 0);
     }
 }

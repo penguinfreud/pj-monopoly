@@ -1,32 +1,22 @@
 package monopoly.util;
 
-import monopoly.Game;
-
+import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class Event<T> {
-    private final SerializableObject key = new SerializableObject();
+public abstract class Event<T> implements Serializable {
+    protected final SerializableObject lock = new SerializableObject();
+    protected final List<T> listeners = new CopyOnWriteArrayList<>();
 
-    public Event() {
-        Game.onGameInit((g, o) -> g.store(key, new CopyOnWriteArrayList<>()));
+    public final void addListener(T listener) {
+        synchronized (lock) {
+            listeners.add(listener);
+        }
     }
 
-    private List<Callback<T>> getListeners(Game g) {
-        return g.getStorage(key);
-    }
-
-    public final void addListener(Game g, Callback<T> listener) {
-        getListeners(g).add(listener);
-    }
-
-    public final void removeListener(Game g, Callback<T> listener) {
-        getListeners(g).remove(listener);
-    }
-
-    public final void trigger(Game g, T arg) {
-        for (Callback<T> callback : getListeners(g)) {
-            callback.run(g, arg);
+    public final void removeListener(T listener) {
+        synchronized (lock) {
+            listeners.remove(listener);
         }
     }
 }

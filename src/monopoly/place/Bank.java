@@ -4,7 +4,7 @@ import monopoly.AbstractPlayer;
 import monopoly.Game;
 import monopoly.Map;
 import monopoly.Place;
-import monopoly.util.Callback;
+import monopoly.util.Consumer0;
 
 public class Bank extends Place {
     static {
@@ -17,12 +17,12 @@ public class Bank extends Place {
     }
 
     @Override
-    public void onPassingBy(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
-        pi.depositOrWithdraw(g, cb);
+    public void onPassingBy(Game g, AbstractPlayer.PlaceInterface pi, Consumer0 cb) {
+        pi.depositOrWithdraw(cb);
     }
 
     @Override
-    public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
+    public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Consumer0 cb) {
         onPassingBy(g, pi, cb);
     }
 }

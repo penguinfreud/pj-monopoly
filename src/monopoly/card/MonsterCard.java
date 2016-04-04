@@ -3,7 +3,7 @@ package monopoly.card;
 import monopoly.*;
 import monopoly.place.Land;
 import monopoly.place.Street;
-import monopoly.util.Callback;
+import monopoly.util.Consumer0;
 
 public class MonsterCard extends Card {
     static {
@@ -16,16 +16,14 @@ public class MonsterCard extends Card {
     }
 
     @Override
-    public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
+    public void use(Game g, AbstractPlayer.CardInterface ci, Consumer0 cb) {
         Property prop = g.getCurrentPlayer().getCurrentPlace().asProperty();
         if (prop != null && prop instanceof Land) {
             Street street = ((Land) prop).getStreet();
-            for (Land land: street.getLands()) {
-                ci.resetLevel(g, land);
-            }
+            street.getLands().stream().forEach(ci::resetLevel);
         } else {
             g.triggerException("not_on_a_removable_land");
         }
-        cb.run(g, null);
+        cb.run();
     }
 }

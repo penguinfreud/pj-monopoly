@@ -1,6 +1,8 @@
 package monopoly;
 
-import monopoly.util.Callback;
+import monopoly.util.Consumer0;
+import monopoly.util.Consumer1;
+import monopoly.util.Consumer2;
 
 import java.io.Serializable;
 
@@ -42,12 +44,12 @@ public abstract class Place implements Serializable, GameObject {
         roadblocks = 0;
     }
 
-    public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
-        cb.run(g, null);
+    public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Consumer0 cb) {
+        cb.run();
     }
 
-    public void onPassingBy(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
-        cb.run(g, null);
+    public void onPassingBy(Game g, AbstractPlayer.PlaceInterface pi, Consumer0 cb) {
+        cb.run();
     }
     
     public Property asProperty() {

@@ -1,7 +1,8 @@
 package monopoly.place;
 
 import monopoly.*;
-import monopoly.util.Callback;
+import monopoly.card.Card;
+import monopoly.util.Consumer0;
 
 public class CardSite extends Place {
     static {
@@ -13,11 +14,11 @@ public class CardSite extends Place {
     }
 
     @Override
-    public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
+    public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Consumer0 cb) {
         Card card = Card.getRandomCard(g, true);
         if (card != null) {
-            pi.addCard(g.getCurrentPlayer(), g, card);
+            pi.addCard(g.getCurrentPlayer(), card);
         }
-        cb.run(g, null);
+        cb.run();
     }
 }

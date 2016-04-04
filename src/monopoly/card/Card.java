@@ -1,6 +1,9 @@
-package monopoly;
+package monopoly.card;
 
-import monopoly.util.Callback;
+import monopoly.AbstractPlayer;
+import monopoly.Game;
+import monopoly.GameObject;
+import monopoly.util.Consumer0;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -28,8 +31,8 @@ public abstract class Card implements Serializable, GameObject {
         return (Integer) g.getConfig(uncamelize(name) + "-price");
     }
 
-    public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
-        cb.run(g, null);
+    public void use(Game g, AbstractPlayer.CardInterface ci, Consumer0 cb) {
+        cb.run();
     }
 
     private static final List<Card> cards = new CopyOnWriteArrayList<>();

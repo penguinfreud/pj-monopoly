@@ -1,10 +1,9 @@
 package monopoly.card;
 
 import monopoly.AbstractPlayer;
-import monopoly.Card;
 import monopoly.Game;
 import monopoly.Place;
-import monopoly.util.Callback;
+import monopoly.util.Consumer0;
 
 public class ControlledDice extends Card {
     static {
@@ -16,19 +15,19 @@ public class ControlledDice extends Card {
         super("ControlledDice");
     }
 
-    public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
+    public void use(Game g, AbstractPlayer.CardInterface ci, Consumer0 cb) {
         AbstractPlayer player = g.getCurrentPlayer();
-        player.askForPlace(g, getName(), (_g, place) -> {
+        player.askForPlace(g, getName(), (place) -> {
             synchronized (ci.lock) {
                 if (place == null) {
-                    cb.run(_g, null);
+                    cb.run();
                 } else {
-                    int reach = _g.getConfig("dice-sides");
+                    int reach = g.getConfig("dice-sides");
                     int steps = Place.withPlayersReach(player, place, reach);
                     if (steps != 0) {
-                        ci.walk(_g, steps);
+                        ci.walk(steps);
                     } else {
-                        cb.run(_g, null);
+                        cb.run();
                     }
                 }
             }

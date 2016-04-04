@@ -4,7 +4,7 @@ import monopoly.AbstractPlayer;
 import monopoly.Game;
 import monopoly.Map;
 import monopoly.Place;
-import monopoly.util.Callback;
+import monopoly.util.Consumer0;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -20,10 +20,10 @@ public class CouponSite extends Place {
     }
 
     @Override
-    public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
+    public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Consumer0 cb) {
         int min = (Integer) g.getConfig("coupon-award-min"),
                 max = (Integer) g.getConfig("coupon-award-max");
-        pi.addCoupons(g.getCurrentPlayer(), g, ThreadLocalRandom.current().nextInt(max - min + 1) + min);
-        cb.run(g, null);
+        pi.addCoupons(g.getCurrentPlayer(), ThreadLocalRandom.current().nextInt(max - min + 1) + min);
+        cb.run();
     }
 }

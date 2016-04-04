@@ -1,11 +1,16 @@
 package monopoly;
 
-import monopoly.util.Callback;
+import monopoly.util.Consumer0;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public abstract class Property extends Place {
     static {
         Game.putDefaultConfig("property-max-level", 6);
     }
+
+    private static final Logger logger = Logger.getLogger(Property.class.getName());
 
     private AbstractPlayer owner;
     private int price = 0, level = 1;
@@ -71,27 +76,22 @@ public abstract class Property extends Place {
     }
 
     @Override
-    public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
-        //System.out.println("property landed");
+    public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Consumer0 cb) {
         if (g.getState() == Game.State.TURN_LANDED) {
             AbstractPlayer p = g.getCurrentPlayer();
             if (owner == null) {
-                //System.out.println("buy");
                 p.buyProperty(g, cb);
             } else if (owner == p) {
                 if (level < (Integer) g.getConfig("property-max-level")) {
-                    //System.out.println("upgrade");
                     p.upgradeProperty(g, cb);
                 } else {
-                    //System.out.println("max level");
-                    cb.run(g, null);
+                    cb.run();
                 }
             } else {
-                //System.out.println("pay rent");
                 p.payRent(g, cb);
             }
         } else {
-            //System.out.println("state error");
+            logger.log(Level.WARNING, Game.WRONG_STATE);
         }
     }
     

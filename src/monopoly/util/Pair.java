@@ -1,6 +1,6 @@
 package monopoly.util;
 
-public final class Pair<A, B> {
+public class Pair<A, B> {
     private final A first;
     private final B second;
 
@@ -9,11 +9,11 @@ public final class Pair<A, B> {
         second = b;
     }
 
-    public A getFirst() {
+    public final A getFirst() {
         return first;
     }
 
-    public B getSecond() {
+    public final B getSecond() {
         return second;
     }
 }

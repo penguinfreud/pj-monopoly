@@ -1,10 +1,9 @@
 package monopoly.card;
 
 import monopoly.AbstractPlayer;
-import monopoly.Card;
 import monopoly.Game;
 import monopoly.Place;
-import monopoly.util.Callback;
+import monopoly.util.Consumer0;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -21,20 +20,20 @@ public class RobCard extends Card {
     }
 
     @Override
-    public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
+    public void use(Game g, AbstractPlayer.CardInterface ci, Consumer0 cb) {
         AbstractPlayer current = g.getCurrentPlayer();
-        current.askForPlayer(g, getName(), (_g, player) -> {
-            int reach = _g.getConfig("rob-card-reach");
+        current.askForPlayer(g, getName(), (player) -> {
+            int reach = g.getConfig("rob-card-reach");
             if (player != null &&
                     Place.withinReach(current.getCurrentPlace(), player.getCurrentPlace(), reach) >= 0) {
                 List<Card> cards = player.getCards();
                 if (!cards.isEmpty()) {
                     Card card = cards.get(ThreadLocalRandom.current().nextInt(cards.size()));
-                    ci.removeCard(player, g, card);
-                    ci.addCard(current, g, card);
+                    ci.removeCard(player, card);
+                    ci.addCard(current, card);
                 }
             }
-            cb.run(_g, null);
+            cb.run();
         });
     }
 }
