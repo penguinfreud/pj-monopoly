@@ -6,7 +6,7 @@ import monopoly.Game;
 import monopoly.Place;
 import monopoly.util.Callback;
 
-class Roadblock extends Card {
+public class Roadblock extends Card {
     static {
         registerCard(new Roadblock());
         Game.putDefaultConfig("roadblock-price", 5);

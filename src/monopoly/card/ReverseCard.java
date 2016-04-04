@@ -6,7 +6,7 @@ import monopoly.Game;
 import monopoly.Place;
 import monopoly.util.Callback;
 
-class ReverseCard extends Card {
+public class ReverseCard extends Card {
     static {
         registerCard(new ReverseCard());
         Game.putDefaultConfig("reversecard-price", 3);

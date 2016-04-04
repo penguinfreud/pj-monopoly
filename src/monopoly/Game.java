@@ -39,7 +39,7 @@ class GameData implements Serializable {
 
 public class Game {
     public enum State {
-        OVER, STARTING, TURN_STARTING, TURN_WALKING, TURN_LANDED, TURN_ENDING
+        OVER, STARTING, TURN_STARTING, TURN_WALKING, TURN_LANDED
     }
 
     final SerializableObject lock = new SerializableObject();
@@ -164,7 +164,7 @@ public class Game {
         if (data.players.count() <= 1) {
             endGame();
         }
-        boolean notFirst = data.state == State.TURN_ENDING;
+        boolean notFirst = data.state == State.TURN_LANDED;
         if (data.state == State.STARTING || notFirst) {
             data.state = State.TURN_STARTING;
             data.hadBankrupt = false;
@@ -178,22 +178,29 @@ public class Game {
 
     private void endTurn() {
         synchronized (lock) {
-            if (data.state == State.TURN_ENDING) {
-                if (!data.hadBankrupt) {
-                    data.players.next();
+            if (data.state == State.TURN_LANDED) {
+                if (inEndTurn) {
+                    tailRecursion = true;
+                } else {
+                    inEndTurn = true;
+                    do {
+                        tailRecursion = false;
+                        if (!data.hadBankrupt) {
+                            data.players.next();
+                        }
+                        startTurn();
+                    } while (tailRecursion);
+                    inEndTurn = false;
                 }
-                startTurn();
             }
         }
     };
 
+    private boolean inEndTurn = false;
+    private boolean tailRecursion = false;
+
     private static final Callback<Object> turnCb = (g, o) -> {
-        synchronized (g.lock) {
-            if (g.data.state == State.TURN_LANDED) {
-                g.data.state = State.TURN_ENDING;
-                pool.execute(g::endTurn);
-            }
-        }
+        g.endTurn();
     };
 
     void rollTheDice() {
@@ -299,36 +306,15 @@ public class Game {
         }
     }
 
-    private void readOrWriteData(ObjectInputStream ois, ObjectOutputStream oos) throws IOException, ClassNotFoundException {
-        loop: while (true) {
-            sync: synchronized (lock) {
-                if (data.state == State.TURN_ENDING) {
-                    break sync;
-                }
-                if (ois != null) {
-                    data = (GameData) ois.readObject();
-                } else {
-                    oos.writeObject(data);
-                }
-                break loop;
-            }
-            try {
-                Thread.sleep(5);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+    protected void readData(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        synchronized (lock) {
+            data = (GameData) ois.readObject();
         }
     }
 
-    protected void readData(ObjectInputStream ois) throws IOException {
-        try {
-            readOrWriteData(ois, null);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+    protected void writeData(ObjectOutputStream oos) throws IOException {
+        synchronized (lock) {
+            oos.writeObject(data);
         }
-    }
-
-    protected void writeData(ObjectOutputStream oos) throws IOException, ClassNotFoundException {
-        readOrWriteData(null, oos);
     }
 }

@@ -9,7 +9,7 @@ public class GodOfLandCard extends Card {
     static {
         registerCard(new GodOfLandCard());
         Game.putDefaultConfig("godoflandcard-price", 15);
-        Game.putDefaultConfig("godoflandcard-duration", 5);
+        Game.putDefaultConfig("god-of-land-card-duration", 5);
     }
 
     private GodOfLandCard() {
@@ -19,7 +19,7 @@ public class GodOfLandCard extends Card {
     @Override
     public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
         Game.onTurn.addListener(g, new Callback<Object>() {
-            private int duration = (Integer) g.getConfig("godoflandcard-duration");
+            private int duration = (Integer) g.getConfig("god-of-land-card-duration");
             private final AbstractPlayer player = g.getCurrentPlayer();
 
             @Override

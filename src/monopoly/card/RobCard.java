@@ -13,7 +13,7 @@ public class RobCard extends Card {
     static {
         registerCard(new RobCard());
         Game.putDefaultConfig("robcard-price", 7);
-        Game.putDefaultConfig("robcard-reach", 5);
+        Game.putDefaultConfig("rob-card-reach", 5);
     }
 
     private RobCard() {
@@ -24,7 +24,7 @@ public class RobCard extends Card {
     public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
         AbstractPlayer current = g.getCurrentPlayer();
         current.askForPlayer(g, getName(), (_g, player) -> {
-            int reach = _g.getConfig("robcard-reach");
+            int reach = _g.getConfig("rob-card-reach");
             if (player != null &&
                     Place.withinReach(current.getCurrentPlace(), player.getCurrentPlace(), reach) >= 0) {
                 List<Card> cards = player.getCards();

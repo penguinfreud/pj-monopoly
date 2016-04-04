@@ -30,7 +30,7 @@ public class Main {
         Class.forName("monopoly.card.GodOfLandCard");
         Class.forName("monopoly.card.TeardownCard");
         Class.forName("monopoly.card.RobCard");
-        Class.forName("monopoly.card.GodOfLuckCard");
+        Class.forName("monopoly.card.GodOfFortuneCard");
 
         Map map = Map.readMap(Main.class.getResourceAsStream("/maps/default_tui.map"));
 

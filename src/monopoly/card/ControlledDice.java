@@ -6,7 +6,7 @@ import monopoly.Game;
 import monopoly.Place;
 import monopoly.util.Callback;
 
-class ControlledDice extends Card {
+public class ControlledDice extends Card {
     static {
         registerCard(new ControlledDice());
         Game.putDefaultConfig("controlleddice-price", 5);

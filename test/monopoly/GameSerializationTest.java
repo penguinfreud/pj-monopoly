@@ -44,7 +44,7 @@ public class GameSerializationTest {
         Class.forName("monopoly.card.GodOfLandCard");
         Class.forName("monopoly.card.TeardownCard");
         Class.forName("monopoly.card.RobCard");
-        Class.forName("monopoly.card.GodOfLuckCard");
+        Class.forName("monopoly.card.GodOfFortuneCard");
 
         List<AbstractPlayer> players = new CopyOnWriteArrayList<>();
         player = new AIPlayer("player A");

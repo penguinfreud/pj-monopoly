@@ -3,8 +3,10 @@ package monopoly;
 import monopoly.util.Callback;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ThreadLocalRandom;
 
 public abstract class Card implements Serializable, GameObject {
     private final String name;
@@ -38,5 +40,29 @@ public abstract class Card implements Serializable, GameObject {
 
     public static List<Card> getCards() {
         return new CopyOnWriteArrayList<>(cards);
+    }
+
+    public static Card getRandomCard(Game g, boolean miss) {
+        int l = cards.size();
+        int[] prob = new int[l + 1];
+        int sum = 0;
+        for (int i = 0; i<l; i++) {
+            sum += 128 / cards.get(i).getPrice(g);
+            prob[i] = sum;
+        }
+        if (miss) {
+            sum += 32;
+            prob[l] = sum;
+        }
+
+        int index = Arrays.binarySearch(prob, ThreadLocalRandom.current().nextInt(sum));
+        if (index < 0) {
+            index = -index - 1;
+        }
+        if (index == l) {
+            return null;
+        } else {
+            return cards.get(index);
+        }
     }
 }
