@@ -196,7 +196,7 @@ public class Game implements Serializable, Host {
                 logger.log(Level.WARNING, WRONG_STATE);
             }
         }
-    };
+    }
 
     private boolean inEndTurn = false;
     private boolean tailRecursion = false;

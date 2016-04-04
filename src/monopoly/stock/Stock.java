@@ -6,7 +6,7 @@ import monopoly.GameObject;
 import java.io.Serializable;
 
 public class Stock implements GameObject, Serializable {
-    private String name;
+    private final String name;
 
     public Stock(String name) {
         this.name = name;

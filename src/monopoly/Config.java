@@ -3,7 +3,7 @@ package monopoly;
 import java.io.Serializable;
 import java.util.Hashtable;
 
-public class Config implements Serializable {
+class Config implements Serializable {
     private final Hashtable<String, Object> configTable = new Hashtable<>();
     private Config base;
 

@@ -1,8 +1,6 @@
 package monopoly;
 
 import monopoly.util.Consumer0;
-import monopoly.util.Consumer1;
-import monopoly.util.Consumer2;
 
 import java.io.Serializable;
 
@@ -44,11 +42,11 @@ public abstract class Place implements Serializable, GameObject {
         roadblocks = 0;
     }
 
-    public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Consumer0 cb) {
+    public void onLanded(Game g, PlaceInterface pi, Consumer0 cb) {
         cb.run();
     }
 
-    public void onPassingBy(Game g, AbstractPlayer.PlaceInterface pi, Consumer0 cb) {
+    public void onPassingBy(Game g, PlaceInterface pi, Consumer0 cb) {
         cb.run();
     }
     

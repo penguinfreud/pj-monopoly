@@ -14,7 +14,7 @@ public class CardSite extends Place {
     }
 
     @Override
-    public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Consumer0 cb) {
+    public void onLanded(Game g, PlaceInterface pi, Consumer0 cb) {
         Card card = Card.getRandomCard(g, true);
         if (card != null) {
             pi.addCard(g.getCurrentPlayer(), card);

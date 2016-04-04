@@ -76,7 +76,7 @@ public abstract class Property extends Place {
     }
 
     @Override
-    public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Consumer0 cb) {
+    public void onLanded(Game g, PlaceInterface pi, Consumer0 cb) {
         if (g.getState() == Game.State.TURN_LANDED) {
             AbstractPlayer p = g.getCurrentPlayer();
             if (owner == null) {

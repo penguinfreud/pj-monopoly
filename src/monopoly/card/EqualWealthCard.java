@@ -1,6 +1,7 @@
 package monopoly.card;
 
 import monopoly.AbstractPlayer;
+import monopoly.CardInterface;
 import monopoly.Game;
 import monopoly.util.Consumer0;
 
@@ -17,7 +18,7 @@ public class EqualWealthCard extends Card {
     }
 
     @Override
-    public void use(Game g, AbstractPlayer.CardInterface ci, Consumer0 cb) {
+    public void use(Game g, CardInterface ci, Consumer0 cb) {
         int sum = 0;
         List<AbstractPlayer> players = g.getPlayers();
         for (AbstractPlayer player: players) {

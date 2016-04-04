@@ -1,9 +1,6 @@
 package monopoly.place;
 
-import monopoly.AbstractPlayer;
-import monopoly.Game;
-import monopoly.Map;
-import monopoly.Place;
+import monopoly.*;
 import monopoly.util.Consumer0;
 import monopoly.util.Consumer2;
 
@@ -13,7 +10,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class News extends Place {
-    private static final List<Consumer2<Game, AbstractPlayer.PlaceInterface>> newsTypes = new ArrayList<>();
+    private static final List<Consumer2<Game, PlaceInterface>> newsTypes = new ArrayList<>();
 
     static {
         Map.registerPlaceReader("News", (r, sc) -> new News());
@@ -57,7 +54,7 @@ public class News extends Place {
     }
 
     @Override
-    public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Consumer0 cb) {
+    public void onLanded(Game g, PlaceInterface pi, Consumer0 cb) {
         newsTypes.get(ThreadLocalRandom.current().nextInt(newsTypes.size())).run(g, pi);
         cb.run();
     }

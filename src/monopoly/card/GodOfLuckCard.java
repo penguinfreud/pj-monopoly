@@ -1,6 +1,7 @@
 package monopoly.card;
 
 import monopoly.AbstractPlayer;
+import monopoly.CardInterface;
 import monopoly.Game;
 import monopoly.util.Consumer0;
 
@@ -16,7 +17,7 @@ public class GodOfLuckCard extends Card {
     }
 
     @Override
-    public void use(Game g, AbstractPlayer.CardInterface ci, Consumer0 cb) {
+    public void use(Game g, CardInterface ci, Consumer0 cb) {
         AbstractPlayer player = g.getCurrentPlayer();
         ci.addCard(player, Card.getRandomCard(g, false));
         new RentFree(g, player, ci, g.getConfig("god-of-luck-card-duration"));

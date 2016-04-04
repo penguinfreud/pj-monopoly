@@ -10,7 +10,7 @@ public class GUIPlace extends DelegatePlace {
         Map.registerPlaceReader("GUIPlace", (r, sc) -> new GUIPlace(sc.nextInt(), sc.nextInt(), r.readPlace(sc)));
     }
 
-    private int x, y;
+    private final int x, y;
 
     public GUIPlace(int x, int y, Place place) {
         super(place);

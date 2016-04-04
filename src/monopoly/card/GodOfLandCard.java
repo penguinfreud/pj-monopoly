@@ -1,6 +1,7 @@
 package monopoly.card;
 
 import monopoly.AbstractPlayer;
+import monopoly.CardInterface;
 import monopoly.Game;
 import monopoly.util.Consumer0;
 
@@ -16,7 +17,7 @@ public class GodOfLandCard extends Card {
     }
 
     @Override
-    public void use(Game g, AbstractPlayer.CardInterface ci, Consumer0 cb) {
+    public void use(Game g, CardInterface ci, Consumer0 cb) {
         Game.onTurn.addListener(g, new Consumer0() {
             private int duration = (Integer) g.getConfig("god-of-land-card-duration");
             private final AbstractPlayer player = g.getCurrentPlayer();

@@ -36,17 +36,11 @@ public class AIPlayer extends AbstractPlayer {
         if (coupons == 0) {
             cb.run(null);
         } else {
-            List<Card> cards = Card.getCards();
-            List<Card> buyableCards = new CopyOnWriteArrayList<>();
-            for (Card card: cards) {
-                if (card.getPrice(g) <= coupons) {
-                    buyableCards.add(card);
-                }
-            }
-            if (buyableCards.isEmpty()) {
+            Object[] buyableCards = Card.getCards().stream().filter((card) -> card.getPrice(g) <= coupons).toArray();
+            if (buyableCards.length == 0) {
                 cb.run(null);
             } else {
-                cb.run(buyableCards.get(ThreadLocalRandom.current().nextInt(buyableCards.size())));
+                cb.run((Card) buyableCards[ThreadLocalRandom.current().nextInt(buyableCards.length)]);
             }
         }
     }

@@ -16,7 +16,7 @@ public class MonsterCard extends Card {
     }
 
     @Override
-    public void use(Game g, AbstractPlayer.CardInterface ci, Consumer0 cb) {
+    public void use(Game g, CardInterface ci, Consumer0 cb) {
         Property prop = g.getCurrentPlayer().getCurrentPlace().asProperty();
         if (prop != null && prop instanceof Land) {
             Street street = ((Land) prop).getStreet();

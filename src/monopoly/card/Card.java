@@ -1,6 +1,6 @@
 package monopoly.card;
 
-import monopoly.AbstractPlayer;
+import monopoly.CardInterface;
 import monopoly.Game;
 import monopoly.GameObject;
 import monopoly.util.Consumer0;
@@ -31,7 +31,7 @@ public abstract class Card implements Serializable, GameObject {
         return (Integer) g.getConfig(uncamelize(name) + "-price");
     }
 
-    public void use(Game g, AbstractPlayer.CardInterface ci, Consumer0 cb) {
+    public void use(Game g, CardInterface ci, Consumer0 cb) {
         cb.run();
     }
 

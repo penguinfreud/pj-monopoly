@@ -11,14 +11,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class StockMarket implements Serializable {
-    private static Parasite<Game, StockMarket> markets = new Parasite<>(Game::onInit, StockMarket::new);
+    private static final Parasite<Game, StockMarket> markets = new Parasite<>(Game::onInit, StockMarket::new);
 
     public static StockMarket getMarket(Game g) {
         return markets.get(g);
     }
 
     public static class StockTrend {
-        private List<Double> prices = new CopyOnWriteArrayList<>();
+        private final List<Double> prices = new CopyOnWriteArrayList<>();
 
         private StockTrend(Game g) {
             Game.onTurn.addListener(g, () -> prices.add(calcNextPrice()));
@@ -55,6 +55,10 @@ public class StockMarket implements Serializable {
         if (!priceMap.containsKey(stock)) {
             priceMap.put(stock, new StockTrend(game));
         }
+    }
+
+    public boolean hasStock(Stock stock) {
+        return priceMap.containsKey(stock);
     }
 
     public StockTrend getPrices(Stock stock) {

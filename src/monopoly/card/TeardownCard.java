@@ -16,7 +16,7 @@ public class TeardownCard extends Card {
     }
 
     @Override
-    public void use(Game g, AbstractPlayer.CardInterface ci, Consumer0 cb) {
+    public void use(Game g, CardInterface ci, Consumer0 cb) {
         Place place = g.getCurrentPlayer().getCurrentPlace();
         Property prop = place.asProperty();
         if (prop != null && prop instanceof Land) {

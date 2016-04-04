@@ -1,6 +1,6 @@
 package monopoly.card;
 
-import monopoly.AbstractPlayer;
+import monopoly.CardInterface;
 import monopoly.Game;
 import monopoly.Place;
 import monopoly.util.Consumer0;
@@ -16,7 +16,7 @@ public class Roadblock extends Card {
         super("Roadblock");
     }
 
-    public void use(Game g, AbstractPlayer.CardInterface ci, Consumer0 cb) {
+    public void use(Game g, CardInterface ci, Consumer0 cb) {
         g.getCurrentPlayer().askForPlace(g, getName(), (place) -> {
             synchronized (ci.lock) {
                 int reach = g.getConfig("roadblock-reach");
