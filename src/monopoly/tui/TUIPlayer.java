@@ -16,7 +16,8 @@ public class TUIPlayer extends AbstractPlayer {
         setName(name);
     }
 
-    private boolean yesOrNo(Game g, String question) {
+    private boolean yesOrNo(String question) {
+        Game g = getGame();
         while (true) {
             System.out.print(question);
             String answer = ((TUIGame) g).getScanner().nextLine().toLowerCase();
@@ -29,10 +30,11 @@ public class TUIPlayer extends AbstractPlayer {
         }
     }
 
-    private int getInt(Game g, String question, int min, int max, int noop) {
+    private int getInt(String question, int min, int max, int noop) {
+        TUIGame g = (TUIGame) getGame();
         while (true) {
             System.out.print(question);
-            String str = ((TUIGame) g).getScanner().nextLine();
+            String str = g.getScanner().nextLine();
             if (str.toLowerCase().equals("q")) {
                 return noop;
             }
@@ -46,7 +48,8 @@ public class TUIPlayer extends AbstractPlayer {
         }
     }
 
-    private <T extends GameObject>T choose(Game g, String question, List<T> options, boolean nullable, Function1<T, String> stringifier) {
+    private <T extends GameObject>T choose(String question, List<T> options, boolean nullable, Function1<T, String> stringifier) {
+        TUIGame g = (TUIGame) getGame();
         while (true) {
             System.out.println(question);
             int l = options.size();
@@ -58,7 +61,7 @@ public class TUIPlayer extends AbstractPlayer {
             if (nullable) {
                 System.out.println("[" + (l + 1) + "] " + g.getText("return"));
             }
-            String strChoice = ((TUIGame) g).getScanner().nextLine();
+            String strChoice = g.getScanner().nextLine();
             try {
                 int choice = Integer.parseInt(strChoice);
                 if (choice >= 1 && choice <= l) {
@@ -71,8 +74,8 @@ public class TUIPlayer extends AbstractPlayer {
         }
     }
 
-    private <T extends GameObject>T choose(Game g, String question, List<T> options, boolean nullable) {
-        return choose(g, question, options, nullable, null);
+    private <T extends GameObject>T choose(String question, List<T> options, boolean nullable) {
+        return choose(question, options, nullable, null);
     }
 
     private int chooseInt(Game g, List<String> options, String prompt) {
@@ -94,43 +97,43 @@ public class TUIPlayer extends AbstractPlayer {
     }
 
     @Override
-    protected void askWhetherToBuyProperty(Game g, Consumer1<Boolean> cb) {
+    protected void askWhetherToBuyProperty(Consumer1<Boolean> cb) {
         Property property = getCurrentPlace().asProperty();
-        String question = g.format("ask_whether_to_buy_property", property.getName(), property.getPurchasePrice(), getCash());
-        cb.run(yesOrNo(g, question));
+        String question = getGame().format("ask_whether_to_buy_property", property.getName(), property.getPurchasePrice(), getCash());
+        cb.run(yesOrNo(question));
     }
 
     @Override
-    protected void askWhetherToUpgradeProperty(Game g, Consumer1<Boolean> cb) {
+    protected void askWhetherToUpgradeProperty(Consumer1<Boolean> cb) {
         Property property = getCurrentPlace().asProperty();
-        String question = g.format("ask_whether_to_upgrade_property", property.getName(), property.getUpgradePrice(), getCash());
-        cb.run(yesOrNo(g, question));
+        String question = getGame().format("ask_whether_to_upgrade_property", property.getName(), property.getUpgradePrice(), getCash());
+        cb.run(yesOrNo(question));
     }
 
     @Override
-    protected void askWhichPropertyToMortgage(Game g, Consumer1<Property> cb) {
-        String question = g.getText("ask_which_property_to_mortgage");
-        cb.run(choose(g, question, getProperties(), false));
+    protected void askWhichPropertyToMortgage(Consumer1<Property> cb) {
+        String question = getGame().getText("ask_which_property_to_mortgage");
+        cb.run(choose(question, getProperties(), false));
     }
 
     @Override
-    protected void askWhichCardToBuy(Game g, Consumer1<Card> cb) {
-        String question = g.format("ask_which_card_to_buy", getCoupons());
-        cb.run(choose(g, question, Card.getCards(), true));
+    protected void askWhichCardToBuy(Consumer1<Card> cb) {
+        String question = getGame().format("ask_which_card_to_buy", getCoupons());
+        cb.run(choose(question, Card.getCards(), true));
     }
 
     private void viewMap(Game g, boolean raw) {
         ((TUIMap) g.getMap()).print(g, System.out, raw);
     }
 
-    private Card _askWhichCardToUse(Game g) {
+    private Card _askWhichCardToUse() {
         List<Card> cards = getCards();
         if (cards.size() == 0) {
-            System.out.println(g.getText("you_have_no_card"));
+            System.out.println(getGame().getText("you_have_no_card"));
             return null;
         } else {
-            String question = g.getText("ask_which_card_to_use");
-            return choose(g, question, cards, true);
+            String question = getGame().getText("ask_which_card_to_use");
+            return choose(question, cards, true);
         }
     }
 
@@ -149,9 +152,10 @@ public class TUIPlayer extends AbstractPlayer {
         }
     }
 
-    private void viewPlace(Game g) {
+    private void viewPlace() {
+        Game g = getGame();
         while (true) {
-            int steps = getInt(g, g.getText("ask_which_place_to_view"), 0, 10, -1);
+            int steps = getInt(g.getText("ask_which_place_to_view"), 0, 10, -1);
             if (steps == -1) {
                 break;
             }
@@ -163,7 +167,8 @@ public class TUIPlayer extends AbstractPlayer {
         }
     }
 
-    private void viewPlayerInfo(Game g) {
+    private void viewPlayerInfo() {
+        Game g = getGame();
         System.out.println(g.getText("player_info_table_head"));
         for (AbstractPlayer player: g.getPlayers()) {
             System.out.println(g.format("player_info_table_row",
@@ -175,12 +180,13 @@ public class TUIPlayer extends AbstractPlayer {
         }
     }
 
-    private void tradeStock(Game g) {
+    private void tradeStock() {
 
     }
 
     @Override
-    protected void startTurn(Game g, Consumer0 cb) {
+    protected void startTurn(Consumer0 cb) {
+        Game g = getGame();
         String direction = g.getText(isReversed()? "anticlockwise": "clockwise");
         System.out.println(g.format("game_info", g.getDate(), getName(), direction));
 
@@ -204,9 +210,9 @@ public class TUIPlayer extends AbstractPlayer {
                     viewMap(g, true);
                     break;
                 case 2:
-                    Card card = _askWhichCardToUse(g);
+                    Card card = _askWhichCardToUse();
                     if (card != null) {
-                        useCard(g, card, () -> startTurn(g, cb));
+                        useCard(card, () -> startTurn(cb));
                         break loop;
                     } else {
                         break;
@@ -215,38 +221,40 @@ public class TUIPlayer extends AbstractPlayer {
                     checkAlert(g);
                     break;
                 case 4:
-                    viewPlace(g);
+                    viewPlace();
                     break;
                 case 5:
-                    viewPlayerInfo(g);
+                    viewPlayerInfo();
                     break;
                 case 6:
                     cb.run();
                     break loop;
                 case 7:
-                    giveUp(g);
+                    giveUp();
                     cb.run();
                     break loop;
                 case 8:
-                    tradeStock(g);
+                    tradeStock();
                     break;
             }
         }
     }
 
     @Override
-    protected void askHowMuchToDepositOrWithdraw(Game g, Consumer1<Integer> cb) {
+    protected void askHowMuchToDepositOrWithdraw(Consumer1<Integer> cb) {
+        Game g = getGame();
         int maxTransfer = g.getConfig("bank-max-transfer");
         String question = g.format("ask_how_much_to_deposit_or_withdraw", getCash(), getDeposit());
-        cb.run(getInt(g, question, -maxTransfer, maxTransfer, 0));
+        cb.run(getInt(question, -maxTransfer, maxTransfer, 0));
     }
 
     @Override
-    public void askForPlayer(Game g, String reason, Consumer1<AbstractPlayer> cb) {
+    public void askForPlayer(String reason, Consumer1<AbstractPlayer> cb) {
+        Game g = getGame();
         if (reason.equals("ReverseCard")) {
             String question = g.getText("ask_whom_to_reverse");
             List<AbstractPlayer> players = g.getPlayers();
-            AbstractPlayer player = choose(g, question, players, true);
+            AbstractPlayer player = choose(question, players, true);
             cb.run(player);
         } else {
             cb.run(null);
@@ -254,9 +262,10 @@ public class TUIPlayer extends AbstractPlayer {
     }
 
     @Override
-    public void askForPlace(Game g, String reason, Consumer1<Place> cb) {
+    public void askForPlace(String reason, Consumer1<Place> cb) {
+        Game g = getGame();
         if (reason.equals("ControlledDice")) {
-            int steps = getInt(g, g.format("ask_where_to_go", getCurrentPlace().getName()), 1, 6, 0);
+            int steps = getInt(g.format("ask_where_to_go", getCurrentPlace().getName()), 1, 6, 0);
             if (steps == 0) {
                 cb.run(null);
             }
@@ -266,7 +275,7 @@ public class TUIPlayer extends AbstractPlayer {
             }
             cb.run(place);
         } else if (reason.equals("Roadblock")) {
-            int steps = getInt(g, g.format("ask_where_to_set_roadblock", getCurrentPlace().getName()), -8, 8, -9);
+            int steps = getInt(g.format("ask_where_to_set_roadblock", getCurrentPlace().getName()), -8, 8, -9);
             if (steps == -9) {
                 cb.run(null);
             }

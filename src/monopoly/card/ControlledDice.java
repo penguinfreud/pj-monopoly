@@ -18,7 +18,7 @@ public class ControlledDice extends Card {
 
     public void use(Game g, CardInterface ci, Consumer0 cb) {
         AbstractPlayer player = g.getCurrentPlayer();
-        player.askForPlace(g, getName(), (place) -> {
+        player.askForPlace(getName(), (place) -> {
             synchronized (ci.lock) {
                 if (place == null) {
                     cb.run();

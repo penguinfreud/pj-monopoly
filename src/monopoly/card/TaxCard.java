@@ -20,7 +20,7 @@ public class TaxCard extends Card {
     @Override
     public void use(Game g, CardInterface ci, Consumer0 cb) {
         AbstractPlayer current = g.getCurrentPlayer();
-        current.askForPlayer(g, getName(), (player) -> {
+        current.askForPlayer(getName(), (player) -> {
             synchronized (ci.lock) {
                 int reach = g.getConfig("tax-card-reach");
                 if (player != null &&

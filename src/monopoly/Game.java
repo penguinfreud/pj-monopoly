@@ -125,6 +125,9 @@ public class Game implements Serializable, Host {
     public final void setPlayers(List<AbstractPlayer> playersList) throws Exception {
         synchronized (lock) {
             if (state == State.OVER) {
+                for (AbstractPlayer player: playersList) {
+                    player.setGame(this);
+                }
                 players.set(playersList);
             } else {
                 logger.log(Level.WARNING, WRONG_STATE);
@@ -169,7 +172,7 @@ public class Game implements Serializable, Host {
                 if (players.isNewCycle() && notFirst) {
                     _onCycle.get(this).trigger();
                 }
-                players.getCurrentPlayer().startTurn(this, this::startWalking);
+                players.getCurrentPlayer().startTurn(this::startWalking);
             } else {
                 logger.log(Level.WARNING, WRONG_STATE);
             }
@@ -215,7 +218,7 @@ public class Game implements Serializable, Host {
                 if (steps == 0) {
                     endWalking();
                 } else {
-                    players.getCurrentPlayer().startWalking(this, steps);
+                    players.getCurrentPlayer().startWalking(steps);
                 }
             }
         } else {
@@ -227,7 +230,7 @@ public class Game implements Serializable, Host {
         if (state == State.TURN_WALKING) {
             state = State.TURN_LANDED;
             _onLanded.get(this).trigger();
-            players.getCurrentPlayer().onLanded(this, this::endTurn);
+            players.getCurrentPlayer().onLanded(this::endTurn);
         } else {
             logger.log(Level.WARNING, WRONG_STATE);
         }

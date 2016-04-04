@@ -17,43 +17,43 @@ public final class PlaceInterface implements Serializable {
 
     public final void changeCash(AbstractPlayer player, int amount, String msg) {
         synchronized (game.lock) {
-            player.changeCash(game, amount, msg);
+            player.changeCash(amount, msg);
         }
     }
 
     public final void changeDeposit(AbstractPlayer player, int amount, String msg) {
         synchronized (game.lock) {
-            player.changeDeposit(game, amount, msg);
+            player.changeDeposit(amount, msg);
         }
     }
 
     public final void depositOrWithdraw(Consumer0 cb) {
         synchronized (game.lock) {
-            game.getCurrentPlayer().depositOrWithdraw(game, cb);
+            game.getCurrentPlayer().depositOrWithdraw(cb);
         }
     }
 
     public final void pay(AbstractPlayer player, AbstractPlayer receiver, int amount, String msg, Consumer0 cb) {
         synchronized (game.lock) {
-            player.pay(game, receiver, amount, msg, cb);
+            player.pay(receiver, amount, msg, cb);
         }
     }
 
     public final void addCoupons(AbstractPlayer player, int amount) {
         synchronized (game.lock) {
-            player.addCoupons(game, amount);
+            player.addCoupons(amount);
         }
     }
 
     public final void addCard(AbstractPlayer player, Card card) {
         synchronized (game.lock) {
-            player.addCard(game, card);
+            player.addCard(card);
         }
     }
 
     public final void buyCards(Consumer0 cb) {
         synchronized (game.lock) {
-            game.getCurrentPlayer().buyCards(game, cb);
+            game.getCurrentPlayer().buyCards(cb);
         }
     }
 }

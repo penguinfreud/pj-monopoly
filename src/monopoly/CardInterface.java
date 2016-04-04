@@ -42,19 +42,19 @@ public final class CardInterface implements Serializable {
 
     public final void buyProperty(Consumer0 cb) {
         synchronized (lock) {
-            game.getCurrentPlayer().buyProperty(game, cb, true);
+            game.getCurrentPlayer().buyProperty(cb, true);
         }
     }
 
     public final void changeCash(AbstractPlayer player, int amount, String msg) {
         synchronized (lock) {
-            player.changeCash(game, amount, msg);
+            player.changeCash(amount, msg);
         }
     }
 
     public final void changeDeposit(AbstractPlayer player, int amount, String msg) {
         synchronized (lock) {
-            player.changeDeposit(game, amount, msg);
+            player.changeDeposit(amount, msg);
         }
     }
 
@@ -78,13 +78,13 @@ public final class CardInterface implements Serializable {
 
     public final void addCard(AbstractPlayer player, Card card) {
         synchronized (lock) {
-            player.addCard(game, card);
+            player.addCard(card);
         }
     }
 
     public final void removeCard(AbstractPlayer player, Card card) {
         synchronized (lock) {
-            player.removeCard(game, card);
+            player.removeCard(card);
         }
     }
 

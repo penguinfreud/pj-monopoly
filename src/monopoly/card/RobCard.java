@@ -23,7 +23,7 @@ public class RobCard extends Card {
     @Override
     public void use(Game g, CardInterface ci, Consumer0 cb) {
         AbstractPlayer current = g.getCurrentPlayer();
-        current.askForPlayer(g, getName(), (player) -> {
+        current.askForPlayer(getName(), (player) -> {
             int reach = g.getConfig("rob-card-reach");
             if (player != null &&
                     Place.withinReach(current.getCurrentPlace(), player.getCurrentPlace(), reach) >= 0) {

@@ -16,27 +16,27 @@ public class AIPlayer extends AbstractPlayer {
     }
 
     @Override
-    public void askWhetherToBuyProperty(Game g, Consumer1<Boolean> cb) {
+    public void askWhetherToBuyProperty(Consumer1<Boolean> cb) {
         cb.run(true);
     }
 
     @Override
-    public void askWhetherToUpgradeProperty(Game g, Consumer1<Boolean> cb) {
+    public void askWhetherToUpgradeProperty(Consumer1<Boolean> cb) {
         cb.run(true);
     }
 
     @Override
-    public void askWhichPropertyToMortgage(Game g, Consumer1<Property> cb) {
+    public void askWhichPropertyToMortgage(Consumer1<Property> cb) {
         cb.run(getProperties().get(0));
     }
 
     @Override
-    protected void askWhichCardToBuy(Game g, Consumer1<Card> cb) {
+    protected void askWhichCardToBuy(Consumer1<Card> cb) {
         int coupons = getCoupons();
         if (coupons == 0) {
             cb.run(null);
         } else {
-            Object[] buyableCards = Card.getCards().stream().filter((card) -> card.getPrice(g) <= coupons).toArray();
+            Object[] buyableCards = Card.getCards().stream().filter((card) -> card.getPrice(getGame()) <= coupons).toArray();
             if (buyableCards.length == 0) {
                 cb.run(null);
             } else {
@@ -46,34 +46,34 @@ public class AIPlayer extends AbstractPlayer {
     }
 
     @Override
-    public void startTurn(Game g, Consumer0 cb) {
+    public void startTurn(Consumer0 cb) {
         List<Card> cards = getCards();
         if (cards.isEmpty()) {
             cb.run();
         } else {
             Card card = cards.get(ThreadLocalRandom.current().nextInt(cards.size()));
-            useCard(g, card, () -> startTurn(g, cb));
+            useCard(card, () -> startTurn(cb));
         }
     }
 
     @Override
-    public void askHowMuchToDepositOrWithdraw(Game g, Consumer1<Integer> cb) {
+    public void askHowMuchToDepositOrWithdraw(Consumer1<Integer> cb) {
         cb.run(-getDeposit());
     }
 
     @Override
-    public void askForPlayer(Game g, String reason, Consumer1<AbstractPlayer> cb) {
+    public void askForPlayer(String reason, Consumer1<AbstractPlayer> cb) {
         if (reason.equals("ReverseCard")) {
             cb.run(this);
         } else {
-            List<AbstractPlayer> players = g.getPlayers();
+            List<AbstractPlayer> players = getGame().getPlayers();
             AbstractPlayer first = players.get(0);
             cb.run(first == this? players.get(1): first);
         }
     }
 
     @Override
-    public void askForPlace(Game g, String reason, Consumer1<Place> cb) {
+    public void askForPlace(String reason, Consumer1<Place> cb) {
         Place cur = getCurrentPlace();
         if (reason.equals("Roadblock")) {
             cb.run(cur);

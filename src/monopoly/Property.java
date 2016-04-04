@@ -80,15 +80,15 @@ public abstract class Property extends Place {
         if (g.getState() == Game.State.TURN_LANDED) {
             AbstractPlayer p = g.getCurrentPlayer();
             if (owner == null) {
-                p.buyProperty(g, cb);
+                p.buyProperty(cb);
             } else if (owner == p) {
                 if (level < (Integer) g.getConfig("property-max-level")) {
-                    p.upgradeProperty(g, cb);
+                    p.upgradeProperty(cb);
                 } else {
                     cb.run();
                 }
             } else {
-                p.payRent(g, cb);
+                p.payRent(cb);
             }
         } else {
             logger.log(Level.WARNING, Game.WRONG_STATE);
