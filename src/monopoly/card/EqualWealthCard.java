@@ -10,7 +10,7 @@ import java.util.List;
 public class EqualWealthCard extends Card {
     static {
         registerCard(new EqualWealthCard());
-        Game.putDefaultConfig("equalwealthcard-price", 11);
+        Game.putDefaultConfig("equal-wealth-card-price", 11);
     }
 
     private EqualWealthCard() {

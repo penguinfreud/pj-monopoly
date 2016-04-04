@@ -8,7 +8,7 @@ import monopoly.util.Callback;
 public class MonsterCard extends Card {
     static {
         registerCard(new MonsterCard());
-        Game.putDefaultConfig("monstercard-price", 9);
+        Game.putDefaultConfig("monster-card-price", 9);
     }
 
     private MonsterCard() {

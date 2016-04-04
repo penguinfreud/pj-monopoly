@@ -8,7 +8,7 @@ import monopoly.util.Callback;
 public class GodOfFortuneCard extends Card {
     static {
         registerCard(new GodOfFortuneCard());
-        Game.putDefaultConfig("godoffortunecard-price", 13);
+        Game.putDefaultConfig("god-of-fortune-card-price", 13);
         Game.putDefaultConfig("god-of-fortune-card-award", 10000);
         Game.putDefaultConfig("god-of-fortune-card-duration", 8);
     }

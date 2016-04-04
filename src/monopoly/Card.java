@@ -25,7 +25,7 @@ public abstract class Card implements Serializable, GameObject {
     }
 
     public int getPrice(Game g) {
-        return (Integer) g.getConfig(name.toLowerCase() + "-price");
+        return (Integer) g.getConfig(uncamelize(name) + "-price");
     }
 
     public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
@@ -64,5 +64,21 @@ public abstract class Card implements Serializable, GameObject {
         } else {
             return cards.get(index);
         }
+    }
+
+    private String uncamelize(String str) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i<str.length(); i++) {
+            char ch = str.charAt(i);
+            if (ch >= 'A' && ch <= 'Z') {
+                if (i > 0) {
+                    sb.append('-');
+                }
+                sb.append((char) (ch - 'A' + 'a'));
+            } else {
+                sb.append(ch);
+            }
+        }
+        return sb.toString();
     }
 }

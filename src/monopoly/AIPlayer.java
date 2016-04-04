@@ -3,6 +3,8 @@ package monopoly;
 import monopoly.util.Callback;
 
 import java.util.List;
+import java.util.ListIterator;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class AIPlayer extends AbstractPlayer {
@@ -29,8 +31,23 @@ public class AIPlayer extends AbstractPlayer {
 
     @Override
     protected void askWhichCardToBuy(Game g, Callback<Card> cb) {
-        List<Card> cards = Card.getCards();
-        cb.run(g, cards.get(ThreadLocalRandom.current().nextInt(cards.size())));
+        int coupons = getCoupons();
+        if (coupons == 0) {
+            cb.run(g, null);
+        } else {
+            List<Card> cards = Card.getCards();
+            List<Card> buyableCards = new CopyOnWriteArrayList<>();
+            for (Card card: cards) {
+                if (card.getPrice(g) <= coupons) {
+                    buyableCards.add(card);
+                }
+            }
+            if (buyableCards.isEmpty()) {
+                cb.run(g, null);
+            } else {
+                cb.run(g, buyableCards.get(ThreadLocalRandom.current().nextInt(buyableCards.size())));
+            }
+        }
     }
 
     @Override

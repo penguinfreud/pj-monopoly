@@ -12,7 +12,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class RobCard extends Card {
     static {
         registerCard(new RobCard());
-        Game.putDefaultConfig("robcard-price", 7);
+        Game.putDefaultConfig("rob-card-price", 7);
         Game.putDefaultConfig("rob-card-reach", 5);
     }
 

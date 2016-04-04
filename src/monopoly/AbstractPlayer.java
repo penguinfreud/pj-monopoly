@@ -227,6 +227,7 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
         if (g.getState() == Game.State.TURN_LANDED) {
             if (rentFree) {
                 rentFree = false;
+                cb.run(g, null);
             } else {
                 Property prop = currentPlace.asProperty();
                 pay(g, prop.getOwner(), prop.getRent(), "pay_rent", cb);
@@ -286,7 +287,7 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
         if (receiver != null) {
             receiver.changeCash(g, Math.min(amount, getTotalPossessions() + amount), "get_" + msg);
         }
-        if (cash <= 0) {
+        if (cash < 0) {
             if (cash + deposit >= 0) {
                 deposit += cash;
                 cash = 0;

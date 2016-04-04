@@ -48,8 +48,8 @@ public class Main {
         players.clear();
         System.out.println(g.getText("ask_player_names"));
         Scanner scanner = ((TUIGame) g).getScanner();
-        players.add(new TUIPlayer(scanner.nextLine()));
-        players.add(new TUIPlayer(scanner.nextLine()));
+        players.add(new AIPlayer(scanner.nextLine()));
+        players.add(new AIPlayer(scanner.nextLine()));
         try {
             g.setPlayers(players);
             g.start();

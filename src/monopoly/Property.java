@@ -72,20 +72,26 @@ public abstract class Property extends Place {
 
     @Override
     public void onLanded(Game g, AbstractPlayer.PlaceInterface pi, Callback<Object> cb) {
+        //System.out.println("property landed");
         if (g.getState() == Game.State.TURN_LANDED) {
             AbstractPlayer p = g.getCurrentPlayer();
             if (owner == null) {
+                //System.out.println("buy");
                 p.buyProperty(g, cb);
             } else if (owner == p) {
                 if (level < (Integer) g.getConfig("property-max-level")) {
+                    //System.out.println("upgrade");
                     p.upgradeProperty(g, cb);
                 } else {
-                    System.out.println("max level reached");
+                    //System.out.println("max level");
                     cb.run(g, null);
                 }
             } else {
+                //System.out.println("pay rent");
                 p.payRent(g, cb);
             }
+        } else {
+            //System.out.println("state error");
         }
     }
     

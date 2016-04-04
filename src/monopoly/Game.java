@@ -220,14 +220,14 @@ public class Game {
 
     void stay() {
         if (data.state == State.TURN_STARTING) {
-            data.state = State.TURN_LANDED;
+            data.state = State.TURN_WALKING;
             data.players.next();
-            startTurn();
+            endWalking();
         }
     }
 
     void endWalking() {
-        if (data.state == State.TURN_WALKING || data.state == State.TURN_STARTING) {
+        if (data.state == State.TURN_WALKING) {
             data.state = State.TURN_LANDED;
             _onLanded.trigger(this, null);
             data.players.getCurrentPlayer().getCurrentPlace().onLanded(this, data.placeInterface, turnCb);

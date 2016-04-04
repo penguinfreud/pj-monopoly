@@ -8,7 +8,7 @@ import monopoly.util.Callback;
 public class TeardownCard extends Card {
     static {
         registerCard(new TeardownCard());
-        Game.putDefaultConfig("teardowncard-price", 11);
+        Game.putDefaultConfig("teardown-card-price", 11);
     }
 
     private TeardownCard() {
