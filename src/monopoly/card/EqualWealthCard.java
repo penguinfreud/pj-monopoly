@@ -27,7 +27,8 @@ public class EqualWealthCard extends Card {
         sum /= players.size();
         for (AbstractPlayer player: players) {
             int amount = sum - player.getCash();
-            ci.changeCash(player, amount, amount >= 0? "equal_wealth_get": "equal_wealth_give");
+            String msg = g.format(amount >= 0? "equal_wealth_get": "equal_wealth_give", player.getName(), amount);
+            ci.changeCash(player, amount, msg);
         }
         cb.run();
     }

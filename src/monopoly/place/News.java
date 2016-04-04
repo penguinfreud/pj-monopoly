@@ -16,20 +16,30 @@ public class News extends Place {
         Map.registerPlaceReader("News", (r, sc) -> new News());
         newsTypes.add((g, pi) -> {
             List<AbstractPlayer> players = getSortedPlayers(g);
-            pi.changeCash(players.get(0), getRandomAward(g), "news_poorest_player");
+            AbstractPlayer player = players.get(0);
+            int award = getRandomAward(g);
+            String msg = g.format("news_poorest_player", player.getName(), award);
+            pi.changeCash(player, award, msg);
         });
         newsTypes.add((g, pi) -> {
             List<AbstractPlayer> players = getSortedPlayers(g);
-            pi.changeCash(players.get(players.size() - 1), getRandomAward(g), "news_biggest_landlord");
+            AbstractPlayer player = players.get(players.size() - 1);
+            int award = getRandomAward(g);
+            String msg = g.format("news_biggest_landlord", player.getName(), award);
+            pi.changeCash(player, award, msg);
         });
         newsTypes.add((g, pi) -> {
             for (AbstractPlayer player: g.getPlayers()) {
-                pi.changeDeposit(player, player.getDeposit() / 10, "news_interest");
+                int amount = player.getDeposit() / 10;
+                String msg = g.format("news_interest", player.getName(), amount);
+                pi.changeDeposit(player, amount, msg);
             }
         });
         newsTypes.add((g, pi) -> {
             for (AbstractPlayer player: g.getPlayers()) {
-                pi.changeDeposit(player, -player.getDeposit() / 10, "news_tax");
+                int amount = player.getDeposit() / 10;
+                String msg = g.format("news_tax", player.getName(), amount);
+                pi.changeDeposit(player, -amount, msg);
             }
         });
 

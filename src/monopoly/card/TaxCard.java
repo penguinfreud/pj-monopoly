@@ -25,7 +25,9 @@ public class TaxCard extends Card {
                 int reach = g.getConfig("tax-card-reach");
                 if (player != null &&
                         Place.withinReach(current.getCurrentPlace(), player.getCurrentPlace(), reach) >= 0) {
-                    ci.changeDeposit(player, player.getDeposit() * 3 / 10, "pay_tax");
+                    int amount = player.getDeposit() * 3 / 10;
+                    String msg = g.format("pay_tax", player.getName(), amount);
+                    ci.changeDeposit(player, -amount, msg);
                 }
                 cb.run();
             }

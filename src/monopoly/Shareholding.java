@@ -51,7 +51,8 @@ public class Shareholding {
                 }
                 holding.amount += amount;
                 holding.cost += price;
-                player.changeCash(-price, "buy_stock");
+                String msg = g.format("buy_stock", player.getName(), stock.toString(g), amount);
+                player.changeCash(-price, msg);
             }
         } else {
             g.triggerException("stock_non_existent", stock.toString(g));
@@ -72,7 +73,8 @@ public class Shareholding {
                 int oldAmount = holding.amount;
                 holding.amount -= amount;
                 holding.cost = holding.cost * holding.amount / oldAmount;
-                player.changeCash(price, "sell_stock");
+                String msg = g.format("sell_stock", player.getName(), stock.toString(g), amount);
+                player.changeCash(price, msg);
             }
         } else {
             g.triggerException("stock_non_existent", stock.toString(g));

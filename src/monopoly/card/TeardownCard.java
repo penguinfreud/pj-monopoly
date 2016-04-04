@@ -24,7 +24,9 @@ public class TeardownCard extends Card {
             for (Land land: street.getLands()) {
                 AbstractPlayer owner = land.getOwner();
                 if (owner != null) {
-                    ci.changeCash(owner, land.getMortgagePrice() * 3/2, "teardown");
+                    int amount = land.getMortgagePrice() * 3/2;
+                    String msg = g.format("teardown", owner.getName(), amount);
+                    ci.changeCash(owner, amount, msg);
                     ci.resetOwner(land);
                 }
                 ci.resetLevel(land);

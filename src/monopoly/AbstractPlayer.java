@@ -263,7 +263,8 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
         int price = prop.getPurchasePrice();
         if (checkBuyingCondition(force)) {
             AbstractPlayer owner = prop.getOwner();
-            pay(owner, price, "buy_property", null);
+            String msg = game.format("buy_property", getName(), price, prop.toString(game));
+            pay(owner, price, msg, null);
             properties.add(prop);
             if (owner != null) {
                 owner.properties.remove(prop);
@@ -279,7 +280,8 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
             int price = prop.getUpgradePrice();
             if (prop.getOwner() == this) {
                 if (cash >= price) {
-                    changeCash(-price, "upgrade_property");
+                    String msg = game.format("upgrade_property", name, price, prop.toString(game), prop.getLevel() + 1);
+                    changeCash(-price, msg);
                     prop.upgrade(game);
                 } else {
                     game.triggerException("short_of_cash");
@@ -299,7 +301,10 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
                 cb.run();
             } else {
                 Property prop = currentPlace.asProperty();
-                pay(prop.getOwner(), prop.getRent(), "pay_rent", cb);
+                AbstractPlayer owner = prop.getOwner();
+                int rent = prop.getRent();
+                String msg = game.format("pay_rent", name, owner.name, rent, prop.toString(game));
+                pay(owner, rent, msg, cb);
             }
         } else {
             logger.log(Level.WARNING, Game.WRONG_STATE);
@@ -354,7 +359,7 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
         cash -= amount;
         _onMoneyChange.get(game).trigger(this, -amount, msg);
         if (receiver != null) {
-            receiver.changeCash(Math.min(amount, getTotalPossessions() + amount), "get_" + msg);
+            receiver.changeCash(Math.min(amount, getTotalPossessions() + amount), "");
         }
         if (cash < 0) {
             if (cash + deposit >= 0) {
