@@ -20,13 +20,17 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
 
     private static final Logger logger = Logger.getLogger(AbstractPlayer.class.getName());
 
-    private static final Parasite<Game, Event1<Triple<AbstractPlayer, Integer, String>>> _onMoneyChange = new Parasite<>(Game::onInit, Event1::New);
-    private static final Parasite<Game, Event2<AbstractPlayer, Integer>> _onGetCoupons = new Parasite<>(Game::onInit, Event2::New);
-    private static final Parasite<Game, Event2<AbstractPlayer, Card>> _onGetCard = new Parasite<>(Game::onInit, Event2::New);
+    private static final Parasite<Game, Event3<AbstractPlayer, Integer, String>> _onMoneyChange = new Parasite<>(Game::onInit, Event3::New);
+    private static final Parasite<Game, Event3<AbstractPlayer, Boolean, Property>> _onPropertyChange = new Parasite<>(Game::onInit, Event3::New);
+    private static final Parasite<Game, Event2<AbstractPlayer, Integer>> _onCouponChange = new Parasite<>(Game::onInit, Event2::New);
+    private static final Parasite<Game, Event3<AbstractPlayer, Boolean, Card>> _onCardChange = new Parasite<>(Game::onInit, Event3::New);
+    private static final Parasite<Game, Event3<AbstractPlayer, Stock, Integer>> _onStockHoldingChange = new Parasite<>(Game::onInit, Event3::New);
 
-    public static final EventWrapper<Game, Consumer1<Triple<AbstractPlayer, Integer, String>>> onMoneyChange = new EventWrapper<>(_onMoneyChange);
-    public static final EventWrapper<Game, Consumer2<AbstractPlayer, Integer>> onGetCoupons = new EventWrapper<>(_onGetCoupons);
-    public static final EventWrapper<Game, Consumer2<AbstractPlayer, Card>> onGetCard = new EventWrapper<>(_onGetCard);
+    public static final EventWrapper<Game, Consumer3<AbstractPlayer, Integer, String>> onMoneyChange = new EventWrapper<>(_onMoneyChange);
+    public static final EventWrapper<Game, Consumer3<AbstractPlayer, Boolean, Property>> onPropertyChange = new EventWrapper<>(_onPropertyChange);
+    public static final EventWrapper<Game, Consumer2<AbstractPlayer, Integer>> onCouponChange = new EventWrapper<>(_onCouponChange);
+    public static final EventWrapper<Game, Consumer3<AbstractPlayer, Boolean, Card>> onCardChange = new EventWrapper<>(_onCardChange);
+    public static final EventWrapper<Game, Consumer3<AbstractPlayer, Stock, Integer>> onStockHoldingChange = new EventWrapper<>(_onStockHoldingChange);
 
     private Game game;
     private String name;
@@ -126,6 +130,7 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
             if (game.getState() == Game.State.TURN_STARTING) {
                 if (cards.contains(card)) {
                     cards.remove(card);
+                    _onCardChange.get(game).trigger(this, false, card);
                     card.use(game, CardInterface.parasites.get(game), cb);
                 } else {
                     game.triggerException("you_do_not_have_this_card");
@@ -145,6 +150,7 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
         synchronized (game.lock) {
             if (game.getState() == Game.State.TURN_STARTING) {
                 shareholding.buy(game, stock, amount);
+                _onStockHoldingChange.get(game).trigger(this, stock, amount);
             }
         }
     }
@@ -153,6 +159,7 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
         synchronized (game.lock) {
             if (game.getState() == Game.State.TURN_STARTING) {
                 shareholding.sell(game, stock, amount);
+                _onStockHoldingChange.get(game).trigger(this, stock, -amount);
             }
         }
     }
@@ -176,7 +183,7 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
     final void changeCash(int amount, String msg) {
         if (cash + amount >= 0) {
             cash += amount;
-            _onMoneyChange.get(game).trigger(new Triple<>(this, amount, msg));
+            _onMoneyChange.get(game).trigger(this, amount, msg);
         } else {
             game.triggerException("short_of_cash");
         }
@@ -185,7 +192,7 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
     final void changeDeposit(int amount, String msg) {
         if (deposit + amount >= 0) {
             deposit += amount;
-            _onMoneyChange.get(game).trigger(new Triple<>(this, amount, msg));
+            _onMoneyChange.get(game).trigger(this, amount, msg);
         } else {
             game.triggerException("short_of_deposit");
         }
@@ -210,6 +217,7 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
                     cash += prop.getMortgagePrice();
                     properties.remove(prop);
                     prop.resetOwner();
+                    _onPropertyChange.get(game).trigger(this, false, prop);
                 } else {
                     game.triggerException("not_your_property");
                 }
@@ -261,6 +269,7 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
                 owner.properties.remove(prop);
             }
             prop.changeOwner(this);
+            _onPropertyChange.get(game).trigger(this, true, prop);
         }
     }
 
@@ -343,7 +352,7 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
 
     final void pay(AbstractPlayer receiver, int amount, String msg, Consumer0 cb) {
         cash -= amount;
-        _onMoneyChange.get(game).trigger(new Triple<>(this, -amount, msg));
+        _onMoneyChange.get(game).trigger(this, -amount, msg);
         if (receiver != null) {
             receiver.changeCash(Math.min(amount, getTotalPossessions() + amount), "get_" + msg);
         }
@@ -370,22 +379,24 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
                 owner.properties.remove(prop);
             }
             prop.changeOwner(this);
+            _onPropertyChange.get(game).trigger(this, true, prop);
         }
     }
 
     final void addCoupons(int amount) {
         coupons += amount;
-        _onGetCoupons.get(game).trigger(this, amount);
+        _onCouponChange.get(game).trigger(this, amount);
     }
 
     final void addCard(Card card) {
         cards.add(card);
-        _onGetCard.get(game).trigger(this, card);
+        _onCardChange.get(game).trigger(this, true, card);
     }
 
     final void removeCard(Card card) {
         if (cards.contains(card)) {
             cards.remove(card);
+            _onCardChange.get(game).trigger(this, false, card);
         }
     }
 
