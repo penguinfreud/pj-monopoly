@@ -6,6 +6,8 @@ import java.io.*;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 class GameData implements Serializable {
@@ -38,7 +40,10 @@ class GameData implements Serializable {
 }
 
 public class Game {
-    public enum State {
+    private static final Logger logger = Logger.getLogger(Game.class.getName());
+    private static final String WRONG_STATE = "wrong state";
+
+    enum State {
         OVER, STARTING, TURN_STARTING, TURN_WALKING, TURN_LANDED
     }
 
@@ -92,7 +97,7 @@ public class Game {
         }
     }
 
-    public void putConfig(String key, Object value) {
+    protected void putConfig(String key, Object value) {
         synchronized (lock) {
             data.config.put(key, value);
             if (key.equals("bundle-name") || key.equals("locale")) {
@@ -108,7 +113,7 @@ public class Game {
             e.printStackTrace();
             return "";
         } catch(MissingResourceException e) {
-            System.err.println("Unknown key: " + key);
+            logger.log(Level.SEVERE, "Unknown key: " + key);
             return "";
         }
     }
@@ -125,6 +130,8 @@ public class Game {
         synchronized (lock) {
             if (data.state == State.OVER) {
                 data.map = map;
+            } else {
+                logger.log(Level.WARNING, WRONG_STATE);
             }
         }
     }
@@ -133,6 +140,8 @@ public class Game {
         synchronized (lock) {
             if (data.state == State.OVER) {
                 data.players.set(playersList);
+            } else {
+                logger.log(Level.WARNING, WRONG_STATE);
             }
         }
     }
@@ -156,6 +165,8 @@ public class Game {
                 data.players.init(this);
                 _onGameStart.trigger(this, null);
                 startTurn();
+            } else {
+                logger.log(Level.WARNING, WRONG_STATE);
             }
         }
     }
@@ -163,16 +174,19 @@ public class Game {
     private void startTurn() {
         if (data.players.count() <= 1) {
             endGame();
-        }
-        boolean notFirst = data.state == State.TURN_LANDED;
-        if (data.state == State.STARTING || notFirst) {
-            data.state = State.TURN_STARTING;
-            data.hadBankrupt = false;
-            _onTurn.trigger(this, null);
-            if (data.players.isNewCycle() && notFirst) {
-                _onCycle.trigger(this, null);
+        } else {
+            boolean notFirst = data.state == State.TURN_LANDED;
+            if (data.state == State.STARTING || notFirst) {
+                data.state = State.TURN_STARTING;
+                data.hadBankrupt = false;
+                _onTurn.trigger(this, null);
+                if (data.players.isNewCycle() && notFirst) {
+                    _onCycle.trigger(this, null);
+                }
+                data.players.getCurrentPlayer().startTurn(this, (g, o) -> g.startWalking());
+            } else {
+                logger.log(Level.WARNING, WRONG_STATE);
             }
-            data.players.getCurrentPlayer().startTurn(this);
         }
     }
 
@@ -192,6 +206,8 @@ public class Game {
                     } while (tailRecursion);
                     inEndTurn = false;
                 }
+            } else {
+                logger.log(Level.WARNING, WRONG_STATE);
             }
         }
     };
@@ -199,30 +215,27 @@ public class Game {
     private boolean inEndTurn = false;
     private boolean tailRecursion = false;
 
-    private static final Callback<Object> turnCb = (g, o) -> {
-        g.endTurn();
-    };
+    private static final Callback<Object> turnCb = (g, o) -> g.endTurn();
 
-    void rollTheDice() {
+    void startWalking() {
         int dice = ThreadLocalRandom.current().nextInt(getConfig("dice-sides")) + 1;
-        if (data.players.count() <= 1) {
-            endGame();
-        }
         startWalking(dice);
     }
 
     void startWalking(int steps) {
         if (data.state == State.TURN_STARTING) {
             data.state = State.TURN_WALKING;
-            data.players.getCurrentPlayer().startWalking(this, steps);
-        }
-    }
-
-    void stay() {
-        if (data.state == State.TURN_STARTING) {
-            data.state = State.TURN_WALKING;
-            data.players.next();
-            endWalking();
+            if (data.players.count() <= 1) {
+                endGame();
+            } else {
+                if (steps == 0) {
+                    endWalking();
+                } else {
+                    data.players.getCurrentPlayer().startWalking(this, steps);
+                }
+            }
+        } else {
+            logger.log(Level.WARNING, WRONG_STATE);
         }
     }
 
@@ -231,6 +244,8 @@ public class Game {
             data.state = State.TURN_LANDED;
             _onLanded.trigger(this, null);
             data.players.getCurrentPlayer().getCurrentPlace().onLanded(this, data.placeInterface, turnCb);
+        } else {
+            logger.log(Level.WARNING, WRONG_STATE);
         }
     }
 
@@ -246,6 +261,8 @@ public class Game {
         if (data.state != State.OVER) {
             data.state = State.OVER;
             _onGameOver.trigger(this, null);
+        } else {
+            logger.log(Level.WARNING, WRONG_STATE);
         }
     }
 
@@ -286,6 +303,8 @@ public class Game {
             data.players.remove(player);
             data.hadBankrupt = true;
             _onBankrupt.trigger(this, player);
+        } else {
+            logger.log(Level.WARNING, WRONG_STATE);
         }
     }
 

@@ -177,7 +177,7 @@ public class TUIPlayer extends AbstractPlayer {
     }
 
     @Override
-    protected void askWhichCardToUse(Game g, Callback<Card> cb) {
+    protected void startTurn(Game g, Callback<Object> cb) {
         String direction = g.getText(isReversed()? "anticlockwise": "clockwise");
         System.out.println(g.format("game_info", g.getDate(), getName(), direction));
 
@@ -203,7 +203,7 @@ public class TUIPlayer extends AbstractPlayer {
                 case 2:
                     Card card = _askWhichCardToUse(g);
                     if (card != null) {
-                        cb.run(g, card);
+                        useCard(g, card, (_g, o) -> startTurn(_g, cb));
                         break loop;
                     } else {
                         break;
@@ -233,7 +233,7 @@ public class TUIPlayer extends AbstractPlayer {
 
     @Override
     protected void askHowMuchToDepositOrWithdraw(Game g, Callback<Integer> cb) {
-        int maxTransfer = (Integer) g.getConfig("bank-max-transfer");
+        int maxTransfer = g.getConfig("bank-max-transfer");
         String question = g.format("ask_how_much_to_deposit_or_withdraw", getCash(), getDeposit());
         cb.run(g, getInt(g, question, -maxTransfer, maxTransfer, 0));
     }

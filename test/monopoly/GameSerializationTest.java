@@ -54,7 +54,7 @@ public class GameSerializationTest {
 
         game = new Game() {
             @Override
-            void rollTheDice() {
+            void startWalking() {
                 if (turn == 0) {
                     turn++;
                     startWalking(1);

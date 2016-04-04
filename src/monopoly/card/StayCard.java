@@ -17,6 +17,6 @@ public class StayCard extends Card {
 
     @Override
     public void use(Game g, AbstractPlayer.CardInterface ci, Callback<Object> cb) {
-        ci.stay(g);
+        ci.walk(g, 0);
     }
 }

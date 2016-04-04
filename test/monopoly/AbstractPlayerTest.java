@@ -7,6 +7,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -15,13 +16,12 @@ import static org.junit.Assert.*;
 public class AbstractPlayerTest {
     private AbstractPlayer player = new AIPlayer() {
         @Override
-        public void askWhichCardToUse(Game g, Callback<Card> cb) {
+        public void startTurn(Game g, Callback<Object> cb) {
             askWhichCardToUseCalled = true;
             if (!doNotUseCard) {
-                cb.run(g, card);
-            } else {
-                cb.run(g, null);
+                useCard(g, card, (_g, o) -> {});
             }
+            cb.run(g, null);
         }
 
         @Override
@@ -37,6 +37,7 @@ public class AbstractPlayerTest {
         }
     };
     private AbstractPlayer anotherPlayer = new AIPlayer();
+    private List<AbstractPlayer> players = new ArrayList<>();
 
     private Street street = new Street("street");
     private Property prop = new Land("Prop", 10, street) {};
@@ -51,11 +52,6 @@ public class AbstractPlayerTest {
         @Override
         public State getState() {
             return gameState;
-        }
-
-        @Override
-        void rollTheDice() {
-            rollTheDiceCalled = true;
         }
 
         @Override
@@ -79,7 +75,6 @@ public class AbstractPlayerTest {
     private boolean askWhetherToBuyPropertyCalled = false,
             askWhetherToUpgradePropertyCalled = false,
             askWhichCardToUseCalled = false,
-            rollTheDiceCalled = false,
             bankruptTriggered = false,
             doNotUseCard = false;
     private Card cardUsed;
@@ -96,17 +91,21 @@ public class AbstractPlayerTest {
         map.addPlace(prop);
         map.addPlace(anotherProp);
         g.setMap(map);
+
+        players.add(player);
+        players.add(player);
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
+        g.setPlayers(players);
         player.init(g);
         anotherPlayer.init(g);
+
         moneyChangeAmount = 0;
         askWhetherToBuyPropertyCalled = false;
         askWhetherToUpgradePropertyCalled = false;
         askWhichCardToUseCalled = false;
-        rollTheDiceCalled = false;
         bankruptTriggered = false;
         doNotUseCard = false;
         cardUsed = null;
@@ -142,31 +141,25 @@ public class AbstractPlayerTest {
     @Test
     public synchronized void testStartTurn() {
         gameState = Game.State.TURN_STARTING;
-
         doNotUseCard = true;
-        player.startTurn(g);
+        player.startTurn(g, cb);
         assertTrue(askWhichCardToUseCalled);
-        assertTrue(rollTheDiceCalled);
         assertNull(cardUsed);
 
         askWhichCardToUseCalled = false;
-        rollTheDiceCalled = false;
         cardUsed = null;
         pi.addCard(player, g, card);
         doNotUseCard = false;
-        player.startTurn(g);
+        player.startTurn(g, cb);
         assertTrue(askWhichCardToUseCalled);
-        assertFalse(rollTheDiceCalled);
         assertEquals(card, cardUsed);
 
         askWhichCardToUseCalled = false;
-        rollTheDiceCalled = false;
         cardUsed = null;
         pi.addCard(player, g, card);
         doNotUseCard = true;
-        player.startTurn(g);
+        player.startTurn(g, cb);
         assertTrue(askWhichCardToUseCalled);
-        assertTrue(rollTheDiceCalled);
         assertNull(cardUsed);
     }
 

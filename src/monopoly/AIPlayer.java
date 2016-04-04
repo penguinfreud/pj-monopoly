@@ -3,7 +3,6 @@ package monopoly;
 import monopoly.util.Callback;
 
 import java.util.List;
-import java.util.ListIterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -51,18 +50,19 @@ public class AIPlayer extends AbstractPlayer {
     }
 
     @Override
-    public void askWhichCardToUse(Game g, Callback<Card> cb) {
-        List<Card> cards = Card.getCards();
+    public void startTurn(Game g, Callback<Object> cb) {
+        List<Card> cards = getCards();
         if (cards.isEmpty()) {
             cb.run(g, null);
         } else {
-            cb.run(g, cards.get(ThreadLocalRandom.current().nextInt(cards.size())));
+            Card card = cards.get(ThreadLocalRandom.current().nextInt(cards.size()));
+            useCard(g, card, (_g, o) -> startTurn(_g, cb));
         }
     }
 
     @Override
     public void askHowMuchToDepositOrWithdraw(Game g, Callback<Integer> cb) {
-        cb.run(g, 0);
+        cb.run(g, -getDeposit());
     }
 
     @Override
