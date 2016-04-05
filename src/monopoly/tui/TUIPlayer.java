@@ -2,12 +2,16 @@ package monopoly.tui;
 
 import monopoly.*;
 import monopoly.card.Card;
+import monopoly.stock.Stock;
+import monopoly.stock.StockMarket;
 import monopoly.util.Consumer0;
 import monopoly.util.Consumer1;
 import monopoly.util.Function1;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.text.DecimalFormat;
+import java.util.*;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class TUIPlayer extends AbstractPlayer {
     public TUIPlayer() {}
@@ -48,19 +52,20 @@ public class TUIPlayer extends AbstractPlayer {
         }
     }
 
-    private <T extends GameObject>T choose(String question, List<T> options, boolean nullable, Function1<T, String> stringifier) {
+    private <T> T choose(String question, List<T> options, boolean nullable, Function1<T, String> stringifier) {
         TUIGame g = (TUIGame) getGame();
         while (true) {
             System.out.println(question);
             int l = options.size();
             for (int i = 0; i<l; i++) {
                 T item = options.get(i);
-                String option = stringifier == null? item.toString(g): stringifier.run(item);
+                String option = stringifier.run(item);
                 System.out.println("[" + (i + 1) + "] " + option);
             }
             if (nullable) {
                 System.out.println("[" + (l + 1) + "] " + g.getText("return"));
             }
+            System.out.print(g.getText("please_choose"));
             String strChoice = g.getScanner().nextLine();
             try {
                 int choice = Integer.parseInt(strChoice);
@@ -75,17 +80,18 @@ public class TUIPlayer extends AbstractPlayer {
     }
 
     private <T extends GameObject>T choose(String question, List<T> options, boolean nullable) {
-        return choose(question, options, nullable, null);
+        return choose(question, options, nullable, (item) -> item.toString(getGame()));
     }
 
-    private int chooseInt(Game g, List<String> options, String prompt) {
+    private int chooseInt(List<String> options) {
+        TUIGame g = (TUIGame) getGame();
         while (true) {
             int l = options.size();
             for (int i = 0; i<l; i++) {
                 System.out.println("[" + (i + 1) + "] " + options.get(i));
             }
-            System.out.print(prompt);
-            String strChoice = ((TUIGame) g).getScanner().nextLine();
+            System.out.print(g.getText("please_choose"));
+            String strChoice = g.getScanner().nextLine();
             try {
                 int choice = Integer.parseInt(strChoice);
                 if (choice >= 1 && choice <= l) {
@@ -126,14 +132,19 @@ public class TUIPlayer extends AbstractPlayer {
         ((TUIMap) g.getMap()).print(g, System.out, raw);
     }
 
-    private Card _askWhichCardToUse() {
+    private void _askWhichCardToUse() {
         List<Card> cards = getCards();
         if (cards.size() == 0) {
             System.out.println(getGame().getText("you_have_no_card"));
-            return null;
         } else {
-            String question = getGame().getText("ask_which_card_to_use");
-            return choose(question, cards, true);
+            while (true) {
+                String question = getGame().getText("ask_which_card_to_use");
+                Card card = choose(question, cards, true);
+                if (card == null) {
+                    break;
+                }
+                useCard(card, () -> {});
+            }
         }
     }
 
@@ -180,29 +191,122 @@ public class TUIPlayer extends AbstractPlayer {
         }
     }
 
-    private void tradeStock() {
+    private final DecimalFormat df = new DecimalFormat("#,##0.00");
 
+    private String formatStockPrice(double price) {
+        if (Double.isNaN(price)) {
+            return getGame().getText("n/a");
+        } else {
+            return df.format(price);
+        }
+    }
+
+    private void menuViewStock() {
+        Game g = getGame();
+        Set<Map.Entry<Stock, StockMarket.StockTrend>> stocks = StockMarket.getMarket(g).getStocks();
+        for (Map.Entry<Stock, StockMarket.StockTrend>entry: stocks) {
+            StockMarket.StockTrend trend = entry.getValue();
+            System.out.println(g.format("stock_table_row", entry.getKey().toString(g),
+                    formatStockPrice(trend.getPrice(-4)),
+                    formatStockPrice(trend.getPrice(-3)),
+                    formatStockPrice(trend.getPrice(-2)),
+                    formatStockPrice(trend.getPrice(-1)),
+                    formatStockPrice(trend.getPrice(0))));
+        }
+    }
+
+    private String formatStockItem(Map.Entry<Stock, StockMarket.StockTrend> entry) {
+        Stock stock = entry.getKey();
+        double price = entry.getValue().getPrice(0);
+        return getGame().format("stock_item", stock.toString(getGame()), formatStockPrice(price), getHolding(stock));
+    }
+
+    private void menuBuyStock() {
+        Game g = getGame();
+        Set<Map.Entry<Stock, StockMarket.StockTrend>> stocks = StockMarket.getMarket(g).getStocks();
+        while (true) {
+            String question = g.format("ask_which_stock_to_buy", getCash());
+            Map.Entry<Stock, StockMarket.StockTrend> choice =
+                    choose(question, new CopyOnWriteArrayList<>(stocks), true, this::formatStockItem);
+
+            if (choice == null) {
+                break;
+            }
+            int max = g.getConfig("stock-max-trade");
+            int amount = getInt(g.getText("ask_how_much_to_buy"), 0, max, -1);
+            if (amount > 0) {
+                buyStock(choice.getKey(), amount);
+            }
+        }
+    }
+
+    private void menuSellStock() {
+        Game g = getGame();
+        Set<Map.Entry<Stock, StockMarket.StockTrend>> stocks = StockMarket.getMarket(g).getStocks();
+        while (true) {
+            String question = g.format("ask_which_stock_to_sell", getCash());
+            Map.Entry<Stock, StockMarket.StockTrend> choice =
+                    choose(question, new CopyOnWriteArrayList<>(stocks), true, this::formatStockItem);
+            if (choice == null) {
+                break;
+            }
+            int max = g.getConfig("stock-max-trade");
+            int amount = getInt(g.getText("ask_how_much_to_sell"), 0, max, -1);
+            if (amount > 0) {
+                buyStock(choice.getKey(), amount);
+            }
+        }
+    }
+
+    private void tradeStock() {
+        loop: while (true) {
+            switch (chooseInt(stockMenuItems)) {
+                case 0:
+                    menuViewStock();
+                    break;
+                case 1:
+                    menuBuyStock();
+                    break;
+                case 2:
+                    menuSellStock();
+                    break;
+                case 3:
+                    break loop;
+            }
+        }
+    }
+
+    private final List<String> gameMenuItems = new ArrayList<>();
+    private final List<String> stockMenuItems = new ArrayList<>();
+
+    @Override
+    protected void setGame(Game game) {
+        super.setGame(game);
+        gameMenuItems.clear();
+        gameMenuItems.add(game.getText("menu_view_map"));
+        gameMenuItems.add(game.getText("menu_view_raw_map"));
+        gameMenuItems.add(game.getText("menu_use_card"));
+        gameMenuItems.add(game.getText("menu_check_alert"));
+        gameMenuItems.add(game.getText("menu_view_place"));
+        gameMenuItems.add(game.getText("menu_player_info"));
+        gameMenuItems.add(game.getText("menu_roll_the_dice"));
+        gameMenuItems.add(game.getText("menu_give_up"));
+        gameMenuItems.add(game.getText("menu_stock"));
+        stockMenuItems.add(game.getText("menu_view_stock"));
+        stockMenuItems.add(game.getText("menu_buy_stock"));
+        stockMenuItems.add(game.getText("menu_sell_stock"));
+        stockMenuItems.add(game.getText("return"));
     }
 
     @Override
     protected void startTurn(Consumer0 cb) {
         Game g = getGame();
+        viewMap(g, false);
         String direction = g.getText(isReversed()? "anticlockwise": "clockwise");
         System.out.println(g.format("game_info", g.getDate(), getName(), direction));
 
-        List<String> gameMenuItems = new ArrayList<>();
-        gameMenuItems.add(g.getText("menu_view_map"));
-        gameMenuItems.add(g.getText("menu_view_raw_map"));
-        gameMenuItems.add(g.getText("menu_use_card"));
-        gameMenuItems.add(g.getText("menu_check_alert"));
-        gameMenuItems.add(g.getText("menu_view_place"));
-        gameMenuItems.add(g.getText("menu_player_info"));
-        gameMenuItems.add(g.getText("menu_roll_the_dice"));
-        gameMenuItems.add(g.getText("menu_give_up"));
-        gameMenuItems.add(g.getText("menu_stock"));
-
         loop: while (true) {
-            switch (chooseInt(g, gameMenuItems, g.getText("please_choose"))) {
+            switch (chooseInt(gameMenuItems)) {
                 case 0:
                     viewMap(g, false);
                     break;
@@ -210,13 +314,8 @@ public class TUIPlayer extends AbstractPlayer {
                     viewMap(g, true);
                     break;
                 case 2:
-                    Card card = _askWhichCardToUse();
-                    if (card != null) {
-                        useCard(card, () -> startTurn(cb));
-                        break loop;
-                    } else {
-                        break;
-                    }
+                    _askWhichCardToUse();
+                    break loop;
                 case 3:
                     checkAlert(g);
                     break;

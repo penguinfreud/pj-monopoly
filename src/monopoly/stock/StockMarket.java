@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -17,7 +18,7 @@ public class StockMarket implements Serializable {
         return markets.get(g);
     }
 
-    public static class StockTrend {
+    public static final class StockTrend {
         private final List<Double> prices = new CopyOnWriteArrayList<>();
 
         private StockTrend(Game g) {
@@ -34,6 +35,7 @@ public class StockMarket implements Serializable {
         }
 
         private double calcNextPrice() {
+            System.out.println("calcprice");
             ThreadLocalRandom random = ThreadLocalRandom.current();
             if (prices.isEmpty()) {
                 return random.nextDouble(50.0) + 10.0;
@@ -49,23 +51,24 @@ public class StockMarket implements Serializable {
 
     private StockMarket(Game g) {
         game = g;
-    }
-
-    public void addStock(Stock stock) {
-        if (!priceMap.containsKey(stock)) {
-            priceMap.put(stock, new StockTrend(game));
+        for (Stock stock: stocks) {
+            priceMap.put(stock, new StockTrend(g));
         }
     }
 
-    public boolean hasStock(Stock stock) {
+    public final boolean hasStock(Stock stock) {
         return priceMap.containsKey(stock);
     }
 
-    public StockTrend getPrices(Stock stock) {
+    public final Set<Map.Entry<Stock, StockTrend>> getStocks() {
+        return priceMap.entrySet();
+    }
+
+    public final StockTrend getPrices(Stock stock) {
         return priceMap.get(stock);
     }
 
-    public double getPrice(Stock stock, int daysAgo) {
+    public final double getPrice(Stock stock, int daysAgo) {
         StockTrend prices = priceMap.get(stock);
         if (prices == null) {
             return Double.NaN;
@@ -73,7 +76,13 @@ public class StockMarket implements Serializable {
         return prices.getPrice(daysAgo);
     }
 
-    public double getPrice(Stock stock) {
+    public final double getPrice(Stock stock) {
         return getPrice(stock, 0);
+    }
+
+    private static final List<Stock> stocks = new CopyOnWriteArrayList<>();
+
+    public static void addStock(Stock stock) {
+        stocks.add(stock);
     }
 }

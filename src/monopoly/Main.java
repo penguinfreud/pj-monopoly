@@ -1,5 +1,7 @@
 package monopoly;
 
+import monopoly.stock.Stock;
+import monopoly.stock.StockMarket;
 import monopoly.tui.TUIGame;
 import monopoly.tui.TUIPlayer;
 
@@ -33,6 +35,11 @@ public class Main {
         Class.forName("monopoly.card.RobCard");
         Class.forName("monopoly.card.GodOfFortuneCard");
 
+        StockMarket.addStock(new Stock("baidu"));
+        StockMarket.addStock(new Stock("google"));
+        StockMarket.addStock(new Stock("facebook"));
+        StockMarket.addStock(new Stock("microsoft"));
+
         Map map = Map.readMap(Main.class.getResourceAsStream("/maps/default_tui.map"));
 
         players = new ArrayList<>();
@@ -49,8 +56,8 @@ public class Main {
         players.clear();
         System.out.println(game.getText("ask_player_names"));
         Scanner scanner = game.getScanner();
-        players.add(new AIPlayer(scanner.nextLine()));
-        players.add(new AIPlayer(scanner.nextLine()));
+        players.add(new TUIPlayer(scanner.nextLine()));
+        players.add(new TUIPlayer(scanner.nextLine()));
         try {
             game.setPlayers(players);
             game.start();

@@ -16,6 +16,7 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
         Game.putDefaultConfig("init-deposit", 2000);
         Game.putDefaultConfig("init-coupons", 0);
         Game.putDefaultConfig("bank-max-transfer", 100000);
+        Game.putDefaultConfig("stock-max-trade", 10000);
     }
 
     private static final Logger logger = Logger.getLogger(AbstractPlayer.class.getName());
@@ -42,7 +43,7 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
     private final List<Card> cards = new CopyOnWriteArrayList<>();
     private final Shareholding shareholding = new Shareholding();
     
-    final void setGame(Game game) {
+    protected void setGame(Game game) {
         this.game = game;
     }
 
@@ -149,8 +150,17 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
     protected final void buyStock(Stock stock, int amount) {
         synchronized (game.lock) {
             if (game.getState() == Game.State.TURN_STARTING) {
-                shareholding.buy(game, stock, amount);
-                _onStockHoldingChange.get(game).trigger(this, stock, amount);
+                int maxTrade = game.getConfig("stock-max-trade");
+                if (amount > maxTrade) {
+                    game.triggerException("exceeded_max_stock_trade");
+                } else if (amount < 0) {
+                    game.triggerException("amount_cannot_be_negative");
+                } else {
+                    shareholding.buy(game, stock, amount);
+                    _onStockHoldingChange.get(game).trigger(this, stock, amount);
+                }
+            } else {
+                logger.log(Level.WARNING, Game.WRONG_STATE);
             }
         }
     }
@@ -158,8 +168,17 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
     protected final void sellStock(Stock stock, int amount) {
         synchronized (game.lock) {
             if (game.getState() == Game.State.TURN_STARTING) {
-                shareholding.sell(game, stock, amount);
-                _onStockHoldingChange.get(game).trigger(this, stock, -amount);
+                int maxTrade = game.getConfig("stock-max-trade");
+                if (amount > maxTrade) {
+                    game.triggerException("exceeded_max_stock_trade");
+                } else if (amount < 0) {
+                    game.triggerException("amount_cannot_be_negative");
+                } else {
+                    shareholding.sell(game, stock, amount);
+                    _onStockHoldingChange.get(game).trigger(this, stock, -amount);
+                }
+            } else {
+                logger.log(Level.WARNING, Game.WRONG_STATE);
             }
         }
     }
@@ -201,10 +220,13 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
     final void depositOrWithdraw(Consumer0 cb) {
         askHowMuchToDepositOrWithdraw((amount) -> {
             int maxTransfer = game.getConfig("bank-max-transfer");
-            if (-maxTransfer <= amount && amount <= maxTransfer &&
-                    cash - amount >= 0 && deposit + amount >= 0) {
-                cash -= amount;
-                deposit += amount;
+            if (-maxTransfer <= amount && amount <= maxTransfer) {
+                if (cash - amount >= 0 && deposit + amount >= 0) {
+                    cash -= amount;
+                    deposit += amount;
+                }
+            } else {
+                game.triggerException("exceeded_max_transfer_credits");
             }
             cb.run();
         });
@@ -356,6 +378,7 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
     }
 
     final void pay(AbstractPlayer receiver, int amount, String msg, Consumer0 cb) {
+        assert amount > 0;
         cash -= amount;
         _onMoneyChange.get(game).trigger(this, -amount, msg);
         if (receiver != null) {

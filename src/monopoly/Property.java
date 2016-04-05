@@ -22,7 +22,7 @@ public abstract class Property extends Place {
 
     @Override
     public String toString(Game g) {
-        return getName();
+        return g.getText(getName());
     }
 
     public boolean isFree() {

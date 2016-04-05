@@ -51,7 +51,7 @@ public class Shareholding {
                 }
                 holding.amount += amount;
                 holding.cost += price;
-                String msg = g.format("buy_stock", player.getName(), stock.toString(g), amount);
+                String msg = g.format("buy_stock", player.getName(), stock.toString(g), amount, price);
                 player.changeCash(-price, msg);
             }
         } else {
@@ -73,7 +73,7 @@ public class Shareholding {
                 int oldAmount = holding.amount;
                 holding.amount -= amount;
                 holding.cost = holding.cost * holding.amount / oldAmount;
-                String msg = g.format("sell_stock", player.getName(), stock.toString(g), amount);
+                String msg = g.format("sell_stock", player.getName(), stock.toString(g), amount, price);
                 player.changeCash(price, msg);
             }
         } else {

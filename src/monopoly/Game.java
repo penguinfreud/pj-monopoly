@@ -99,8 +99,8 @@ public class Game implements Serializable, Host {
             e.printStackTrace();
             return "";
         } catch(MissingResourceException e) {
-            logger.log(Level.SEVERE, "Unknown key: " + key);
-            return "";
+            //logger.log(Level.SEVERE, "Unknown key: " + key);
+            return key;
         }
     }
 
