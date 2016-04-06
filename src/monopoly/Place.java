@@ -3,6 +3,7 @@ package monopoly;
 import monopoly.util.Consumer0;
 
 import java.io.Serializable;
+import java.util.stream.Stream;
 
 public abstract class Place implements Serializable, GameObject {
     private final String name;

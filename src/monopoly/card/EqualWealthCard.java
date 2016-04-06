@@ -19,14 +19,10 @@ public class EqualWealthCard extends Card {
 
     @Override
     public void use(Game g, CardInterface ci, Consumer0 cb) {
-        int sum = 0;
         List<AbstractPlayer> players = g.getPlayers();
+        int average = players.stream().map(AbstractPlayer::getCash).reduce(0, (a, b) -> a + b) / players.size();
         for (AbstractPlayer player: players) {
-            sum += player.getCash();
-        }
-        sum /= players.size();
-        for (AbstractPlayer player: players) {
-            int amount = sum - player.getCash();
+            int amount = average - player.getCash();
             String msg = g.format(amount >= 0? "equal_wealth_get": "equal_wealth_give", player.getName(), amount);
             ci.changeCash(player, amount, msg);
         }

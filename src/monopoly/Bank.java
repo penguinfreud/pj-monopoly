@@ -8,7 +8,9 @@ final class Bank {
             GameCalendar.onMonth.addListener(g, () -> {
                 synchronized (g.lock) {
                     for (AbstractPlayer player: g.getPlayers()) {
-                        player.changeDeposit(player.getDeposit() / 10, "give_interest");
+                        int amount = player.getDeposit() / 10;
+                        String msg = g.format("give_interest", player.getName(), amount);
+                        player.changeDeposit(amount, msg);
                     }
                 }
             }));

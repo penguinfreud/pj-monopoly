@@ -5,12 +5,13 @@ import monopoly.stock.Stock;
 import monopoly.util.*;
 
 import java.io.Serializable;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public abstract class AbstractPlayer implements Serializable, GameObject {
+public abstract class AbstractPlayer implements Serializable, GameObject, Host {
     static {
         Game.putDefaultConfig("init-cash", 2000);
         Game.putDefaultConfig("init-deposit", 2000);
@@ -22,29 +23,76 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
     private static final Logger logger = Logger.getLogger(AbstractPlayer.class.getName());
 
     private static final Parasite<Game, Event3<AbstractPlayer, Integer, String>> _onMoneyChange = new Parasite<>(Game::onInit, Event3::New);
-    private static final Parasite<Game, Event3<AbstractPlayer, Boolean, Property>> _onPropertyChange = new Parasite<>(Game::onInit, Event3::New);
     private static final Parasite<Game, Event2<AbstractPlayer, Integer>> _onCouponChange = new Parasite<>(Game::onInit, Event2::New);
     private static final Parasite<Game, Event3<AbstractPlayer, Boolean, Card>> _onCardChange = new Parasite<>(Game::onInit, Event3::New);
     private static final Parasite<Game, Event3<AbstractPlayer, Stock, Integer>> _onStockHoldingChange = new Parasite<>(Game::onInit, Event3::New);
 
     public static final EventWrapper<Game, Consumer3<AbstractPlayer, Integer, String>> onMoneyChange = new EventWrapper<>(_onMoneyChange);
-    public static final EventWrapper<Game, Consumer3<AbstractPlayer, Boolean, Property>> onPropertyChange = new EventWrapper<>(_onPropertyChange);
     public static final EventWrapper<Game, Consumer2<AbstractPlayer, Integer>> onCouponChange = new EventWrapper<>(_onCouponChange);
     public static final EventWrapper<Game, Consumer3<AbstractPlayer, Boolean, Card>> onCardChange = new EventWrapper<>(_onCardChange);
     public static final EventWrapper<Game, Consumer3<AbstractPlayer, Stock, Integer>> onStockHoldingChange = new EventWrapper<>(_onStockHoldingChange);
+
+    private static final SerializableObject staticLock = new SerializableObject();
+    private static final List<Consumer1<AbstractPlayer>> _onInit = new CopyOnWriteArrayList<>();
+    private static final List<AbstractPlayer> players = new CopyOnWriteArrayList<>();
+
+    private static final List<Function1<AbstractPlayer, Integer>> possessions = new CopyOnWriteArrayList<>();
+    private static final List<Consumer2<AbstractPlayer, Consumer0>> propertySellers = new CopyOnWriteArrayList<>();
+
+    static void addPossession(Function1<AbstractPlayer, Integer> possession) {
+        possessions.add(possession);
+    }
+
+    static void addPropertySeller(Consumer2<AbstractPlayer, Consumer0> fn) {
+        propertySellers.add(fn);
+    }
+
+    static {
+        possessions.add(AbstractPlayer::getCash);
+        possessions.add(AbstractPlayer::getDeposit);
+    }
 
     private Game game;
     private String name;
     private Place currentPlace;
     private int cash, deposit, coupons;
     private boolean reversed = false;
-    private boolean rentFree = false;
-    private final List<Property> properties = new CopyOnWriteArrayList<>();
     private final List<Card> cards = new CopyOnWriteArrayList<>();
     private final Shareholding shareholding = new Shareholding();
+    private final java.util.Map<Object, Object> storage = new Hashtable<>();
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public final <T> T getParasite(Object key) {
+        return (T) storage.get(key);
+    }
+
+    @Override
+    public final void setParasite(Object key, Object value) {
+        storage.put(key, value);
+    }
+
+    public static void onInit(Consumer1<AbstractPlayer> listener) {
+        synchronized (staticLock) {
+            _onInit.add(listener);
+            players.stream().forEach(listener::run);
+        }
+    }
+
+    private static void triggerGameInit(AbstractPlayer player) {
+        synchronized (staticLock) {
+            for (Consumer1<AbstractPlayer> listener: _onInit) {
+                listener.run(player);
+            }
+        }
+    }
     
     protected void setGame(Game game) {
-        this.game = game;
+        synchronized (game.lock) {
+            this.game = game;
+            triggerGameInit(this);
+            players.add(this);
+        }
     }
 
     final void init() {
@@ -53,7 +101,6 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
             this.deposit = game.getConfig("init-deposit");
             this.coupons = game.getConfig("init-coupons");
             currentPlace = game.getMap().getStartingPoint();
-            properties.clear();
             cards.clear();
             reversed = false;
         } else {
@@ -94,21 +141,14 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
         return currentPlace;
     }
 
-    public final List<Property> getProperties() {
-        return new CopyOnWriteArrayList<>(properties);
-    }
-
     public final List<Card> getCards() {
         return new CopyOnWriteArrayList<>(cards);
     }
 
     public final int getTotalPossessions() {
-        int poss = cash + deposit;
-        for (Property prop : properties) {
-            poss += prop.getMortgagePrice();
-        }
-        return poss;
+        return possessions.stream().map(f -> f.run(this)).reduce(0, (a, b) -> (a + b));
     }
+
 
     public final boolean isReversed() {
         return reversed;
@@ -116,10 +156,6 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
 
     final void reverse() {
         reversed = !reversed;
-    }
-
-    final void setRentFree() {
-        rentFree = true;
     }
 
     protected final void giveUp() {
@@ -184,19 +220,9 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
     }
 
     protected abstract void startTurn(Consumer0 cb);
-
-    protected abstract void askWhetherToBuyProperty(Consumer1<Boolean> cb);
-
-    protected abstract void askWhetherToUpgradeProperty(Consumer1<Boolean> cb);
-
-    protected abstract void askWhichPropertyToMortgage(Consumer1<Property> cb);
-
     protected abstract void askWhichCardToBuy(Consumer1<Card> cb);
-
     protected abstract void askHowMuchToDepositOrWithdraw(Consumer1<Integer> cb);
-
     public abstract void askForPlayer(String reason, Consumer1<AbstractPlayer> cb);
-
     public abstract void askForPlace(String reason, Consumer1<Place> cb);
 
     final void changeCash(int amount, String msg) {
@@ -232,153 +258,16 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
         });
     }
 
-    private void sellProperties(Property prop, Consumer0 cb) {
-        if (cash <= 0) {
-            if (prop != null) {
-                if (properties.contains(prop)) {
-                    cash += prop.getMortgagePrice();
-                    properties.remove(prop);
-                    prop.resetOwner();
-                    _onPropertyChange.get(game).trigger(this, false, prop);
-                } else {
-                    game.triggerException("not_your_property");
-                }
-            }
-            if (cash <= 0) {
-                if (properties.size() > 0) {
-                    askWhichPropertyToMortgage((nextProp) -> sellProperties(nextProp, cb));
-                } else {
-                    game.triggerBankrupt(this);
-                    cb.run();
-                }
-            } else {
-                cb.run();
-            }
+    private void sellProperties(int i, Consumer0 cb) {
+        if (i < propertySellers.size()) {
+            propertySellers.get(i).run(this, () -> sellProperties(i+1, cb));
         } else {
             cb.run();
         }
     }
 
-    private boolean checkBuyingCondition(boolean force) {
-        Property prop = currentPlace.asProperty();
-        if (cash >= prop.getPurchasePrice()) {
-            if (prop.isFree()) {
-                return true;
-            } else if (force) {
-                AbstractPlayer owner = prop.getOwner();
-                if (owner != this) {
-                    return true;
-                } else {
-                    game.triggerException("you_cannot_buy_your_own_land");
-                }
-            } else {
-                game.triggerException("cannot_buy_sold_land");
-            }
-        } else {
-            game.triggerException("short_of_cash");
-        }
-        return false;
-    }
-
-    private void _buyProperty(boolean force) {
-        Property prop = currentPlace.asProperty();
-        int price = prop.getPurchasePrice();
-        if (checkBuyingCondition(force)) {
-            AbstractPlayer owner = prop.getOwner();
-            String msg = game.format("buy_property", getName(), price, prop.toString(game));
-            pay(owner, price, msg, null);
-            properties.add(prop);
-            if (owner != null) {
-                owner.properties.remove(prop);
-            }
-            prop.changeOwner(this);
-            _onPropertyChange.get(game).trigger(this, true, prop);
-        }
-    }
-
-    private void _upgradeProperty() {
-        if (game.getState() == Game.State.TURN_LANDED) {
-            Property prop = currentPlace.asProperty();
-            int price = prop.getUpgradePrice();
-            if (prop.getOwner() == this) {
-                if (cash >= price) {
-                    String msg = game.format("upgrade_property", name, price, prop.toString(game), prop.getLevel() + 1);
-                    changeCash(-price, msg);
-                    prop.upgrade(game);
-                } else {
-                    game.triggerException("short_of_cash");
-                }
-            } else {
-                game.triggerException("not_your_property");
-            }
-        } else {
-            logger.log(Level.WARNING, Game.WRONG_STATE);
-        }
-    }
-
-    final void payRent(Consumer0 cb) {
-        if (game.getState() == Game.State.TURN_LANDED) {
-            if (rentFree) {
-                rentFree = false;
-                cb.run();
-            } else {
-                Property prop = currentPlace.asProperty();
-                AbstractPlayer owner = prop.getOwner();
-                int rent = prop.getRent();
-                String msg = game.format("pay_rent", name, owner.name, rent, prop.toString(game));
-                pay(owner, rent, msg, cb);
-            }
-        } else {
-            logger.log(Level.WARNING, Game.WRONG_STATE);
-        }
-    }
-
-    final void buyProperty(Consumer0 cb, boolean force) {
-        synchronized (game.lock) {
-            Property prop = currentPlace.asProperty();
-            int price = prop.getPurchasePrice();
-            if (prop.isFree() && cash >= price) {
-                askWhetherToBuyProperty((ok) -> {
-                    synchronized (game.lock) {
-                        if (ok) {
-                            _buyProperty(force);
-                        }
-                        cb.run();
-                    }
-                });
-            } else {
-                cb.run();
-            }
-        }
-    }
-
-    final void buyProperty(Consumer0 cb) {
-        buyProperty(cb, false);
-    }
-
-    final void upgradeProperty(Consumer0 cb) {
-        if (game.getState() == Game.State.TURN_LANDED) {
-            Property prop = currentPlace.asProperty();
-            int price = prop.getUpgradePrice();
-            if (prop.getOwner() == this && cash >= price) {
-                askWhetherToUpgradeProperty((ok) -> {
-                    synchronized (game.lock) {
-                        if (ok) {
-                            _upgradeProperty();
-                        }
-                        cb.run();
-                    }
-                });
-            } else {
-                cb.run();
-            }
-        } else {
-            logger.log(Level.WARNING, Game.WRONG_STATE);
-        }
-    }
-
     final void pay(AbstractPlayer receiver, int amount, String msg, Consumer0 cb) {
-        assert amount > 0;
+        assert amount >= 0;
         cash -= amount;
         _onMoneyChange.get(game).trigger(this, -amount, msg);
         if (receiver != null) {
@@ -392,22 +281,10 @@ public abstract class AbstractPlayer implements Serializable, GameObject {
             } else {
                 cash += deposit;
                 deposit = 0;
-                sellProperties(null, cb);
+                sellProperties(0, cb);
             }
         } else if (cb != null) {
             cb.run();
-        }
-    }
-
-    final void robLand() {
-        Property prop = currentPlace.asProperty();
-        if (prop != null) {
-            AbstractPlayer owner = prop.getOwner();
-            if (owner != null) {
-                owner.properties.remove(prop);
-            }
-            prop.changeOwner(this);
-            _onPropertyChange.get(game).trigger(this, true, prop);
         }
     }
 

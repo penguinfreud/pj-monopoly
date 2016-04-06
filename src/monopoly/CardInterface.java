@@ -42,7 +42,8 @@ public final class CardInterface implements Serializable {
 
     public final void buyProperty(Consumer0 cb) {
         synchronized (lock) {
-            game.getCurrentPlayer().buyProperty(cb, true);
+            AbstractPlayer player = game.getCurrentPlayer();
+            Properties.get(player).buyProperty(player.getCurrentPlace().asProperty(), cb, true);
         }
     }
 
@@ -60,7 +61,8 @@ public final class CardInterface implements Serializable {
 
     public final void robLand() {
         synchronized (lock) {
-            game.getCurrentPlayer().robLand();
+            AbstractPlayer player = game.getCurrentPlayer();
+            Properties.get(player).robLand(player.getCurrentPlace().asProperty());
         }
     }
 
@@ -90,7 +92,7 @@ public final class CardInterface implements Serializable {
 
     public final void setRentFree(AbstractPlayer player) {
         synchronized (lock) {
-            player.setRentFree();
+            Properties.get(player).setRentFree();
         }
     }
 }

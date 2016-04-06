@@ -25,12 +25,7 @@ public class Street implements Serializable {
     }
 
     public int getExtraRent(Land ref) {
-        int rent = 0;
-        for (Land land: lands) {
-            if (land.getOwner() == ref.getOwner()) {
-                rent += land.getPrice();
-            }
-        }
-        return rent / 10;
+        return lands.stream().filter((land) -> land.getOwner() == ref.getOwner())
+                .map(Land::getPrice).reduce(0, (a, b) -> a + b) / 10;
     }
 }

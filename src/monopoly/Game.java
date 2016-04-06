@@ -125,9 +125,7 @@ public class Game implements Serializable, Host {
     public final void setPlayers(List<AbstractPlayer> playersList) throws Exception {
         synchronized (lock) {
             if (state == State.OVER) {
-                for (AbstractPlayer player: playersList) {
-                    player.setGame(this);
-                }
+                playersList.stream().forEach((player) -> player.setGame(this));
                 players.set(playersList);
             } else {
                 logger.log(Level.WARNING, WRONG_STATE);
@@ -248,16 +246,12 @@ public class Game implements Serializable, Host {
     @Override
     @SuppressWarnings("unchecked")
     public final <T> T getParasite(Object key) {
-        synchronized (lock) {
-            return (T) storage.get(key);
-        }
+        return (T) storage.get(key);
     }
 
     @Override
     public final void setParasite(Object key, Object value) {
-        synchronized (lock) {
-            storage.put(key, value);
-        }
+        storage.put(key, value);
     }
 
     public static void onInit(Consumer1<Game> listener) {

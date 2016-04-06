@@ -49,7 +49,8 @@ public class News extends Place {
 
     private static List<AbstractPlayer> getSortedPlayers(Game g) {
         List<AbstractPlayer> players = g.getPlayers();
-        Collections.sort(players, (a, b) -> a.getProperties().size() - b.getProperties().size());
+        Collections.sort(players, (a, b) ->
+                Properties.get(a).getPropertiesCount() - Properties.get(b).getPropertiesCount());
         return players;
     }
 

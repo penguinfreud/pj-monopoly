@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class AIPlayer extends AbstractPlayer {
+public class AIPlayer extends AbstractPlayer implements Properties.IPlayerWithProperties {
     public AIPlayer() {}
 
     public AIPlayer(String name) {
@@ -27,7 +27,7 @@ public class AIPlayer extends AbstractPlayer {
 
     @Override
     public void askWhichPropertyToMortgage(Consumer1<Property> cb) {
-        cb.run(getProperties().get(0));
+        cb.run(Properties.get(this).getProperties().get(0));
     }
 
     @Override

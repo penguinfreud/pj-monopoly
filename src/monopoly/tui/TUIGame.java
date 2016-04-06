@@ -28,8 +28,11 @@ public class TUIGame extends Game {
                 System.out.println(format("get_coupons", player.getName(), amount));
             }
         });
-        AbstractPlayer.onCardChange.addListener(this, (player, isGet, card) ->
-            System.out.println(format(isGet? "get_card": "lose_card", player.getName(), card.toString(this))));
+        AbstractPlayer.onCardChange.addListener(this, (player, isGet, card) -> {
+            if (isGet) {
+                System.out.println(format("get_card", player.getName(), card.toString(this)));
+            }
+        });
     }
 
     public Scanner getScanner() {

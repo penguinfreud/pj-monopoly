@@ -6,14 +6,8 @@ import monopoly.stock.StockMarket;
 import java.util.Hashtable;
 import java.util.Map;
 
-public class Shareholding {
-    public static final class Certificate {
-        private Certificate() {}
-    }
-
-    private static final Certificate cert = new Certificate();
-
-    public static class StockHolding {
+class Shareholding {
+    static class StockHolding {
         private double cost = 0.0;
         private int amount;
 
@@ -34,7 +28,7 @@ public class Shareholding {
 
     private final Map<Stock, StockHolding> holdingMap = new Hashtable<>();
 
-    public StockHolding getHolding(Stock stock) {
+    StockHolding getHolding(Stock stock) {
         return holdingMap.get(stock);
     }
 
@@ -53,6 +47,8 @@ public class Shareholding {
                 holding.cost += price;
                 String msg = g.format("buy_stock", player.getName(), stock.toString(g), amount, price);
                 player.changeCash(-price, msg);
+            } else {
+                g.triggerException("short_of_cash");
             }
         } else {
             g.triggerException("stock_non_existent", stock.toString(g));

@@ -35,9 +35,7 @@ class Players implements Serializable {
     }
 
     void init(Game g) {
-        for (AbstractPlayer player : players) {
-            player.init();
-        }
+        players.forEach(AbstractPlayer::init);
     }
 
     void remove(AbstractPlayer player) {

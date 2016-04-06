@@ -1,6 +1,7 @@
 package monopoly.tui;
 
 import monopoly.*;
+import monopoly.Properties;
 import monopoly.card.Card;
 import monopoly.stock.Stock;
 import monopoly.stock.StockMarket;
@@ -13,7 +14,7 @@ import java.util.*;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class TUIPlayer extends AbstractPlayer {
+public class TUIPlayer extends AbstractPlayer implements Properties.IPlayerWithProperties {
     public TUIPlayer() {}
 
     public TUIPlayer(String name) {
@@ -102,24 +103,38 @@ public class TUIPlayer extends AbstractPlayer {
         }
     }
 
+    private Place nthPlace(int n) {
+        Place place = getCurrentPlace();
+        if (n > 0) {
+            for (int i = 0; i < n; i++) {
+                place = isReversed() ? place.getPrev() : place.getNext();
+            }
+        } else {
+            for (int i = 0; i < n; i++) {
+                place = isReversed() ? place.getNext() : place.getPrev();
+            }
+        }
+        return place;
+    }
+
     @Override
-    protected void askWhetherToBuyProperty(Consumer1<Boolean> cb) {
+    public void askWhetherToBuyProperty(Consumer1<Boolean> cb) {
         Property property = getCurrentPlace().asProperty();
         String question = getGame().format("ask_whether_to_buy_property", property.getName(), property.getPurchasePrice(), getCash());
         cb.run(yesOrNo(question));
     }
 
     @Override
-    protected void askWhetherToUpgradeProperty(Consumer1<Boolean> cb) {
+    public void askWhetherToUpgradeProperty(Consumer1<Boolean> cb) {
         Property property = getCurrentPlace().asProperty();
         String question = getGame().format("ask_whether_to_upgrade_property", property.getName(), property.getUpgradePrice(), getCash());
         cb.run(yesOrNo(question));
     }
 
     @Override
-    protected void askWhichPropertyToMortgage(Consumer1<Property> cb) {
+    public void askWhichPropertyToMortgage(Consumer1<Property> cb) {
         String question = getGame().getText("ask_which_property_to_mortgage");
-        cb.run(choose(question, getProperties(), false));
+        cb.run(choose(question, Properties.get(this).getProperties(), false));
     }
 
     @Override
@@ -170,11 +185,7 @@ public class TUIPlayer extends AbstractPlayer {
             if (steps == -1) {
                 break;
             }
-            Place place = getCurrentPlace();
-            for (int i = 0; i<steps; i++) {
-                place = isReversed()? place.getPrev(): place.getNext();
-            }
-            ((TUIPlace)place).printDetail(g, System.out);
+            ((TUIPlace)nthPlace(steps)).printDetail(g, System.out);
         }
     }
 
@@ -185,7 +196,7 @@ public class TUIPlayer extends AbstractPlayer {
             System.out.println(g.format("player_info_table_row",
                     player.getCash(),
                     player.getDeposit(),
-                    player.getProperties().size(),
+                    Properties.get(player).getPropertiesCount(),
                     player.getCoupons(),
                     player.getTotalPossessions()));
         }
@@ -253,7 +264,7 @@ public class TUIPlayer extends AbstractPlayer {
             int max = g.getConfig("stock-max-trade");
             int amount = getInt(g.getText("ask_how_much_to_sell"), 0, max, -1);
             if (amount > 0) {
-                buyStock(choice.getKey(), amount);
+                sellStock(choice.getKey(), amount);
             }
         }
     }
@@ -368,27 +379,14 @@ public class TUIPlayer extends AbstractPlayer {
             if (steps == 0) {
                 cb.run(null);
             }
-            Place place = getCurrentPlace();
-            for (int i = 0; i<steps; i++) {
-                place = isReversed()? place.getPrev(): place.getNext();
-            }
+            Place place = nthPlace(steps);
             cb.run(place);
         } else if (reason.equals("Roadblock")) {
             int steps = getInt(g.format("ask_where_to_set_roadblock", getCurrentPlace().getName()), -8, 8, -9);
             if (steps == -9) {
                 cb.run(null);
             }
-            Place place = getCurrentPlace();
-            if (steps > 0) {
-                for (int i = 0; i < steps; i++) {
-                    place = isReversed()? place.getPrev(): place.getNext();
-                }
-            } else if (steps < 0) {
-                for (int i = 0; i < steps; i++) {
-                    place = isReversed()? place.getNext(): place.getPrev();
-                }
-            }
-            cb.run(place);
+            cb.run(nthPlace(steps));
         } else {
             cb.run(null);
         }

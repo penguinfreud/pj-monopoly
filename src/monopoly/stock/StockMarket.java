@@ -19,10 +19,19 @@ public class StockMarket implements Serializable {
     }
 
     public static final class StockTrend {
+        static {
+            Game.putDefaultConfig("stock-init-price-min", 10.0);
+            Game.putDefaultConfig("stock-init-price-max", 50.0);
+            Game.putDefaultConfig("stock-max-changing-rate", 0.1);
+        }
+
+        private Game game;
         private final List<Double> prices = new CopyOnWriteArrayList<>();
 
         private StockTrend(Game g) {
-            Game.onTurn.addListener(g, () -> prices.add(calcNextPrice()));
+            game = g;
+            Game.onGameStart.addListener(g, this::initPrice);
+            Game.onCycle.addListener(g, this::calcNextPrice);
         }
 
         public double getPrice(int daysAgo) {
@@ -34,23 +43,22 @@ public class StockMarket implements Serializable {
             }
         }
 
-        private double calcNextPrice() {
-            System.out.println("calcprice");
-            ThreadLocalRandom random = ThreadLocalRandom.current();
-            if (prices.isEmpty()) {
-                return random.nextDouble(50.0) + 10.0;
-            } else {
-                double k = random.nextDouble(0.2) - 0.1;
-                return prices.get(prices.size() - 1) * k;
-            }
+        private void initPrice() {
+            double min = game.getConfig("stock-init-price-min"),
+            max = game.getConfig("stock-init-price-max");
+            prices.add(ThreadLocalRandom.current().nextDouble(max - min) + min);
+        }
+
+        private void calcNextPrice() {
+            double rate = game.getConfig("stock-max-changing-rate");
+            double k = ThreadLocalRandom.current().nextDouble(rate + rate) - rate;
+            prices.add(prices.get(prices.size() - 1) * k);
         }
     }
 
-    private final Game game;
     private final Map<Stock, StockTrend> priceMap = new Hashtable<>();
 
     private StockMarket(Game g) {
-        game = g;
         for (Stock stock: stocks) {
             priceMap.put(stock, new StockTrend(g));
         }

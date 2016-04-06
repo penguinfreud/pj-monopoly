@@ -19,4 +19,10 @@ public abstract class Event<T> implements Serializable {
             listeners.remove(listener);
         }
     }
+
+    public final void clearListeners() {
+        synchronized (lock) {
+            listeners.clear();
+        }
+    }
 }
