@@ -8,21 +8,18 @@ import org.junit.Test;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class GameSerializationTest {
     private Game game = new Game();
     
-    private List<Game> games = new CopyOnWriteArrayList<>();
-    
-    private static class Player extends AIPlayer {
+    private static class Player extends BasePlayer implements Properties.IPlayerWithProperties, IPlayerWithCardsAndStock {
         private Consumer0 cb;
         private Consumer1<Integer> cbi;
         private Consumer1<Boolean> cbb;
         private Consumer1<Property> cbpr;
         private Consumer1<Place> cbpl;
         private Consumer1<Card> cbc;
-        private Consumer1<AbstractPlayer> cba;
+        private Consumer1<IPlayer> cba;
         private String reason;
 
         public Player(String name) {
@@ -47,15 +44,15 @@ public class GameSerializationTest {
         public void askWhichCardToBuy(Consumer1<Card> cb) {
             cbc = cb;
             serialize(getGame(), 3);
-            super.askWhichCardToBuy(cb);
+            IPlayerWithCardsAndStock.super.askWhichCardToBuy(cb);
         }
 
         @Override
-        public void askForTargetPlayer(String reason, Consumer1<AbstractPlayer> cb) {
+        public void askForTargetPlayer(String reason, Consumer1<IPlayer> cb) {
             this.reason = reason;
             cba = cb;
             serialize(getGame(), 4);
-            super.askForTargetPlayer(reason, cb);
+            IPlayerWithCardsAndStock.super.askForTargetPlayer(reason, cb);
         }
 
         @Override
@@ -63,28 +60,28 @@ public class GameSerializationTest {
             this.reason = reason;
             cbpl = cb;
             serialize(getGame(), 5);
-            super.askForTargetPlace(reason, cb);
+            IPlayerWithCardsAndStock.super.askForTargetPlace(reason, cb);
         }
 
         @Override
         public void askWhetherToBuyProperty(Consumer1<Boolean> cb) {
             cbb = cb;
             serialize(getGame(), 6);
-            super.askWhetherToBuyProperty(cb);
+            Properties.IPlayerWithProperties.super.askWhetherToBuyProperty(cb);
         }
 
         @Override
         public void askWhetherToUpgradeProperty(Consumer1<Boolean> cb) {
             cbb = cb;
             serialize(getGame(), 7);
-            super.askWhetherToUpgradeProperty(cb);
+            Properties.IPlayerWithProperties.super.askWhetherToUpgradeProperty(cb);
         }
 
         @Override
         public void askWhichPropertyToMortgage(Consumer1<Property> cb) {
             cbpr = cb;
             serialize(getGame(), 8);
-            super.askWhichPropertyToMortgage(cb);
+            Properties.IPlayerWithProperties.super.askWhichPropertyToMortgage(cb);
         }
 
         @Override
@@ -102,22 +99,22 @@ public class GameSerializationTest {
                     super.askHowMuchToDepositOrWithdraw(cbi);
                     break;
                 case 3:
-                    super.askWhichCardToBuy(cbc);
+                    IPlayerWithCardsAndStock.super.askWhichCardToBuy(cbc);
                     break;
                 case 4:
-                    super.askForTargetPlayer(reason, cba);
+                    IPlayerWithCardsAndStock.super.askForTargetPlayer(reason, cba);
                     break;
                 case 5:
-                    super.askForTargetPlace(reason, cbpl);
+                    IPlayerWithCardsAndStock.super.askForTargetPlace(reason, cbpl);
                     break;
                 case 6:
-                    super.askWhetherToBuyProperty(cbb);
+                    Properties.IPlayerWithProperties.super.askWhetherToBuyProperty(cbb);
                     break;
                 case 7:
-                    super.askWhetherToUpgradeProperty(cbb);
+                    Properties.IPlayerWithProperties.super.askWhetherToUpgradeProperty(cbb);
                     break;
                 case 8:
-                    super.askWhichPropertyToMortgage(cbpr);
+                    Properties.IPlayerWithProperties.super.askWhichPropertyToMortgage(cbpr);
                     break;
                 case 9:
                     super.startStep();
@@ -128,25 +125,10 @@ public class GameSerializationTest {
     
     public GameSerializationTest() throws Exception {
         Class.forName("monopoly.GameMapReader");
-        Class.forName("monopoly.place.Empty");
-        Class.forName("monopoly.place.Land");
-        Class.forName("monopoly.place.Bank");
-        Class.forName("monopoly.place.News");
-        Class.forName("monopoly.place.CouponSite");
-        Class.forName("monopoly.place.CardSite");
-        Class.forName("monopoly.place.CardShop");
-        Class.forName("monopoly.place.Trap");
-        Class.forName("monopoly.card.BuyLandCard");
-        Class.forName("monopoly.card.ControlledDice");
-        Class.forName("monopoly.card.ReverseCard");
-        Class.forName("monopoly.card.Roadblock");
-        Class.forName("monopoly.card.StayCard");
-        Class.forName("monopoly.card.TaxCard");
-        Class.forName("monopoly.card.GodOfLandCard");
-        Class.forName("monopoly.card.TeardownCard");
-        Class.forName("monopoly.card.RobCard");
-        Class.forName("monopoly.card.GodOfFortuneCard");
+        Place.loadAll();
+        Card.loadAll();
         Class.forName("monopoly.Shareholding");
+        Class.forName("monopoly.stock.StockMarket");
         Class.forName("monopoly.Properties");
         Class.forName("monopoly.Cards");
         
@@ -154,7 +136,7 @@ public class GameSerializationTest {
 
         game.putConfig("original", true);
         game.setMap(map);
-        List<AbstractPlayer> players = new ArrayList<>();
+        List<IPlayer> players = new ArrayList<>();
         players.add(new Player("player A"));
         players.add(new Player("player B"));
         players.add(new Player("player C"));

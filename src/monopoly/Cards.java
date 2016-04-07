@@ -5,36 +5,78 @@ import monopoly.util.*;
 import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Cards implements Serializable {
-    public interface IPlayerWithCards {
-        void askWhichCardToBuy(Consumer1<Card> cb);
-        void askForTargetPlayer(String reason, Consumer1<AbstractPlayer> cb);
-        void askForTargetPlace(String reason, Consumer1<Place> cb);
+    public interface IPlayerWithCards extends IPlayer {
+        default void askWhichCardToBuy(Consumer1<Card> cb) {
+            int coupons = Cards.get(this).getCoupons();
+            if (coupons == 0) {
+                cb.run(null);
+            } else {
+                Object[] buyableCards = Card.getCards().stream().filter((card) -> card.getPrice(getGame()) <= coupons).toArray();
+                if (buyableCards.length == 0) {
+                    cb.run(null);
+                } else {
+                    cb.run((Card) buyableCards[ThreadLocalRandom.current().nextInt(buyableCards.length)]);
+                }
+            }
+        }
+
+        default void askForTargetPlayer(String reason, Consumer1<IPlayer> cb) {
+            if (reason.equals("ReverseCard")) {
+                cb.run(this);
+            } else {
+                List<IPlayer> players = getGame().getPlayers();
+                IPlayer first = players.get(0);
+                cb.run(first == this? players.get(1): first);
+            }
+        }
+
+        default void askForTargetPlace(String reason, Consumer1<Place> cb) {
+            Place cur = getCurrentPlace();
+            if (reason.equals("Roadblock")) {
+                cb.run(cur);
+            } else {
+                cb.run(isReversed() ? cur.getPrev() : cur.getNext());
+            }
+        }
+
+        @Override
+        default void startTurn(Consumer0 cb) {
+            Cards cards = Cards.get(this);
+            List<Card> cardList = cards.getCards();
+            if (cardList.isEmpty()) {
+                cb.run();
+            } else {
+                Card card = cardList.get(ThreadLocalRandom.current().nextInt(cardList.size()));
+                cards.useCard(card, () -> startTurn(cb));
+            }
+        }
     }
 
     static {
         Game.putDefaultConfig("init-coupons", 0);
     }
 
-    private static final Parasite<AbstractPlayer, Cards> parasites = new Parasite<>("Cards", AbstractPlayer::onInit, Cards::new);
-    private static final Parasite<Game, Event2<AbstractPlayer, Integer>> _onCouponChange = new Parasite<>("Cards.onCouponChange", Game::onInit, Event2::New);
-    private static final Parasite<Game, Event3<AbstractPlayer, Boolean, Card>> _onCardChange = new Parasite<>("Cards.onCardChange", Game::onInit, Event3::New);
-    public static final EventWrapper<Game, Consumer2<AbstractPlayer, Integer>> onCouponChange = new EventWrapper<>(_onCouponChange);
-    public static final EventWrapper<Game, Consumer3<AbstractPlayer, Boolean, Card>> onCardChange = new EventWrapper<>(_onCardChange);
+    private static final Parasite<IPlayer, Cards> parasites = new Parasite<>("Cards", BasePlayer::onInit, Cards::new);
+    private static final Parasite<Game, Event2<IPlayer, Integer>> _onCouponChange = new Parasite<>("Cards.onCouponChange", Game::onInit, Event2::New);
+    private static final Parasite<Game, Event3<IPlayer, Boolean, Card>> _onCardChange = new Parasite<>("Cards.onCardChange", Game::onInit, Event3::New);
+    public static final EventWrapper<Game, Consumer2<IPlayer, Integer>> onCouponChange = new EventWrapper<>(_onCouponChange);
+    public static final EventWrapper<Game, Consumer3<IPlayer, Boolean, Card>> onCardChange = new EventWrapper<>(_onCardChange);
 
-    public static Cards get(AbstractPlayer player) {
+    public static Cards get(IPlayer player) {
         return parasites.get(player);
     }
 
     private final Game game;
-    private final AbstractPlayer player;
+    private final IPlayer player;
     private int coupons;
     private final List<Card> cards = new CopyOnWriteArrayList<>();
 
-    private Cards(AbstractPlayer player) {
+    private Cards(IPlayer player) {
         game = player.getGame();
         this.player = player;
 
@@ -120,7 +162,7 @@ public class Cards implements Serializable {
         }
     }
 
-    public final void askForTargetPlayer(String reason, Consumer1<AbstractPlayer> cb) {
+    public final void askForTargetPlayer(String reason, Consumer1<IPlayer> cb) {
         ((IPlayerWithCards) player).askForTargetPlayer(reason, cb);
     }
 

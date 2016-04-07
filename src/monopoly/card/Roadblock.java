@@ -16,7 +16,7 @@ public class Roadblock extends Card {
 
     @Override
     public void use(Game g, Consumer0 cb) {
-        AbstractPlayer player = g.getCurrentPlayer();
+        IPlayer player = g.getCurrentPlayer();
         ((Cards.IPlayerWithCards) player).askForTargetPlace(getName(), g.sync(place -> {
                 int reach = g.getConfig("roadblock-reach");
                 if (place != null &&

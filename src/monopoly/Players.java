@@ -6,14 +6,14 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 class Players implements Serializable {
-    private final List<AbstractPlayer> players = new CopyOnWriteArrayList<>();
+    private final List<IPlayer> players = new CopyOnWriteArrayList<>();
     private int currentPlayerIndex = 0;
 
     int count() {
         return players.size();
     }
 
-    AbstractPlayer getCurrentPlayer() {
+    IPlayer getCurrentPlayer() {
         return players.get(currentPlayerIndex);
     }
 
@@ -21,11 +21,11 @@ class Players implements Serializable {
         return currentPlayerIndex == 0;
     }
 
-    List<AbstractPlayer> getPlayers() {
+    List<IPlayer> getPlayers() {
         return new CopyOnWriteArrayList<>(players);
     }
 
-    void set(List<AbstractPlayer> thePlayers) throws Exception {
+    void set(List<IPlayer> thePlayers) throws Exception {
         if (thePlayers.size() < 2)
             throw new Exception("Too few players.");
         players.clear();
@@ -38,10 +38,10 @@ class Players implements Serializable {
     }
 
     void init(Game g) {
-        players.forEach(AbstractPlayer::init);
+        players.forEach(IPlayer::init);
     }
 
-    void remove(AbstractPlayer player) {
+    void remove(IPlayer player) {
         int i = players.indexOf(player);
         if (i == -1) return;
         if (i < currentPlayerIndex) {

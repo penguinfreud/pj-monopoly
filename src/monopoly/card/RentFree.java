@@ -1,16 +1,17 @@
 package monopoly.card;
 
-import monopoly.AbstractPlayer;
+import monopoly.BasePlayer;
 import monopoly.Game;
+import monopoly.IPlayer;
 import monopoly.Properties;
 import monopoly.util.Consumer0;
 
 class RentFree implements Consumer0 {
     private int duration;
     private final Game game;
-    private final AbstractPlayer player;
+    private final IPlayer player;
 
-    RentFree(AbstractPlayer player, int duration) {
+    RentFree(IPlayer player, int duration) {
         this.player = player;
         game = player.getGame();
         this.duration = duration;

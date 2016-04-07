@@ -2,7 +2,6 @@ package monopoly;
 
 import monopoly.util.*;
 
-import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.Hashtable;
 import java.util.List;
@@ -11,44 +10,44 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public abstract class AbstractPlayer implements Serializable, Host, GameObject {
+public class BasePlayer implements IPlayer {
     static {
         Game.putDefaultConfig("init-cash", 2000);
         Game.putDefaultConfig("init-deposit", 2000);
         Game.putDefaultConfig("bank-max-transfer", 100000);
     }
 
-    private static final Logger logger = Logger.getLogger(AbstractPlayer.class.getName());
+    private static final Logger logger = Logger.getLogger(BasePlayer.class.getName());
 
-    private static final Parasite<Game, Event3<AbstractPlayer, Integer, String>> _onMoneyChange = new Parasite<>("AbstractPlayer.onMoneyChange", Game::onInit, Event3::New);
+    private static final Parasite<Game, Event3<IPlayer, Integer, String>> _onMoneyChange = new Parasite<>("BasePlayer.onMoneyChange", Game::onInit, Event3::New);
 
-    public static final EventWrapper<Game, Consumer3<AbstractPlayer, Integer, String>> onMoneyChange = new EventWrapper<>(_onMoneyChange);
+    public static final EventWrapper<Game, Consumer3<IPlayer, Integer, String>> onMoneyChange = new EventWrapper<>(_onMoneyChange);
 
     private static final SerializableObject staticLock = new SerializableObject();
-    private static final List<Consumer1<AbstractPlayer>> _onInit = new CopyOnWriteArrayList<>();
-    private static final List<WeakReference<AbstractPlayer>> players = new CopyOnWriteArrayList<>();
+    private static final List<Consumer1<IPlayer>> _onInit = new CopyOnWriteArrayList<>();
+    private static final List<WeakReference<IPlayer>> players = new CopyOnWriteArrayList<>();
 
-    private static final List<Function1<AbstractPlayer, Integer>> possessions = new CopyOnWriteArrayList<>();
-    private static final List<Consumer2<AbstractPlayer, Consumer0>> propertySellers = new CopyOnWriteArrayList<>();
+    private static final List<Function1<IPlayer, Integer>> possessions = new CopyOnWriteArrayList<>();
+    private static final List<Consumer2<IPlayer, Consumer0>> propertySellers = new CopyOnWriteArrayList<>();
 
-    static void addPossession(Function1<AbstractPlayer, Integer> possession) {
+    static void addPossession(Function1<IPlayer, Integer> possession) {
         possessions.add(possession);
     }
 
-    static void addPropertySeller(Consumer2<AbstractPlayer, Consumer0> fn) {
+    static void addPropertySeller(Consumer2<IPlayer, Consumer0> fn) {
         propertySellers.add(fn);
     }
 
     static {
-        possessions.add(AbstractPlayer::getCash);
-        possessions.add(AbstractPlayer::getDeposit);
+        possessions.add(IPlayer::getCash);
+        possessions.add(IPlayer::getDeposit);
     }
 
-    public static void onInit(Consumer1<AbstractPlayer> listener) {
+    public static void onInit(Consumer1<IPlayer> listener) {
         synchronized (staticLock) {
             _onInit.add(listener);
             for (int i = players.size() - 1; i>=0; i--) {
-                AbstractPlayer player = players.get(i).get();
+                IPlayer player = players.get(i).get();
                 if (player == null) {
                     players.remove(i);
                 } else {
@@ -58,9 +57,9 @@ public abstract class AbstractPlayer implements Serializable, Host, GameObject {
         }
     }
 
-    private static void triggerPlayerInit(AbstractPlayer player) {
+    private static void triggerPlayerInit(BasePlayer player) {
         synchronized (staticLock) {
-            for (Consumer1<AbstractPlayer> listener: _onInit) {
+            for (Consumer1<IPlayer> listener: _onInit) {
                 listener.run(player);
             }
         }
@@ -85,10 +84,18 @@ public abstract class AbstractPlayer implements Serializable, Host, GameObject {
         storage.put(key, value);
     }
 
+    public BasePlayer() {}
+
+    public BasePlayer(String name) {
+        this.name = name;
+    }
+
+    @Override
     public final Game getGame() {
         return game;
     }
 
+    @Override
     public final String getName() {
         return name;
     }
@@ -102,66 +109,73 @@ public abstract class AbstractPlayer implements Serializable, Host, GameObject {
         this.name = name;
     }
 
+    @Override
     public final int getCash() {
         return cash;
     }
 
+    @Override
     public final int getDeposit() {
         return deposit;
     }
 
+    @Override
     public final Place getCurrentPlace() {
         return currentPlace;
     }
 
+    @Override
     public final int getTotalPossessions() {
         synchronized (game.lock) {
             return possessions.stream().map(f -> f.run(this)).reduce(0, (a, b) -> (a + b));
         }
     }
 
+    @Override
     public final boolean isReversed() {
         return reversed;
     }
 
-    protected abstract void startTurn(Consumer0 cb);
-    public abstract void askHowMuchToDepositOrWithdraw(Consumer1<Integer> cb);
-
+    @Override
     public void reverse() {
         reversed = !reversed;
     }
 
     void bankrupt() {
         bankrupted = true;
-        game.triggerBankrupt(AbstractPlayer.this);
+        game.triggerBankrupt(this);
     }
 
+    @Override
     public void giveUp() {
         bankrupt();
     }
 
+    @Override
     public void changeCash(int amount, String msg) {
         synchronized (game.lock) {
             if (cash + amount >= 0) {
                 cash += amount;
-                _onMoneyChange.get(game).trigger(AbstractPlayer.this, amount, msg);
+                _onMoneyChange.get(game).trigger(this, amount, msg);
             } else {
                 game.triggerException("short_of_cash");
             }
         }
     }
 
+    @Override
     public void changeDeposit(int amount, String msg) {
         synchronized (game.lock) {
             if (deposit + amount >= 0) {
                 deposit += amount;
-                _onMoneyChange.get(game).trigger(AbstractPlayer.this, amount, msg);
+                _onMoneyChange.get(game).trigger(this, amount, msg);
             } else {
                 game.triggerException("short_of_deposit");
             }
         }
     }
 
+    @Override
     public void depositOrWithdraw(Consumer0 cb) {
         askHowMuchToDepositOrWithdraw((amount) -> {
             int maxTransfer = game.getConfig("bank-max-transfer");
@@ -179,17 +193,18 @@ public abstract class AbstractPlayer implements Serializable, Host, GameObject {
 
     private void sellProperties(int i, Consumer0 cb) {
         if (i < propertySellers.size()) {
-            propertySellers.get(i).run(AbstractPlayer.this, () -> sellProperties(i+1, cb));
+            propertySellers.get(i).run(this, () -> sellProperties(i+1, cb));
         } else {
             cb.run();
         }
     }
 
-    public void pay(AbstractPlayer receiver, int amount, String msg, Consumer0 cb) {
+    @Override
+    public void pay(IPlayer receiver, int amount, String msg, Consumer0 cb) {
         synchronized (game.lock) {
             assert amount >= 0;
             cash -= amount;
-            _onMoneyChange.get(game).trigger(AbstractPlayer.this, -amount, msg);
+            _onMoneyChange.get(game).trigger(this, -amount, msg);
             if (receiver != null) {
                 receiver.changeCash(Math.min(amount, getTotalPossessions() + amount), "");
             }
@@ -246,7 +261,8 @@ public abstract class AbstractPlayer implements Serializable, Host, GameObject {
         }
     }
 
-    final void init() {
+    @Override
+    public final void init() {
         if (game.getState() == Game.State.STARTING) {
             cash = game.getConfig("init-cash");
             deposit = game.getConfig("init-deposit");
@@ -258,8 +274,8 @@ public abstract class AbstractPlayer implements Serializable, Host, GameObject {
             (new Exception()).printStackTrace();
         }
     }
-
-    protected void setGame(Game g) {
+    @Override
+    public void setGame(Game g) {
         synchronized (g.lock) {
             game = g;
             triggerPlayerInit(this);
@@ -267,7 +283,8 @@ public abstract class AbstractPlayer implements Serializable, Host, GameObject {
         }
     }
 
-    final void startWalking(int steps) {
+    @Override
+    public final void startWalking(int steps) {
         if (game.getState() == Game.State.TURN_WALKING) {
             stepsToAdvance = steps;
             startStep();

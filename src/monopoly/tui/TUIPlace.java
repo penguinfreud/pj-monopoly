@@ -30,7 +30,7 @@ public class TUIPlace extends DelegatePlace {
 
     String print(Game g, boolean raw) {
         Place place = getPlace();
-        List<AbstractPlayer> players = g.getPlayers();
+        List<IPlayer> players = g.getPlayers();
         if (!raw && this == players.get(0).getCurrentPlace()) {
             return "□ ";
         } else if (!raw && this == players.get(1).getCurrentPlace()) {
@@ -68,7 +68,7 @@ public class TUIPlace extends DelegatePlace {
             out.print(g.getText("place_type"));
             out.println(g.getText("place_land"));
             out.print(g.getText("land_owner"));
-            AbstractPlayer owner = prop.getOwner();
+            IPlayer owner = prop.getOwner();
             if (owner == null) {
                 out.println(g.getText("none"));
             } else {

@@ -1,6 +1,6 @@
 package monopoly.gui;
 
-import monopoly.AbstractPlayer;
+import monopoly.IPlayer;
 
 import javax.swing.*;
 
@@ -39,7 +39,7 @@ public class NewGamePane extends Pane {
     private void updatePlayerNames() {
         synchronized (controller.lock) {
             StringBuilder sb = new StringBuilder();
-            for (AbstractPlayer player : controller.getPlayers()) {
+            for (IPlayer player : controller.getPlayers()) {
                 sb.append(player.getName());
                 sb.append(' ');
             }

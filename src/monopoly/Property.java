@@ -12,7 +12,7 @@ public abstract class Property extends Place {
 
     private static final Logger logger = Logger.getLogger(Property.class.getName());
 
-    private AbstractPlayer owner;
+    private IPlayer owner;
     private int price = 0, level = 1;
 
     protected Property(String name, int price) {
@@ -49,7 +49,7 @@ public abstract class Property extends Place {
         return 0;
     }
 
-    public AbstractPlayer getOwner() {
+    public IPlayer getOwner() {
         return owner;
     }
 
@@ -57,7 +57,7 @@ public abstract class Property extends Place {
         return level;
     }
 
-    void changeOwner(AbstractPlayer owner) {
+    void changeOwner(IPlayer owner) {
         this.owner = owner;
     }
 
@@ -82,7 +82,7 @@ public abstract class Property extends Place {
     @Override
     public void arriveAt(Game g, Consumer0 cb) {
         if (g.getState() == Game.State.TURN_LANDED) {
-            AbstractPlayer player = g.getCurrentPlayer();
+            IPlayer player = g.getCurrentPlayer();
             if (owner == null) {
                 Properties.get(player).buyProperty(this, cb);
             } else if (owner == player) {

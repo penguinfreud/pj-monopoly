@@ -10,11 +10,17 @@ import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 
 public class GameTest {
+    private static class Player extends BasePlayer implements Properties.IPlayerWithProperties {
+        Player(String name) {
+            super(name);
+        }
+    }
+
     private GameMap map;
-    private List<AbstractPlayer> players = new ArrayList<>();
-    private AbstractPlayer playerA = new AIPlayer("player A"),
-            playerB = new AIPlayer("player B"),
-            playerC = new AIPlayer("player C");
+    private List<IPlayer> players = new ArrayList<>();
+    private IPlayer playerA = new Player("player A"),
+            playerB = playerA = new Player("player B"),
+            playerC = playerA = new Player("player C");
 
     private MyGame game;
 
@@ -73,7 +79,7 @@ public class GameTest {
         game.setPlayers(players);
         game.start();
 
-        List<AbstractPlayer> _players = new ArrayList<>();
+        List<IPlayer> _players = new ArrayList<>();
         _players.add(game.getCurrentPlayer());
         game.startWalking(1);
         _players.add(game.getCurrentPlayer());
@@ -118,7 +124,7 @@ public class GameTest {
     public void testTriggerBankrupt() throws Exception {
         players.add(playerC);
         game.setPlayers(players);
-        List<AbstractPlayer> bankrupted = new ArrayList<>();
+        List<IPlayer> bankrupted = new ArrayList<>();
         Game.onBankrupt.addListener(game, player -> bankrupted.add(player));
         game.forwardUntil = -1;
         game.start();

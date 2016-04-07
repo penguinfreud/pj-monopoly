@@ -15,28 +15,28 @@ public class News extends Place {
     static {
         GameMap.registerPlaceReader("News", (r, sc) -> new News());
         newsTypes.add(g -> {
-            List<AbstractPlayer> players = getSortedPlayers(g);
-            AbstractPlayer player = players.get(0);
+            List<IPlayer> players = getSortedPlayers(g);
+            IPlayer player = players.get(0);
             int award = getRandomAward(g);
             String msg = g.format("news_poorest_player", player.getName(), award);
             player.changeCash(award, msg);
         });
         newsTypes.add(g -> {
-            List<AbstractPlayer> players = getSortedPlayers(g);
-            AbstractPlayer player = players.get(players.size() - 1);
+            List<IPlayer> players = getSortedPlayers(g);
+            IPlayer player = players.get(players.size() - 1);
             int award = getRandomAward(g);
             String msg = g.format("news_biggest_landlord", player.getName(), award);
             player.changeCash(award, msg);
         });
         newsTypes.add(g -> {
-            for (AbstractPlayer player: g.getPlayers()) {
+            for (IPlayer player: g.getPlayers()) {
                 int amount = player.getDeposit() / 10;
                 String msg = g.format("news_interest", player.getName(), amount);
                 player.changeDeposit(amount, msg);
             }
         });
         newsTypes.add(g -> {
-            for (AbstractPlayer player: g.getPlayers()) {
+            for (IPlayer player: g.getPlayers()) {
                 int amount = player.getDeposit() / 10;
                 String msg = g.format("news_tax", player.getName(), amount);
                 player.changeDeposit(-amount, msg);
@@ -47,8 +47,8 @@ public class News extends Place {
         Game.putDefaultConfig("news-award-max", 200);
     }
 
-    private static List<AbstractPlayer> getSortedPlayers(Game g) {
-        List<AbstractPlayer> players = g.getPlayers();
+    private static List<IPlayer> getSortedPlayers(Game g) {
+        List<IPlayer> players = g.getPlayers();
         Collections.sort(players, (a, b) ->
                 Properties.get(a).getPropertiesCount() - Properties.get(b).getPropertiesCount());
         return players;

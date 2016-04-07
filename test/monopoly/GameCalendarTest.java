@@ -10,6 +10,12 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 public class GameCalendarTest {
+    private static class Player extends BasePlayer implements Properties.IPlayerWithProperties {
+        Player(String name) {
+            super(name);
+        }
+    }
+
     private MyGame game = new MyGame();
 
     public GameCalendarTest() throws Exception {
@@ -18,9 +24,9 @@ public class GameCalendarTest {
         Class.forName("monopoly.GameCalendar");
         GameMap map = GameMap.readMap(GameTest.class.getResourceAsStream("/test.map"));
         game.setMap(map);
-        List<AbstractPlayer> players = new ArrayList<>();
-        players.add(new AIPlayer("player A"));
-        players.add(new AIPlayer("player B"));
+        List<IPlayer> players = new ArrayList<>();
+        players.add(new Player("player A"));
+        players.add(new Player("player A"));
         game.setPlayers(players);
     }
 

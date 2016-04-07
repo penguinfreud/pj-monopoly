@@ -12,6 +12,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class StockMarket implements Serializable {
+    private static final List<Stock> stocks = new CopyOnWriteArrayList<>();
+
+    public static void addStock(Stock stock) {
+        stocks.add(stock);
+    }
+
     private static final Parasite<Game, StockMarket> markets = new Parasite<>("StockMarket", Game::onInit, StockMarket::new);
 
     public static StockMarket getMarket(Game g) {
@@ -27,6 +33,7 @@ public class StockMarket implements Serializable {
 
         private Game game;
         private final List<Double> prices = new CopyOnWriteArrayList<>();
+        private boolean red = false, black = false;
 
         private StockTrend(Game g) {
             game = g;
@@ -51,8 +58,26 @@ public class StockMarket implements Serializable {
 
         private void calcNextPrice() {
             double rate = game.getConfig("stock-max-changing-rate");
-            double k = ThreadLocalRandom.current().nextDouble(rate + rate) - rate;
+            double k;
+            if (red) {
+                k = rate;
+            } else if (black) {
+                k = -rate;
+            } else {
+                k = ThreadLocalRandom.current().nextDouble(rate + rate) - rate;
+            }
             prices.add(prices.get(prices.size() - 1) * k);
+            red = black = false;
+        }
+
+        private void setRed() {
+            black = false;
+            red = true;
+        }
+
+        private void setBlack() {
+            red = false;
+            black = true;
         }
     }
 
@@ -68,8 +93,12 @@ public class StockMarket implements Serializable {
         return priceMap.containsKey(stock);
     }
 
-    public final Set<Map.Entry<Stock, StockTrend>> getStocks() {
+    public final Set<Map.Entry<Stock, StockTrend>> getStockEntries() {
         return priceMap.entrySet();
+    }
+
+    public final Set<Stock> getStocks() {
+        return priceMap.keySet();
     }
 
     public final StockTrend getPrices(Stock stock) {
@@ -88,9 +117,11 @@ public class StockMarket implements Serializable {
         return getPrice(stock, 0);
     }
 
-    private static final List<Stock> stocks = new CopyOnWriteArrayList<>();
+    public final void setRed(Stock stock) {
+        priceMap.get(stock).setRed();
+    }
 
-    public static void addStock(Stock stock) {
-        stocks.add(stock);
+    public final void setBlack(Stock stock) {
+        priceMap.get(stock).setBlack();
     }
 }

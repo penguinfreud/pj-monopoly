@@ -133,7 +133,7 @@ public class Game implements Serializable, Host {
         }
     }
 
-    public final void setPlayers(List<AbstractPlayer> playersList) throws Exception {
+    public final void setPlayers(List<IPlayer> playersList) throws Exception {
         synchronized (lock) {
             if (state == State.OVER) {
                 playersList.stream().forEach((player) -> player.setGame(this));
@@ -148,11 +148,11 @@ public class Game implements Serializable, Host {
         }
     }
 
-    public final List<AbstractPlayer> getPlayers() {
+    public final List<IPlayer> getPlayers() {
         return players.getPlayers();
     }
 
-    public final AbstractPlayer getCurrentPlayer() {
+    public final IPlayer getCurrentPlayer() {
         return players.getCurrentPlayer();
     }
 
@@ -307,16 +307,16 @@ public class Game implements Serializable, Host {
             _onLanded = new Parasite<>("Game.onLanded", Game::onInit, Event0::New),
             _onCycle = new Parasite<>("Game.onCycle", Game::onInit, Event0::New);
     private static final Parasite<Game, Event1<String>> _onException = new Parasite<>("Game.onException", Game::onInit, Event1::New);
-    private static final Parasite<Game, Event1<AbstractPlayer>> _onBankrupt = new Parasite<>("Game.onBankrupt", Game::onInit, Event1::New);
+    private static final Parasite<Game, Event1<IPlayer>> _onBankrupt = new Parasite<>("Game.onBankrupt", Game::onInit, Event1::New);
     public static final EventWrapper<Game, Consumer0> onGameStart = new EventWrapper<>(_onGameStart),
             onGameOver = new EventWrapper<>(_onGameOver),
             onTurn = new EventWrapper<>(_onTurn),
             onLanded = new EventWrapper<>(_onLanded),
             onCycle = new EventWrapper<>(_onCycle);
     public static final EventWrapper<Game, Consumer1<String>> onException = new EventWrapper<>(_onException);
-    public static final EventWrapper<Game, Consumer1<AbstractPlayer>> onBankrupt = new EventWrapper<>(_onBankrupt);
+    public static final EventWrapper<Game, Consumer1<IPlayer>> onBankrupt = new EventWrapper<>(_onBankrupt);
 
-    final void triggerBankrupt(AbstractPlayer player) {
+    final void triggerBankrupt(IPlayer player) {
         if (state != State.OVER) {
             players.remove(player);
             hadBankrupt = true;

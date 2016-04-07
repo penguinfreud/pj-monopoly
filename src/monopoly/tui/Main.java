@@ -1,9 +1,6 @@
 package monopoly.tui;
 
-import monopoly.AIPlayer;
-import monopoly.AbstractPlayer;
-import monopoly.Game;
-import monopoly.GameMap;
+import monopoly.*;
 import monopoly.stock.Stock;
 import monopoly.stock.StockMarket;
 
@@ -12,7 +9,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Main {
-    private static List<AbstractPlayer> players;
+    private static List<IPlayer> players;
     private static TUIGame game;
 
     public static void main(String[] args) {
@@ -24,23 +21,9 @@ public class Main {
             Class.forName("monopoly.GameMapReader");
             Class.forName("monopoly.tui.TUIGameMap");
             Class.forName("monopoly.tui.TUIPlace");
-            Class.forName("monopoly.place.Empty");
-            Class.forName("monopoly.place.Land");
-            Class.forName("monopoly.place.Bank");
-            Class.forName("monopoly.place.News");
-            Class.forName("monopoly.place.CouponSite");
-            Class.forName("monopoly.place.CardSite");
-            Class.forName("monopoly.place.CardShop");
-            Class.forName("monopoly.card.BuyLandCard");
-            Class.forName("monopoly.card.ControlledDice");
-            Class.forName("monopoly.card.ReverseCard");
-            Class.forName("monopoly.card.Roadblock");
-            Class.forName("monopoly.card.StayCard");
-            Class.forName("monopoly.card.TaxCard");
-            Class.forName("monopoly.card.GodOfLandCard");
-            Class.forName("monopoly.card.TeardownCard");
-            Class.forName("monopoly.card.RobCard");
-            Class.forName("monopoly.card.GodOfFortuneCard");
+            Place.loadAll();
+            Card.loadAll();
+            Class.forName("monopoly.GameCalendar");
             Class.forName("monopoly.Shareholding");
             Class.forName("monopoly.Properties");
             Class.forName("monopoly.Cards");
@@ -70,8 +53,8 @@ public class Main {
         players.clear();
         System.out.println(game.getText("ask_player_names"));
         Scanner scanner = game.getScanner();
-        players.add(new AIPlayer(scanner.nextLine()));
-        players.add(new AIPlayer(scanner.nextLine()));
+        players.add(new BasePlayer(scanner.nextLine()));
+        players.add(new BasePlayer(scanner.nextLine()));
         try {
             game.setPlayers(players);
             game.start();

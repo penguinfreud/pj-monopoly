@@ -1,6 +1,6 @@
 package monopoly.tui;
 
-import monopoly.AbstractPlayer;
+import monopoly.BasePlayer;
 import monopoly.Cards;
 import monopoly.Game;
 
@@ -19,7 +19,7 @@ public class TUIGame extends Game {
         onBankrupt.addListener(this, (p) ->
             System.out.println(format("bankrupt", p.getName())));
         onException.addListener(this, System.out::println);
-        AbstractPlayer.onMoneyChange.addListener(this, (player, amount, msg) -> {
+        BasePlayer.onMoneyChange.addListener(this, (player, amount, msg) -> {
             if (!msg.isEmpty()) {
                 System.out.println(msg);
             }

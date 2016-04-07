@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class TUIPlayer extends AbstractPlayer implements Properties.IPlayerWithProperties, Cards.IPlayerWithCards {
+public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithProperties, Cards.IPlayerWithCards {
     public TUIPlayer() {}
 
     public TUIPlayer(String name) {
@@ -189,7 +189,7 @@ public class TUIPlayer extends AbstractPlayer implements Properties.IPlayerWithP
     private void viewPlayerInfo() {
         Game g = getGame();
         System.out.println(g.getText("player_info_table_head"));
-        for (AbstractPlayer player: g.getPlayers()) {
+        for (IPlayer player: g.getPlayers()) {
             System.out.println(g.format("player_info_table_row",
                     player.getCash(),
                     player.getDeposit(),
@@ -211,7 +211,7 @@ public class TUIPlayer extends AbstractPlayer implements Properties.IPlayerWithP
 
     private void menuViewStock() {
         Game g = getGame();
-        Set<Map.Entry<Stock, StockMarket.StockTrend>> stocks = StockMarket.getMarket(g).getStocks();
+        Set<Map.Entry<Stock, StockMarket.StockTrend>> stocks = StockMarket.getMarket(g).getStockEntries();
         for (Map.Entry<Stock, StockMarket.StockTrend>entry: stocks) {
             StockMarket.StockTrend trend = entry.getValue();
             System.out.println(g.format("stock_table_row", entry.getKey().toString(g),
@@ -232,7 +232,7 @@ public class TUIPlayer extends AbstractPlayer implements Properties.IPlayerWithP
 
     private void menuBuyStock() {
         Game g = getGame();
-        Set<Map.Entry<Stock, StockMarket.StockTrend>> stocks = StockMarket.getMarket(g).getStocks();
+        Set<Map.Entry<Stock, StockMarket.StockTrend>> stocks = StockMarket.getMarket(g).getStockEntries();
         while (true) {
             String question = g.format("ask_which_stock_to_buy", getCash());
             Map.Entry<Stock, StockMarket.StockTrend> choice =
@@ -251,7 +251,7 @@ public class TUIPlayer extends AbstractPlayer implements Properties.IPlayerWithP
 
     private void menuSellStock() {
         Game g = getGame();
-        Set<Map.Entry<Stock, StockMarket.StockTrend>> stocks = StockMarket.getMarket(g).getStocks();
+        Set<Map.Entry<Stock, StockMarket.StockTrend>> stocks = StockMarket.getMarket(g).getStockEntries();
         while (true) {
             String question = g.format("ask_which_stock_to_sell", getCash());
             Map.Entry<Stock, StockMarket.StockTrend> choice =
@@ -289,7 +289,7 @@ public class TUIPlayer extends AbstractPlayer implements Properties.IPlayerWithP
     private final List<String> stockMenuItems = new ArrayList<>();
 
     @Override
-    protected void setGame(Game game) {
+    public void setGame(Game game) {
         super.setGame(game);
         gameMenuItems.clear();
         gameMenuItems.add(game.getText("menu_view_map"));
@@ -308,7 +308,7 @@ public class TUIPlayer extends AbstractPlayer implements Properties.IPlayerWithP
     }
 
     @Override
-    protected void startTurn(Consumer0 cb) {
+    public void startTurn(Consumer0 cb) {
         Game g = getGame();
         viewMap(g, false);
         String direction = g.getText(isReversed()? "anticlockwise": "clockwise");
@@ -357,12 +357,12 @@ public class TUIPlayer extends AbstractPlayer implements Properties.IPlayerWithP
     }
 
     @Override
-    public void askForTargetPlayer(String reason, Consumer1<AbstractPlayer> cb) {
+    public void askForTargetPlayer(String reason, Consumer1<IPlayer> cb) {
         Game g = getGame();
         if (reason.equals("ReverseCard")) {
             String question = g.getText("ask_whom_to_reverse");
-            List<AbstractPlayer> players = g.getPlayers();
-            AbstractPlayer player = choose(question, players, true);
+            List<IPlayer> players = g.getPlayers();
+            IPlayer player = choose(question, players, true);
             cb.run(player);
         } else {
             cb.run(null);

@@ -1,6 +1,6 @@
 package monopoly.gui;
 
-import monopoly.AIPlayer;
+import monopoly.BasePlayer;
 
 import javax.swing.*;
 
@@ -26,7 +26,7 @@ public class NewPlayerPane extends Pane {
         JButton btnOk = new JButton("OK");
         btnOk.addActionListener((e) -> {
             synchronized (controller.lock) {
-                controller.addPlayer(new AIPlayer(txtName.getText()));
+                controller.addPlayer(new BasePlayer(txtName.getText()));
             }
         });
         return btnOk;

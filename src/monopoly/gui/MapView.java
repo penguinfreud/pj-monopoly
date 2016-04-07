@@ -1,6 +1,6 @@
 package monopoly.gui;
 
-import monopoly.AbstractPlayer;
+import monopoly.IPlayer;
 
 import java.awt.Graphics;
 import javax.swing.*;
@@ -18,7 +18,7 @@ public class MapView extends Pane {
                 place = (GUIPlace) place.getNext();
             } while(place != start);
             
-            for (AbstractPlayer player: controller.getGame().getPlayers()) {
+            for (IPlayer player: controller.getGame().getPlayers()) {
                 drawPlayer(g, player);
             }
         }
@@ -27,7 +27,7 @@ public class MapView extends Pane {
         
         }
         
-        private void drawPlayer(Graphics g, AbstractPlayer player) {
+        private void drawPlayer(Graphics g, IPlayer player) {
         
         }
     }

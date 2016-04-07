@@ -33,24 +33,24 @@ public class Shareholding implements Serializable {
         }
     }
 
-    private static final Parasite<AbstractPlayer, Shareholding> parasites = new Parasite<>("Shareholding", AbstractPlayer::onInit, Shareholding::new);
-    private static final Parasite<Game, Event3<AbstractPlayer, Stock, Integer>> _onStockHoldingChange = new Parasite<>("Shareholding.onStockHoldingChange", Game::onInit, Event3::New);
-    public static final EventWrapper<Game, Consumer3<AbstractPlayer, Stock, Integer>> onStockHoldingChange = new EventWrapper<>(_onStockHoldingChange);
+    private static final Parasite<IPlayer, Shareholding> parasites = new Parasite<>("Shareholding", BasePlayer::onInit, Shareholding::new);
+    private static final Parasite<Game, Event3<IPlayer, Stock, Integer>> _onStockHoldingChange = new Parasite<>("Shareholding.onStockHoldingChange", Game::onInit, Event3::New);
+    public static final EventWrapper<Game, Consumer3<IPlayer, Stock, Integer>> onStockHoldingChange = new EventWrapper<>(_onStockHoldingChange);
 
-    public static Shareholding get(AbstractPlayer player) {
+    public static Shareholding get(IPlayer player) {
         return parasites.get(player);
     }
 
     static {
         Game.putDefaultConfig("stock-max-trade", 10000);
-        AbstractPlayer.addPossession(player -> get(player).getValue());
+        BasePlayer.addPossession(player -> get(player).getValue());
     }
 
     private final Game game;
-    private final AbstractPlayer player;
+    private final IPlayer player;
     private final Map<Stock, StockHolding> holdingMap = new Hashtable<>();
 
-    private Shareholding(AbstractPlayer player) {
+    private Shareholding(IPlayer player) {
         this.player = player;
         game = player.getGame();
     }

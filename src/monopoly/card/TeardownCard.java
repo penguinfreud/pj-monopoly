@@ -22,7 +22,7 @@ public class TeardownCard extends Card {
         if (prop != null && prop instanceof Land) {
             Street street = ((Land) prop).getStreet();
             for (Land land: street.getLands()) {
-                AbstractPlayer owner = land.getOwner();
+                IPlayer owner = land.getOwner();
                 if (owner != null) {
                     int amount = land.getMortgagePrice() * 3/2;
                     String msg = g.format("teardown", owner.getName(), amount);

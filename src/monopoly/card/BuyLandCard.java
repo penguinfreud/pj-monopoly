@@ -15,7 +15,7 @@ public class BuyLandCard extends Card {
 
     @Override
     public void use(Game g, Consumer0 cb) {
-        AbstractPlayer player = g.getCurrentPlayer();
+        IPlayer player = g.getCurrentPlayer();
         Property prop = player.getCurrentPlace().asProperty();
         if (prop != null && prop.getOwner() != player) {
             Properties.get(player).buyProperty(prop, cb, true);

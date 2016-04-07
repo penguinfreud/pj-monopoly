@@ -1,7 +1,7 @@
 package monopoly.gui;
 
-import monopoly.AbstractPlayer;
 import monopoly.GameMap;
+import monopoly.IPlayer;
 
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
@@ -15,7 +15,7 @@ public class MainController {
 
     private Pane welcomePane, newGamePane, newPlayerPane, gamePane, gameOverPane;
     private JFrame main;
-    private List<AbstractPlayer> players;
+    private List<IPlayer> players;
     private File mapFile;
     private GUIGame game;
     
@@ -65,7 +65,7 @@ public class MainController {
         return game;
     }
     
-    public List<AbstractPlayer> getPlayers() {
+    public List<IPlayer> getPlayers() {
         return new CopyOnWriteArrayList<>(players);
     }
     
@@ -86,7 +86,7 @@ public class MainController {
         }
     }
     
-    public void addPlayer(AbstractPlayer player) {
+    public void addPlayer(IPlayer player) {
         synchronized (lock) {
             if (currentPane == newPlayerPane) {
                 players.add(player);

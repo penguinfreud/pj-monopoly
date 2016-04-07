@@ -1,8 +1,8 @@
 package monopoly.card;
 
-import monopoly.AbstractPlayer;
 import monopoly.Card;
 import monopoly.Game;
+import monopoly.IPlayer;
 import monopoly.util.Consumer0;
 
 public class GodOfFortuneCard extends Card {
@@ -19,7 +19,7 @@ public class GodOfFortuneCard extends Card {
 
     @Override
     public void use(Game g, Consumer0 cb) {
-        AbstractPlayer player = g.getCurrentPlayer();
+        IPlayer player = g.getCurrentPlayer();
         int amount = g.getConfig("god-of-fortune-card-award");
         String msg = g.format("blessed_by_god_of_fortune", player.getName(), amount);
         player.changeCash(amount, msg);

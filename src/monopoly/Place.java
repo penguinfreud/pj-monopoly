@@ -1,7 +1,6 @@
 package monopoly;
 
 import monopoly.util.Consumer0;
-import monopoly.util.Parasite;
 
 import java.io.Serializable;
 
@@ -72,7 +71,7 @@ public abstract class Place implements Serializable, GameObject {
         return -1;
     }
 
-    public static int withinPlayersReach(AbstractPlayer player, Place place, int steps) {
+    public static int withinPlayersReach(IPlayer player, Place place, int steps) {
         Place cur = player.getCurrentPlace();
         for (int i = 0; i<steps; i++) {
             cur = player.isReversed()? cur.getPrev(): cur.getNext();
@@ -81,5 +80,16 @@ public abstract class Place implements Serializable, GameObject {
             }
         }
         return 0;
+    }
+
+    public static void loadAll() throws ClassNotFoundException {
+        Class.forName("monopoly.place.Empty");
+        Class.forName("monopoly.place.Land");
+        Class.forName("monopoly.place.News");
+        Class.forName("monopoly.place.Bank");
+        Class.forName("monopoly.place.CouponSite");
+        Class.forName("monopoly.place.CardSite");
+        Class.forName("monopoly.place.CardShop");
+        Class.forName("monopoly.place.Trap");
     }
 }

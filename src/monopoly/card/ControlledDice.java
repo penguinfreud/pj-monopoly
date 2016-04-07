@@ -15,7 +15,7 @@ public class ControlledDice extends Card {
 
     @Override
     public void use(Game g, Consumer0 cb) {
-        AbstractPlayer player = g.getCurrentPlayer();
+        IPlayer player = g.getCurrentPlayer();
         ((Cards.IPlayerWithCards) player).askForTargetPlace(getName(), g.sync(place -> {
             if (place == null) {
                 cb.run();

@@ -2,5 +2,5 @@ package monopoly.gui;
 
 import monopoly.*;
 
-public class GUIPlayer extends AIPlayer {
+public class GUIPlayer extends BasePlayer {
 }

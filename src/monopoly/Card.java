@@ -82,4 +82,23 @@ public abstract class Card implements Serializable, GameObject {
         }
         return sb.toString();
     }
+
+    public static void loadAll() throws ClassNotFoundException {
+        Class.forName("monopoly.card.BlackCard");
+        Class.forName("monopoly.card.RedCard");
+        Class.forName("monopoly.card.ControlledDice");
+        Class.forName("monopoly.card.StayCard");
+        Class.forName("monopoly.card.Roadblock");
+        Class.forName("monopoly.card.ReverseCard");
+        Class.forName("monopoly.card.TortoiseCard");
+        Class.forName("monopoly.card.TaxCard");
+        Class.forName("monopoly.card.EqualWealthCard");
+        Class.forName("monopoly.card.MonsterCard");
+        Class.forName("monopoly.card.RobCard");
+        Class.forName("monopoly.card.TeardownCard");
+        Class.forName("monopoly.card.BuyLandCard");
+        Class.forName("monopoly.card.GodOfLandCard");
+        Class.forName("monopoly.card.GodOfFortuneCard");
+        Class.forName("monopoly.card.GodOfLuckCard");
+    }
 }

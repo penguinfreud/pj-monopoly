@@ -9,31 +9,39 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Properties implements Serializable {
-    public interface IPlayerWithProperties {
-        void askWhetherToBuyProperty(Consumer1<Boolean> cb);
-        void askWhetherToUpgradeProperty(Consumer1<Boolean> cb);
-        void askWhichPropertyToMortgage(Consumer1<Property> cb);
+    public interface IPlayerWithProperties extends IPlayer {
+        default void askWhetherToBuyProperty(Consumer1<Boolean> cb) {
+            cb.run(true);
+        }
+
+        default void askWhetherToUpgradeProperty(Consumer1<Boolean> cb) {
+            cb.run(true);
+        }
+
+        default void askWhichPropertyToMortgage(Consumer1<Property> cb) {
+            cb.run(get(this).getProperties().get(0));
+        }
     }
 
-    private static final Parasite<AbstractPlayer, Properties> parasites = new Parasite<>("Properties", AbstractPlayer::onInit, Properties::new);
-    private static final Parasite<Game, Event3<AbstractPlayer, Boolean, Property>> _onPropertyChange = new Parasite<>("Properties.onPropertyChange", Game::onInit, Event3::New);
-    public static final EventWrapper<Game, Consumer3<AbstractPlayer, Boolean, Property>> onPropertyChange = new EventWrapper<>(_onPropertyChange);
+    private static final Parasite<IPlayer, Properties> parasites = new Parasite<>("Properties", BasePlayer::onInit, Properties::new);
+    private static final Parasite<Game, Event3<IPlayer, Boolean, Property>> _onPropertyChange = new Parasite<>("Properties.onPropertyChange", Game::onInit, Event3::New);
+    public static final EventWrapper<Game, Consumer3<IPlayer, Boolean, Property>> onPropertyChange = new EventWrapper<>(_onPropertyChange);
 
     static {
-        AbstractPlayer.addPossession(player -> parasites.get(player).getValue());
-        AbstractPlayer.addPropertySeller(Properties::sellProperties);
+        BasePlayer.addPossession(player -> parasites.get(player).getValue());
+        BasePlayer.addPropertySeller(Properties::sellProperties);
     }
 
-    public static Properties get(AbstractPlayer player) {
+    public static Properties get(IPlayer player) {
         return parasites.get(player);
     }
 
-    private final AbstractPlayer player;
+    private final IPlayer player;
     private final Game game;
     private final List<Property> properties = new CopyOnWriteArrayList<>();
     private boolean rentFree = false;
 
-    private Properties(AbstractPlayer player) {
+    private Properties(IPlayer player) {
         this.player = player;
         game = player.getGame();
 
@@ -51,7 +59,7 @@ public class Properties implements Serializable {
         return game;
     }
 
-    public final AbstractPlayer getPlayer() {
+    public final IPlayer getPlayer() {
         return player;
     }
 
@@ -69,7 +77,7 @@ public class Properties implements Serializable {
         return properties.size();
     }
 
-    private static void sellProperties(AbstractPlayer player, Consumer0 cb) {
+    private static void sellProperties(IPlayer player, Consumer0 cb) {
         parasites.get(player).sellProperties((Property)null, cb);
     }
 
@@ -107,7 +115,7 @@ public class Properties implements Serializable {
             if (prop.isFree()) {
                 return true;
             } else if (force) {
-                AbstractPlayer owner = prop.getOwner();
+                IPlayer owner = prop.getOwner();
                 if (owner != player) {
                     return true;
                 } else {
@@ -125,7 +133,7 @@ public class Properties implements Serializable {
     private void _buyProperty(Property property, boolean force) {
         int price = property.getPurchasePrice();
         if (checkBuyingCondition(property, force)) {
-            AbstractPlayer owner = property.getOwner();
+            IPlayer owner = property.getOwner();
             String msg = game.format("buy_property", player.getName(), price, property.toString(game));
             player.pay(owner, price, msg, null);
             properties.add(property);
@@ -162,7 +170,7 @@ public class Properties implements Serializable {
                 rentFree = false;
                 cb.run();
             } else {
-                AbstractPlayer owner = property.getOwner();
+                IPlayer owner = property.getOwner();
                 int rent = property.getRent();
                 String msg = game.format("pay_rent", player.getName(), owner.getName(), rent, property.toString(game));
                 player.pay(owner, rent, msg, cb);
@@ -222,7 +230,7 @@ public class Properties implements Serializable {
 
     final void robLand(Property property) {
         if (property != null) {
-            AbstractPlayer owner = property.getOwner();
+            IPlayer owner = property.getOwner();
             property.changeOwner(player);
             if (owner != null) {
                 get(owner).properties.remove(property);
