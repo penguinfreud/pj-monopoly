@@ -285,6 +285,19 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
         }
     }
 
+    private void buyLottery() {
+        Game g = getGame();
+        int price = g.getConfig("lottery-price");
+        if (getCash() > price) {
+            int max = g.getConfig("lottery-number-max");
+            String question = g.getText("ask_what_number_to_bet");
+            int number = getInt(question, 0, max, -1);
+            if (number >= 0) {
+                Lottery.buyLottery(this, number);
+            }
+        }
+    }
+
     private final List<String> gameMenuItems = new ArrayList<>();
     private final List<String> stockMenuItems = new ArrayList<>();
 
@@ -301,6 +314,7 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
         gameMenuItems.add(game.getText("menu_roll_the_dice"));
         gameMenuItems.add(game.getText("menu_give_up"));
         gameMenuItems.add(game.getText("menu_stock"));
+        gameMenuItems.add(game.getText("menu_buy_lottery"));
         stockMenuItems.add(game.getText("menu_view_stock"));
         stockMenuItems.add(game.getText("menu_buy_stock"));
         stockMenuItems.add(game.getText("menu_sell_stock"));
@@ -343,6 +357,9 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
                     break loop;
                 case 8:
                     tradeStock();
+                    break;
+                case 9:
+                    buyLottery();
                     break;
             }
         }

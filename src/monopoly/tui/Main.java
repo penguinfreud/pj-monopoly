@@ -9,6 +9,12 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Main {
+    private static class Player extends BasePlayer implements IPlayerWithCardsAndStock, Properties.IPlayerWithProperties {
+        Player(String name) {
+            setName(name);
+        }
+    }
+
     private static List<IPlayer> players;
     private static TUIGame game;
 
@@ -24,9 +30,10 @@ public class Main {
             Place.loadAll();
             Card.loadAll();
             Class.forName("monopoly.GameCalendar");
-            Class.forName("monopoly.Shareholding");
             Class.forName("monopoly.Properties");
             Class.forName("monopoly.Cards");
+            Class.forName("monopoly.Shareholding");
+            Class.forName("monopoly.Lottery");
 
             StockMarket.addStock(new Stock("baidu"));
             StockMarket.addStock(new Stock("google"));
@@ -52,8 +59,8 @@ public class Main {
         players.clear();
         System.out.println(game.getText("ask_player_names"));
         Scanner scanner = game.getScanner();
-        players.add(new BasePlayer(scanner.nextLine()));
-        players.add(new BasePlayer(scanner.nextLine()));
+        players.add(new Player(scanner.nextLine()));
+        players.add(new Player(scanner.nextLine()));
         try {
             game.setPlayers(players);
             game.start();

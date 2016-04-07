@@ -26,13 +26,14 @@ public class TortoiseCard extends Card {
             public void run() {
                 if (g.getCurrentPlayer() == player) {
                     if (--duration > 0) {
-                        g.startWalking(1);
+                        g.setDice(1);
                     } else {
                         Game.onTurn.removeListener(g, this);
                     }
                 }
             }
         });
-        g.startWalking(1);
+        g.setDice(1);
+        cb.run();
     }
 }
