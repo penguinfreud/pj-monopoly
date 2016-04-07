@@ -2,20 +2,21 @@ package monopoly;
 
 import monopoly.util.*;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Properties {
-    public interface IPlayerWithProperties extends IPlayer {
+public class Properties implements Serializable {
+    public interface IPlayerWithProperties {
         void askWhetherToBuyProperty(Consumer1<Boolean> cb);
         void askWhetherToUpgradeProperty(Consumer1<Boolean> cb);
         void askWhichPropertyToMortgage(Consumer1<Property> cb);
     }
 
-    private static final Parasite<AbstractPlayer, Properties> parasites = new Parasite<>(AbstractPlayer::onInit, Properties::new);
-    private static final Parasite<Game, Event3<AbstractPlayer, Boolean, Property>> _onPropertyChange = new Parasite<>(Game::onInit, Event3::New);
+    private static final Parasite<AbstractPlayer, Properties> parasites = new Parasite<>("Properties", AbstractPlayer::onInit, Properties::new);
+    private static final Parasite<Game, Event3<AbstractPlayer, Boolean, Property>> _onPropertyChange = new Parasite<>("Properties.onPropertyChange", Game::onInit, Event3::New);
     public static final EventWrapper<Game, Consumer3<AbstractPlayer, Boolean, Property>> onPropertyChange = new EventWrapper<>(_onPropertyChange);
 
     static {
@@ -55,7 +56,9 @@ public class Properties {
     }
 
     public final int getValue() {
-        return properties.stream().map(Property::getMortgagePrice).reduce(0, (a, b) -> a + b);
+        synchronized (game.lock) {
+            return properties.stream().map(Property::getMortgagePrice).reduce(0, (a, b) -> a + b);
+        }
     }
 
     public final List<Property> getProperties() {
@@ -89,7 +92,6 @@ public class Properties {
                     ((IPlayerWithProperties) player)
                             .askWhichPropertyToMortgage(nextProp -> sellProperties(nextProp, cb));
                 } else {
-                    game.triggerBankrupt(player);
                     cb.run();
                 }
             } else {
@@ -170,26 +172,32 @@ public class Properties {
         }
     }
 
-    final void buyProperty(Property property, Consumer0 cb, boolean force) {
+    public final void buyProperty(Property property, Consumer0 cb, boolean force) {
         synchronized (game.lock) {
-            int price = property.getPurchasePrice();
-            if (property.isFree() && player.getCash() >= price) {
-                ((IPlayerWithProperties) player).askWhetherToBuyProperty((ok) -> {
-                    synchronized (game.lock) {
-                        if (ok) {
-                            _buyProperty(property, force);
-                        }
-                        cb.run();
-                    }
-                });
+            if (force) {
+                _buyProperty(property, force);
             } else {
-                cb.run();
+                int price = property.getPurchasePrice();
+                if (property.isFree() && player.getCash() >= price) {
+                    ((IPlayerWithProperties) player).askWhetherToBuyProperty((ok) -> {
+                        synchronized (game.lock) {
+                            if (ok) {
+                                _buyProperty(property, force);
+                            }
+                            cb.run();
+                        }
+                    });
+                } else {
+                    cb.run();
+                }
             }
         }
     }
 
-    final void buyProperty(Property property, Consumer0 cb) {
-        buyProperty(property, cb, false);
+    public final void buyProperty(Property property, Consumer0 cb) {
+        synchronized (game.lock) {
+            buyProperty(property, cb, false);
+        }
     }
 
     final void upgradeProperty(Property property, Consumer0 cb) {
@@ -215,11 +223,9 @@ public class Properties {
     final void robLand(Property property) {
         if (property != null) {
             AbstractPlayer owner = property.getOwner();
-            if (owner != null) {
-                properties.remove(property);
-            }
             property.changeOwner(player);
             if (owner != null) {
+                get(owner).properties.remove(property);
                 _onPropertyChange.get(game).trigger(owner, false, property);
             }
             _onPropertyChange.get(game).trigger(player, true, property);
@@ -229,12 +235,6 @@ public class Properties {
     public final void robLand() {
         synchronized (game.lock) {
             robLand(player.getCurrentPlace().asProperty());
-        }
-    }
-
-    public final void buyProperty(Consumer0 cb) {
-        synchronized (game.lock) {
-            buyProperty(player.getCurrentPlace().asProperty(), cb, true);
         }
     }
 

@@ -2,13 +2,14 @@ package monopoly;
 
 import monopoly.util.*;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Cards {
-    public interface IPlayerWithCards extends IPlayer {
+public class Cards implements Serializable {
+    public interface IPlayerWithCards {
         void askWhichCardToBuy(Consumer1<Card> cb);
         void askForTargetPlayer(String reason, Consumer1<AbstractPlayer> cb);
         void askForTargetPlace(String reason, Consumer1<Place> cb);
@@ -18,9 +19,9 @@ public class Cards {
         Game.putDefaultConfig("init-coupons", 0);
     }
 
-    private static final Parasite<AbstractPlayer, Cards> parasites = new Parasite<>(AbstractPlayer::onInit, Cards::new);
-    private static final Parasite<Game, Event2<AbstractPlayer, Integer>> _onCouponChange = new Parasite<>(Game::onInit, Event2::New);
-    private static final Parasite<Game, Event3<AbstractPlayer, Boolean, Card>> _onCardChange = new Parasite<>(Game::onInit, Event3::New);
+    private static final Parasite<AbstractPlayer, Cards> parasites = new Parasite<>("Cards", AbstractPlayer::onInit, Cards::new);
+    private static final Parasite<Game, Event2<AbstractPlayer, Integer>> _onCouponChange = new Parasite<>("Cards.onCouponChange", Game::onInit, Event2::New);
+    private static final Parasite<Game, Event3<AbstractPlayer, Boolean, Card>> _onCardChange = new Parasite<>("Cards.onCardChange", Game::onInit, Event3::New);
     public static final EventWrapper<Game, Consumer2<AbstractPlayer, Integer>> onCouponChange = new EventWrapper<>(_onCouponChange);
     public static final EventWrapper<Game, Consumer3<AbstractPlayer, Boolean, Card>> onCardChange = new EventWrapper<>(_onCardChange);
 
@@ -41,10 +42,8 @@ public class Cards {
             game.triggerException("interface not implemented: IPlayerWithCards");
         }
 
-        Game.onGameStart.addListener(game, () -> {
-
-            coupons = game.getConfig("init-coupons");
-        });
+        Game.onGameStart.addListener(game, () ->
+            coupons = game.getConfig("init-coupons"));
     }
 
     public final int getCoupons() {

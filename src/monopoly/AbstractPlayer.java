@@ -2,6 +2,8 @@ package monopoly;
 
 import monopoly.util.*;
 
+import java.io.Serializable;
+import java.lang.ref.WeakReference;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +11,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public abstract class AbstractPlayer implements IPlayer {
+public abstract class AbstractPlayer implements Serializable, Host, GameObject {
     static {
         Game.putDefaultConfig("init-cash", 2000);
         Game.putDefaultConfig("init-deposit", 2000);
@@ -18,13 +20,13 @@ public abstract class AbstractPlayer implements IPlayer {
 
     private static final Logger logger = Logger.getLogger(AbstractPlayer.class.getName());
 
-    private static final Parasite<Game, Event3<AbstractPlayer, Integer, String>> _onMoneyChange = new Parasite<>(Game::onInit, Event3::New);
+    private static final Parasite<Game, Event3<AbstractPlayer, Integer, String>> _onMoneyChange = new Parasite<>("AbstractPlayer.onMoneyChange", Game::onInit, Event3::New);
 
     public static final EventWrapper<Game, Consumer3<AbstractPlayer, Integer, String>> onMoneyChange = new EventWrapper<>(_onMoneyChange);
 
     private static final SerializableObject staticLock = new SerializableObject();
     private static final List<Consumer1<AbstractPlayer>> _onInit = new CopyOnWriteArrayList<>();
-    private static final List<AbstractPlayer> players = new CopyOnWriteArrayList<>();
+    private static final List<WeakReference<AbstractPlayer>> players = new CopyOnWriteArrayList<>();
 
     private static final List<Function1<AbstractPlayer, Integer>> possessions = new CopyOnWriteArrayList<>();
     private static final List<Consumer2<AbstractPlayer, Consumer0>> propertySellers = new CopyOnWriteArrayList<>();
@@ -45,11 +47,18 @@ public abstract class AbstractPlayer implements IPlayer {
     public static void onInit(Consumer1<AbstractPlayer> listener) {
         synchronized (staticLock) {
             _onInit.add(listener);
-            players.stream().forEach(listener::run);
+            for (int i = players.size() - 1; i>=0; i--) {
+                AbstractPlayer player = players.get(i).get();
+                if (player == null) {
+                    players.remove(i);
+                } else {
+                    listener.run(player);
+                }
+            }
         }
     }
 
-    private static void triggerGameInit(AbstractPlayer player) {
+    private static void triggerPlayerInit(AbstractPlayer player) {
         synchronized (staticLock) {
             for (Consumer1<AbstractPlayer> listener: _onInit) {
                 listener.run(player);
@@ -62,7 +71,7 @@ public abstract class AbstractPlayer implements IPlayer {
     private Place currentPlace;
     private int cash, deposit;
     private int stepsToAdvance;
-    private boolean reversed = false;
+    private boolean reversed = false, bankrupted = false;
     private final Map<Object, Object> storage = new Hashtable<>();
 
     @Override
@@ -76,12 +85,10 @@ public abstract class AbstractPlayer implements IPlayer {
         storage.put(key, value);
     }
 
-    @Override
     public final Game getGame() {
         return game;
     }
 
-    @Override
     public final String getName() {
         return name;
     }
@@ -95,27 +102,24 @@ public abstract class AbstractPlayer implements IPlayer {
         this.name = name;
     }
 
-    @Override
     public final int getCash() {
         return cash;
     }
 
-    @Override
     public final int getDeposit() {
         return deposit;
     }
 
-    @Override
     public final Place getCurrentPlace() {
         return currentPlace;
     }
 
-    @Override
     public final int getTotalPossessions() {
-        return possessions.stream().map(f -> f.run(this)).reduce(0, (a, b) -> (a + b));
+        synchronized (game.lock) {
+            return possessions.stream().map(f -> f.run(this)).reduce(0, (a, b) -> (a + b));
+        }
     }
 
-    @Override
     public final boolean isReversed() {
         return reversed;
     }
@@ -123,37 +127,41 @@ public abstract class AbstractPlayer implements IPlayer {
     protected abstract void startTurn(Consumer0 cb);
     public abstract void askHowMuchToDepositOrWithdraw(Consumer1<Integer> cb);
 
-    @Override
     public void reverse() {
         reversed = !reversed;
     }
 
-    @Override
-    public void giveUp() {
+    void bankrupt() {
+        bankrupted = true;
         game.triggerBankrupt(AbstractPlayer.this);
     }
 
-    @Override
+    public void giveUp() {
+        bankrupt();
+    }
+
     public void changeCash(int amount, String msg) {
-        if (cash + amount >= 0) {
-            cash += amount;
-            _onMoneyChange.get(game).trigger(AbstractPlayer.this, amount, msg);
-        } else {
-            game.triggerException("short_of_cash");
+        synchronized (game.lock) {
+            if (cash + amount >= 0) {
+                cash += amount;
+                _onMoneyChange.get(game).trigger(AbstractPlayer.this, amount, msg);
+            } else {
+                game.triggerException("short_of_cash");
+            }
         }
     }
 
-    @Override
     public void changeDeposit(int amount, String msg) {
-        if (deposit + amount >= 0) {
-            deposit += amount;
-            _onMoneyChange.get(game).trigger(AbstractPlayer.this, amount, msg);
-        } else {
-            game.triggerException("short_of_deposit");
+        synchronized (game.lock) {
+            if (deposit + amount >= 0) {
+                deposit += amount;
+                _onMoneyChange.get(game).trigger(AbstractPlayer.this, amount, msg);
+            } else {
+                game.triggerException("short_of_deposit");
+            }
         }
     }
 
-    @Override
     public void depositOrWithdraw(Consumer0 cb) {
         askHowMuchToDepositOrWithdraw((amount) -> {
             int maxTransfer = game.getConfig("bank-max-transfer");
@@ -177,26 +185,32 @@ public abstract class AbstractPlayer implements IPlayer {
         }
     }
 
-    @Override
     public void pay(AbstractPlayer receiver, int amount, String msg, Consumer0 cb) {
-        assert amount >= 0;
-        cash -= amount;
-        _onMoneyChange.get(game).trigger(AbstractPlayer.this, -amount, msg);
-        if (receiver != null) {
-            receiver.changeCash(Math.min(amount, getTotalPossessions() + amount), "");
-        }
-        if (cash < 0) {
-            if (cash + deposit >= 0) {
-                deposit += cash;
-                cash = 0;
-                cb.run();
-            } else {
-                cash += deposit;
-                deposit = 0;
-                sellProperties(0, cb);
+        synchronized (game.lock) {
+            assert amount >= 0;
+            cash -= amount;
+            _onMoneyChange.get(game).trigger(AbstractPlayer.this, -amount, msg);
+            if (receiver != null) {
+                receiver.changeCash(Math.min(amount, getTotalPossessions() + amount), "");
             }
-        } else if (cb != null) {
-            cb.run();
+            if (cash < 0) {
+                if (cash + deposit >= 0) {
+                    deposit += cash;
+                    cash = 0;
+                    cb.run();
+                } else {
+                    cash += deposit;
+                    deposit = 0;
+                    sellProperties(0, () -> {
+                        if (cash <= 0) {
+                            bankrupt();
+                        }
+                        cb.run();
+                    });
+                }
+            } else if (cb != null) {
+                cb.run();
+            }
         }
     }
 
@@ -214,13 +228,20 @@ public abstract class AbstractPlayer implements IPlayer {
                     currentPlace.clearRoadblocks();
                     game.triggerException("met_roadblock", currentPlace.toString(game));
                 }
-                if (stepsToAdvance == 0) {
+                if (stepsToAdvance <= 0) {
                     game.endWalking();
                 } else {
-                    currentPlace.passBy(game, this::startStep);
+                    currentPlace.passBy(game, () -> {
+                        if (bankrupted) {
+                            game.endWalking();
+                        } else {
+                            startStep();
+                        }
+                    });
                 }
             } else {
                 logger.log(Level.WARNING, Game.WRONG_STATE);
+                (new Exception()).printStackTrace();
             }
         }
     }
@@ -231,16 +252,18 @@ public abstract class AbstractPlayer implements IPlayer {
             deposit = game.getConfig("init-deposit");
             currentPlace = game.getMap().getStartingPoint();
             reversed = false;
+            bankrupted = false;
         } else {
             logger.log(Level.WARNING, Game.WRONG_STATE);
+            (new Exception()).printStackTrace();
         }
     }
 
     protected void setGame(Game g) {
         synchronized (g.lock) {
             game = g;
-            triggerGameInit(AbstractPlayer.this);
-            players.add(AbstractPlayer.this);
+            triggerPlayerInit(this);
+            players.add(new WeakReference<>(this));
         }
     }
 
@@ -250,6 +273,7 @@ public abstract class AbstractPlayer implements IPlayer {
             startStep();
         } else {
             logger.log(Level.WARNING, Game.WRONG_STATE);
+            (new Exception()).printStackTrace();
         }
     }
 

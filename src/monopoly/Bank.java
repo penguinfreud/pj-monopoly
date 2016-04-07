@@ -4,8 +4,7 @@ final class Bank {
     private Bank() {}
 
     static {
-        Game.onInit((g) ->
-            GameCalendar.onMonth.addListener(g, () -> {
+        Game.onInit(g -> GameCalendar.onMonth.addListener(g, () -> {
                 synchronized (g.lock) {
                     for (AbstractPlayer player: g.getPlayers()) {
                         int amount = player.getDeposit() / 10;

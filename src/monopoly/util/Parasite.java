@@ -1,9 +1,12 @@
 package monopoly.util;
 
-public class Parasite<H extends Host, T> {
-    private final SerializableObject key = new SerializableObject();
+import java.io.Serializable;
 
-    public Parasite(Consumer1<Consumer1<H>> onInit, Function1<H, T> factory) {
+public class Parasite<H extends Host, T> {
+    private final Serializable key;
+
+    public Parasite(Serializable key, Consumer1<Consumer1<H>> onInit, Function1<H, T> factory) {
+        this.key = key;
         onInit.run((host) -> host.setParasite(key, factory.run(host)));
     }
 

@@ -7,13 +7,14 @@ import monopoly.util.Event3;
 import monopoly.util.EventWrapper;
 import monopoly.util.Parasite;
 
+import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Shareholding {
-    static class StockHolding {
+public class Shareholding implements Serializable {
+    static class StockHolding implements Serializable {
         private double cost = 0.0;
         private int amount;
 
@@ -32,8 +33,8 @@ public class Shareholding {
         }
     }
 
-    private static final Parasite<AbstractPlayer, Shareholding> parasites = new Parasite<>(AbstractPlayer::onInit, Shareholding::new);
-    private static final Parasite<Game, Event3<AbstractPlayer, Stock, Integer>> _onStockHoldingChange = new Parasite<>(Game::onInit, Event3::New);
+    private static final Parasite<AbstractPlayer, Shareholding> parasites = new Parasite<>("Shareholding", AbstractPlayer::onInit, Shareholding::new);
+    private static final Parasite<Game, Event3<AbstractPlayer, Stock, Integer>> _onStockHoldingChange = new Parasite<>("Shareholding.onStockHoldingChange", Game::onInit, Event3::New);
     public static final EventWrapper<Game, Consumer3<AbstractPlayer, Stock, Integer>> onStockHoldingChange = new EventWrapper<>(_onStockHoldingChange);
 
     public static Shareholding get(AbstractPlayer player) {

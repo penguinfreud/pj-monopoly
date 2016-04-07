@@ -312,7 +312,7 @@ public class TUIPlayer extends AbstractPlayer implements Properties.IPlayerWithP
         Game g = getGame();
         viewMap(g, false);
         String direction = g.getText(isReversed()? "anticlockwise": "clockwise");
-        System.out.println(g.format("game_info", g.getDate(), getName(), direction));
+        System.out.println(g.format("game_info", GameCalendar.getDate(g), getName(), direction));
 
         loop: while (true) {
             switch (chooseInt(gameMenuItems)) {

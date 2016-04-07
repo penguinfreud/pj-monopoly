@@ -82,17 +82,17 @@ public abstract class Property extends Place {
     @Override
     public void arriveAt(Game g, Consumer0 cb) {
         if (g.getState() == Game.State.TURN_LANDED) {
-            AbstractPlayer p = g.getCurrentPlayer();
+            AbstractPlayer player = g.getCurrentPlayer();
             if (owner == null) {
-                Properties.get(p).buyProperty(this, cb);
-            } else if (owner == p) {
+                Properties.get(player).buyProperty(this, cb);
+            } else if (owner == player) {
                 if (level < (Integer) g.getConfig("property-max-level")) {
-                    Properties.get(p).upgradeProperty(this, cb);
+                    Properties.get(player).upgradeProperty(this, cb);
                 } else {
                     cb.run();
                 }
             } else {
-                Properties.get(p).payRent(this, cb);
+                Properties.get(player).payRent(this, cb);
             }
         } else {
             logger.log(Level.WARNING, Game.WRONG_STATE);

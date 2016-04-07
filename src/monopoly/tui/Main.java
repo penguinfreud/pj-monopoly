@@ -41,6 +41,9 @@ public class Main {
             Class.forName("monopoly.card.TeardownCard");
             Class.forName("monopoly.card.RobCard");
             Class.forName("monopoly.card.GodOfFortuneCard");
+            Class.forName("monopoly.Shareholding");
+            Class.forName("monopoly.Properties");
+            Class.forName("monopoly.Cards");
 
             StockMarket.addStock(new Stock("baidu"));
             StockMarket.addStock(new Stock("google"));

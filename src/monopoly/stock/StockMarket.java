@@ -12,7 +12,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class StockMarket implements Serializable {
-    private static final Parasite<Game, StockMarket> markets = new Parasite<>(Game::onInit, StockMarket::new);
+    private static final Parasite<Game, StockMarket> markets = new Parasite<>("StockMarket", Game::onInit, StockMarket::new);
 
     public static StockMarket getMarket(Game g) {
         return markets.get(g);

@@ -30,8 +30,11 @@ class Players implements Serializable {
             throw new Exception("Too few players.");
         players.clear();
         players.addAll(thePlayers);
-        Collections.shuffle(players);
         currentPlayerIndex = 0;
+    }
+
+    void shuffle() {
+        Collections.shuffle(players);
     }
 
     void init(Game g) {

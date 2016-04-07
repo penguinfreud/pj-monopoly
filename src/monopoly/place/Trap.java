@@ -5,17 +5,20 @@ import monopoly.util.Consumer0;
 
 public class Trap extends Place {
     static {
-        GameMap.registerPlaceReader("Trap", (r, sc) -> new Trap());
+        GameMap.registerPlaceReader("Trap", (r, sc) -> new Trap(sc.nextInt()));
     }
 
-    private Trap() {
+    private int amount;
+
+    private Trap(int amount) {
         super("Trap");
+        this.amount = amount;
     }
 
     @Override
     public void passBy(Game g, Consumer0 cb) {
         AbstractPlayer player = g.getCurrentPlayer();
-        player.pay(null, player.getTotalPossessions() + 1, g.format("trap", player.getName()), cb);
+        player.pay(null, amount, g.format("trap", player.getName(), amount), cb);
     }
 
     @Override
