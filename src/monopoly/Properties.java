@@ -1,8 +1,10 @@
 package monopoly;
 
+import monopoly.place.News;
 import monopoly.util.*;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;

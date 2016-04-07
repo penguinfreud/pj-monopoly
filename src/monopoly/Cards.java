@@ -1,5 +1,6 @@
 package monopoly;
 
+import monopoly.place.News;
 import monopoly.util.*;
 
 import java.io.Serializable;

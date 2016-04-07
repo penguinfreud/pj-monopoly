@@ -32,6 +32,8 @@ public class Main {
             Class.forName("monopoly.GameCalendar");
             Class.forName("monopoly.Properties");
             Class.forName("monopoly.Cards");
+            Class.forName("monopoly.place.PropertyNews");
+            Class.forName("monopoly.place.CardNews");
             Class.forName("monopoly.Shareholding");
             Class.forName("monopoly.Lottery");
 
@@ -59,8 +61,8 @@ public class Main {
         players.clear();
         System.out.println(game.getText("ask_player_names"));
         Scanner scanner = game.getScanner();
-        players.add(new TUIPlayer(scanner.nextLine()));
-        players.add(new TUIPlayer(scanner.nextLine()));
+        players.add(new Player(scanner.nextLine()));
+        players.add(new Player(scanner.nextLine()));
         try {
             game.setPlayers(players);
             game.start();

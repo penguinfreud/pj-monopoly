@@ -23,7 +23,12 @@ public class EqualWealthCard extends Card {
         int average = players.stream().map(IPlayer::getCash).reduce(0, (a, b) -> a + b) / players.size();
         for (IPlayer player: players) {
             int amount = average - player.getCash();
-            String msg = g.format(amount >= 0? "equal_wealth_get": "equal_wealth_give", player.getName(), amount);
+            String msg;
+            if (amount >= 0) {
+                msg = g.format("equal_wealth_get", player.getName(), amount);
+            } else {
+                msg = g.format("equal_wealth_give", player.getName(), -amount);
+            }
             player.changeCash(amount, msg);
         }
         cb.run();
