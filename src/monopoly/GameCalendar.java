@@ -10,7 +10,7 @@ public final class GameCalendar implements Serializable {
     private final Game game;
     private final Calendar calendar = Calendar.getInstance();
     private static final Parasite<Game, Event0> _onMonth = new Parasite<>("GameCalendar.onMonth", Game::onInit, Event0::New);
-    private static final Parasite<Game, GameCalendar> calendars = new Parasite<>("GameCalendar.calendar", Game::onInit, GameCalendar::new);
+    private static final Parasite<Game, GameCalendar> calendars = new Parasite<>("GameCalendar", Game::onInit, GameCalendar::new);
     public static final EventWrapper<Game, Consumer0> onMonth = new EventWrapper<>(_onMonth);
 
     private GameCalendar(Game g) {
@@ -25,6 +25,10 @@ public final class GameCalendar implements Serializable {
         if (oldMonth < newMoth) {
             _onMonth.get(game).trigger();
         }
+    }
+
+    public static int getField(Game g, int field) {
+        return calendars.get(g).calendar.get(field);
     }
 
     public static String getDate(Game g) {

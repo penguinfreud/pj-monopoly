@@ -44,6 +44,14 @@ public class Cards implements Serializable {
             }
         }
 
+        default void askForInt(String reason, Consumer1<Integer> cb) {
+            if (reason.equals("LotteryCard")) {
+                cb.run(0);
+            } else {
+                cb.run(0);
+            }
+        }
+
         @Override
         default void startTurn(Consumer0 cb) {
             Cards cards = Cards.get(this);

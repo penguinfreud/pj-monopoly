@@ -178,10 +178,11 @@ public class Game implements Serializable, Host {
             if (state == State.STARTING || notFirst) {
                 state = State.TURN_STARTING;
                 hadBankrupt = false;
-                _onTurn.get(this).trigger();
+                dice = -1;
                 if (players.isNewCycle() && notFirst) {
                     _onCycle.get(this).trigger();
                 }
+                _onTurn.get(this).trigger();
                 players.getCurrentPlayer().startTurn(this::startWalking);
             } else {
                 logger.log(Level.WARNING, WRONG_STATE);
@@ -216,10 +217,31 @@ public class Game implements Serializable, Host {
         }
     }
 
+    private int dice = -1;
+
+    public void setDice(int dice) {
+        synchronized (lock) {
+            if (state == State.TURN_STARTING) {
+                if (dice >= 1 && dice < (Integer) config.get("dice-sides")) {
+                    this.dice = dice;
+                } else {
+                    triggerException("invalid_dice_number");
+                }
+            } else {
+                logger.log(Level.WARNING, WRONG_STATE);
+                (new Exception()).printStackTrace();
+            }
+        }
+    }
+
     public void startWalking() {
         synchronized (lock) {
-            int dice = ThreadLocalRandom.current().nextInt(getConfig("dice-sides")) + 1;
-            startWalking(dice);
+            if (dice != -1) {
+                startWalking(dice);
+            } else {
+                int dice = ThreadLocalRandom.current().nextInt(getConfig("dice-sides")) + 1;
+                startWalking(dice);
+            }
         }
     }
 

@@ -92,6 +92,7 @@ public abstract class Card implements Serializable, GameObject {
         Class.forName("monopoly.card.TortoiseCard");
         Class.forName("monopoly.card.TaxCard");
         Class.forName("monopoly.card.EqualWealthCard");
+        Class.forName("monopoly.card.LotteryCard");
         Class.forName("monopoly.card.MonsterCard");
         Class.forName("monopoly.card.RobCard");
         Class.forName("monopoly.card.TeardownCard");
