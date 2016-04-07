@@ -8,15 +8,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Properties {
-    public interface IPlayerWithProperties {
+    public interface IPlayerWithProperties extends IPlayer {
         void askWhetherToBuyProperty(Consumer1<Boolean> cb);
         void askWhetherToUpgradeProperty(Consumer1<Boolean> cb);
         void askWhichPropertyToMortgage(Consumer1<Property> cb);
     }
 
     private static final Parasite<AbstractPlayer, Properties> parasites = new Parasite<>(AbstractPlayer::onInit, Properties::new);
-    private static final Parasite<AbstractPlayer, Event2<Boolean, Property>> _onPropertyChange = new Parasite<>(AbstractPlayer::onInit, Event2::New);
-    public static final EventWrapper<AbstractPlayer, Consumer2<Boolean, Property>> onPropertyChange = new EventWrapper<>(_onPropertyChange);
+    private static final Parasite<Game, Event3<AbstractPlayer, Boolean, Property>> _onPropertyChange = new Parasite<>(Game::onInit, Event3::New);
+    public static final EventWrapper<Game, Consumer3<AbstractPlayer, Boolean, Property>> onPropertyChange = new EventWrapper<>(_onPropertyChange);
 
     static {
         AbstractPlayer.addPossession(player -> parasites.get(player).getValue());
@@ -32,18 +32,26 @@ public class Properties {
     private final List<Property> properties = new CopyOnWriteArrayList<>();
     private boolean rentFree = false;
 
-    protected Properties(AbstractPlayer player) {
+    private Properties(AbstractPlayer player) {
         this.player = player;
         game = player.getGame();
+
+        if (!(player instanceof IPlayerWithProperties)) {
+            game.triggerException("interface not implemented: IPlayerWithProperties");
+        }
+
+        Game.onGameStart.addListener(game, () -> {
+            properties.clear();
+            rentFree = false;
+        });
     }
 
-    final void init() {
-        properties.clear();
-        rentFree = false;
+    public final Game getGame() {
+        return game;
     }
 
-    final void setRentFree() {
-        rentFree = true;
+    public final AbstractPlayer getPlayer() {
+        return player;
     }
 
     public final int getValue() {
@@ -69,9 +77,9 @@ public class Properties {
                     int amount = property.getMortgagePrice();
                     String msg = game.format("mortgage", player.getName(), property.getName(), amount);
                     properties.remove(property);
-                    property.resetOwner();
+                    property.resetOwner(game);
                     player.changeCash(amount, msg);
-                    _onPropertyChange.get(player).trigger(false, property);
+                    _onPropertyChange.get(game).trigger(player, false, property);
                 } else {
                     game.triggerException("not_your_property");
                 }
@@ -123,10 +131,9 @@ public class Properties {
                 get(owner).properties.remove(property);
             }
             property.changeOwner(player);
-            _onPropertyChange.get(player).trigger(true, property);
+            _onPropertyChange.get(game).trigger(player, true, property);
         }
     }
-
 
     private void _upgradeProperty(Property property) {
         if (game.getState() == Game.State.TURN_LANDED) {
@@ -213,9 +220,27 @@ public class Properties {
             }
             property.changeOwner(player);
             if (owner != null) {
-                _onPropertyChange.get(owner).trigger(false, property);
+                _onPropertyChange.get(game).trigger(owner, false, property);
             }
-            _onPropertyChange.get(player).trigger(true, property);
+            _onPropertyChange.get(game).trigger(player, true, property);
+        }
+    }
+
+    public final void robLand() {
+        synchronized (game.lock) {
+            robLand(player.getCurrentPlace().asProperty());
+        }
+    }
+
+    public final void buyProperty(Consumer0 cb) {
+        synchronized (game.lock) {
+            buyProperty(player.getCurrentPlace().asProperty(), cb, true);
+        }
+    }
+
+    public final void setRentFree() {
+        synchronized (game.lock) {
+            rentFree = true;
         }
     }
 }

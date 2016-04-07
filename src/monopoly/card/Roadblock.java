@@ -1,8 +1,6 @@
 package monopoly.card;
 
-import monopoly.CardInterface;
-import monopoly.Game;
-import monopoly.Place;
+import monopoly.*;
 import monopoly.util.Consumer0;
 
 public class Roadblock extends Card {
@@ -16,16 +14,16 @@ public class Roadblock extends Card {
         super("Roadblock");
     }
 
-    public void use(Game g, CardInterface ci, Consumer0 cb) {
-        g.getCurrentPlayer().askForPlace(getName(), (place) -> {
-            synchronized (ci.lock) {
+    @Override
+    public void use(Game g, Consumer0 cb) {
+        AbstractPlayer player = g.getCurrentPlayer();
+        ((Cards.IPlayerWithCards) player).askForTargetPlace(getName(), g.sync(place -> {
                 int reach = g.getConfig("roadblock-reach");
                 if (place != null &&
-                        Place.withinReach(g.getCurrentPlayer().getCurrentPlace(), place, reach) >= 0) {
-                    ci.setRoadblock(place);
+                        Place.withinReach(player.getCurrentPlace(), place, reach) >= 0) {
+                    place.setRoadblock(g);
                 }
                 cb.run();
-            }
-        });
+        }));
     }
 }

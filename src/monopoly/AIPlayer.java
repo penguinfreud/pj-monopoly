@@ -1,14 +1,12 @@
 package monopoly;
 
-import monopoly.card.Card;
 import monopoly.util.Consumer0;
 import monopoly.util.Consumer1;
 
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class AIPlayer extends AbstractPlayer implements Properties.IPlayerWithProperties {
+public class AIPlayer extends AbstractPlayer implements Properties.IPlayerWithProperties, Cards.IPlayerWithCards {
     public AIPlayer() {}
 
     public AIPlayer(String name) {
@@ -31,8 +29,8 @@ public class AIPlayer extends AbstractPlayer implements Properties.IPlayerWithPr
     }
 
     @Override
-    protected void askWhichCardToBuy(Consumer1<Card> cb) {
-        int coupons = getCoupons();
+    public void askWhichCardToBuy(Consumer1<Card> cb) {
+        int coupons = Cards.get(this).getCoupons();
         if (coupons == 0) {
             cb.run(null);
         } else {
@@ -47,12 +45,13 @@ public class AIPlayer extends AbstractPlayer implements Properties.IPlayerWithPr
 
     @Override
     public void startTurn(Consumer0 cb) {
-        List<Card> cards = getCards();
-        if (cards.isEmpty()) {
+        Cards cards = Cards.get(this);
+        List<Card> cardList = cards.getCards();
+        if (cardList.isEmpty()) {
             cb.run();
         } else {
-            Card card = cards.get(ThreadLocalRandom.current().nextInt(cards.size()));
-            useCard(card, () -> startTurn(cb));
+            Card card = cardList.get(ThreadLocalRandom.current().nextInt(cardList.size()));
+            cards.useCard(card, () -> startTurn(cb));
         }
     }
 
@@ -62,7 +61,7 @@ public class AIPlayer extends AbstractPlayer implements Properties.IPlayerWithPr
     }
 
     @Override
-    public void askForPlayer(String reason, Consumer1<AbstractPlayer> cb) {
+    public void askForTargetPlayer(String reason, Consumer1<AbstractPlayer> cb) {
         if (reason.equals("ReverseCard")) {
             cb.run(this);
         } else {
@@ -73,7 +72,7 @@ public class AIPlayer extends AbstractPlayer implements Properties.IPlayerWithPr
     }
 
     @Override
-    public void askForPlace(String reason, Consumer1<Place> cb) {
+    public void askForTargetPlace(String reason, Consumer1<Place> cb) {
         Place cur = getCurrentPlace();
         if (reason.equals("Roadblock")) {
             cb.run(cur);

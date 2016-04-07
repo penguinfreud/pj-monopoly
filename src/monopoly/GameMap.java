@@ -2,15 +2,16 @@ package monopoly;
 
 import java.io.*;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-public class Map implements Serializable {
+public class GameMap implements Serializable {
     private Place head = null;
     private String name = null;
     private int _size = 0;
 
-    public Map() {}
+    public GameMap() {}
 
     public int size() {
         return _size;
@@ -40,13 +41,13 @@ public class Map implements Serializable {
         ++_size;
     }
 
-    public static Map readMap(InputStream is) throws Exception {
+    public static GameMap readMap(InputStream is) throws Exception {
         InputStreamReader isr = new InputStreamReader(is, "UTF-8");
         Scanner sc = new Scanner(isr);
         sc.useDelimiter(Pattern.compile("\\s*(,|[\r\n]+)\\s*"));
         String mapType = sc.next();
-        MapReader reader = mapReaders.get(mapType);
-        Map map;
+        GameMapReader reader = mapReaders.get(mapType);
+        GameMap map;
 
         if (reader != null) {
             map = reader.readMap(sc);
@@ -63,7 +64,7 @@ public class Map implements Serializable {
         return head;
     }
 
-    private static final java.util.Map<String, PlaceReader> placeReaders = new Hashtable<>();
+    private static final Map<String, PlaceReader> placeReaders = new Hashtable<>();
 
     public static void registerPlaceReader(String id, PlaceReader reader) {
         placeReaders.put(id, reader);
@@ -73,9 +74,9 @@ public class Map implements Serializable {
         return placeReaders.get(id);
     }
 
-    private static final java.util.Map<String, MapReader> mapReaders = new Hashtable<>();
+    private static final Map<String, GameMapReader> mapReaders = new Hashtable<>();
 
-    public static void registerMapReader(String id, MapReader reader) {
+    public static void registerMapReader(String id, GameMapReader reader) {
         mapReaders.put(id, reader);
     }
 }

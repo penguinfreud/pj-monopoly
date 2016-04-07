@@ -3,7 +3,7 @@ package monopoly.tui;
 import monopoly.AIPlayer;
 import monopoly.AbstractPlayer;
 import monopoly.Game;
-import monopoly.Map;
+import monopoly.GameMap;
 import monopoly.stock.Stock;
 import monopoly.stock.StockMarket;
 
@@ -21,8 +21,8 @@ public class Main {
 
     public static void startGame() {
         try {
-            Class.forName("monopoly.MapReader");
-            Class.forName("monopoly.tui.TUIMap");
+            Class.forName("monopoly.GameMapReader");
+            Class.forName("monopoly.tui.TUIGameMap");
             Class.forName("monopoly.tui.TUIPlace");
             Class.forName("monopoly.place.Empty");
             Class.forName("monopoly.place.Land");
@@ -41,30 +41,26 @@ public class Main {
             Class.forName("monopoly.card.TeardownCard");
             Class.forName("monopoly.card.RobCard");
             Class.forName("monopoly.card.GodOfFortuneCard");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
 
-        StockMarket.addStock(new Stock("baidu"));
-        StockMarket.addStock(new Stock("google"));
-        StockMarket.addStock(new Stock("facebook"));
-        StockMarket.addStock(new Stock("microsoft"));
+            StockMarket.addStock(new Stock("baidu"));
+            StockMarket.addStock(new Stock("google"));
+            StockMarket.addStock(new Stock("facebook"));
+            StockMarket.addStock(new Stock("microsoft"));
 
-        Map map = null;
-        try {
-            map = Map.readMap(Main.class.getResourceAsStream("/maps/default_tui.map"));
+            GameMap map = null;
+                map = GameMap.readMap(Main.class.getResourceAsStream("/maps/default_tui.map"));
+
+            players = new ArrayList<>();
+
+            game = new TUIGame();
+            game.setMap(map);
+
+            Game.onGameOver.addListener(game, Main::newGame);
+
+            newGame();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        players = new ArrayList<>();
-
-        game = new TUIGame();
-        game.setMap(map);
-
-        Game.onGameOver.addListener(game, Main::newGame);
-
-        newGame();
     }
 
     private static void newGame() {

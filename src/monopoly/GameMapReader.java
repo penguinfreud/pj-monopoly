@@ -3,14 +3,15 @@ package monopoly;
 import monopoly.place.Street;
 
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Scanner;
 
-public class MapReader {
-    protected MapReader() {}
-    private final java.util.Map<String, Street> streetMap = new Hashtable<>();
+public class GameMapReader {
+    protected GameMapReader() {}
+    private final Map<String, Street> streetMap = new Hashtable<>();
 
-    public Map readMap(Scanner sc) throws Exception {
-        Map map = createMap();
+    public GameMap readMap(Scanner sc) throws Exception {
+        GameMap map = createMap();
         initStreetMap();
         map.setName(sc.next());
         while (sc.hasNext()) {
@@ -19,8 +20,8 @@ public class MapReader {
         return map;
     }
 
-    protected Map createMap() {
-        return new Map();
+    protected GameMap createMap() {
+        return new GameMap();
     }
 
     protected void initStreetMap() {
@@ -29,7 +30,7 @@ public class MapReader {
 
     public Place readPlace(Scanner sc) throws Exception {
         String id = sc.next();
-        PlaceReader reader = Map.getPlaceReader(id);
+        PlaceReader reader = GameMap.getPlaceReader(id);
         if (reader != null) {
             return reader.read(this, sc);
         } else {
@@ -47,6 +48,6 @@ public class MapReader {
     }
 
     static {
-        Map.registerMapReader("Map", new MapReader());
+        GameMap.registerMapReader("GameMap", new GameMapReader());
     }
 }

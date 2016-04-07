@@ -2,7 +2,7 @@ package monopoly.place;
 
 import monopoly.*;
 import monopoly.util.Consumer0;
-import monopoly.util.Consumer2;
+import monopoly.util.Consumer1;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,36 +10,36 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class News extends Place {
-    private static final List<Consumer2<Game, PlaceInterface>> newsTypes = new ArrayList<>();
+    private static final List<Consumer1<Game>> newsTypes = new ArrayList<>();
 
     static {
-        Map.registerPlaceReader("News", (r, sc) -> new News());
-        newsTypes.add((g, pi) -> {
+        GameMap.registerPlaceReader("News", (r, sc) -> new News());
+        newsTypes.add(g -> {
             List<AbstractPlayer> players = getSortedPlayers(g);
             AbstractPlayer player = players.get(0);
             int award = getRandomAward(g);
             String msg = g.format("news_poorest_player", player.getName(), award);
-            pi.changeCash(player, award, msg);
+            player.changeCash(award, msg);
         });
-        newsTypes.add((g, pi) -> {
+        newsTypes.add(g -> {
             List<AbstractPlayer> players = getSortedPlayers(g);
             AbstractPlayer player = players.get(players.size() - 1);
             int award = getRandomAward(g);
             String msg = g.format("news_biggest_landlord", player.getName(), award);
-            pi.changeCash(player, award, msg);
+            player.changeCash(award, msg);
         });
-        newsTypes.add((g, pi) -> {
+        newsTypes.add(g -> {
             for (AbstractPlayer player: g.getPlayers()) {
                 int amount = player.getDeposit() / 10;
                 String msg = g.format("news_interest", player.getName(), amount);
-                pi.changeDeposit(player, amount, msg);
+                player.changeDeposit(amount, msg);
             }
         });
-        newsTypes.add((g, pi) -> {
+        newsTypes.add(g -> {
             for (AbstractPlayer player: g.getPlayers()) {
                 int amount = player.getDeposit() / 10;
                 String msg = g.format("news_tax", player.getName(), amount);
-                pi.changeDeposit(player, -amount, msg);
+                player.changeDeposit(-amount, msg);
             }
         });
 
@@ -65,8 +65,8 @@ public class News extends Place {
     }
 
     @Override
-    public void onLanded(Game g, PlaceInterface pi, Consumer0 cb) {
-        newsTypes.get(ThreadLocalRandom.current().nextInt(newsTypes.size())).run(g, pi);
+    public void arriveAt(Game g, Consumer0 cb) {
+        newsTypes.get(ThreadLocalRandom.current().nextInt(newsTypes.size())).run(g);
         cb.run();
     }
 }

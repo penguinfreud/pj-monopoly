@@ -1,6 +1,7 @@
 package monopoly.tui;
 
 import monopoly.AbstractPlayer;
+import monopoly.Cards;
 import monopoly.Game;
 
 import java.util.Scanner;
@@ -23,12 +24,12 @@ public class TUIGame extends Game {
                 System.out.println(msg);
             }
         });
-        AbstractPlayer.onCouponChange.addListener(this, (player, amount) -> {
+        Cards.onCouponChange.addListener(this, (player, amount) -> {
             if (amount > 0) {
                 System.out.println(format("get_coupons", player.getName(), amount));
             }
         });
-        AbstractPlayer.onCardChange.addListener(this, (player, isGet, card) -> {
+        Cards.onCardChange.addListener(this, (player, isGet, card) -> {
             if (isGet) {
                 System.out.println(format("get_card", player.getName(), card.toString(this)));
             }

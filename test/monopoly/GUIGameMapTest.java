@@ -10,17 +10,17 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-public class GUIMapTest {
+public class GUIGameMapTest {
     @Before
     public void setUp() throws IOException, ClassNotFoundException {
-        Class.forName("monopoly.gui.GUIMapReader");
+        Class.forName("monopoly.gui.GUIGameMapReader");
         Class.forName("monopoly.gui.GUIPlace");
         Class.forName("monopoly.place.Land");
     }
 
     @Test
     public void testMapFromFile() throws Exception {
-        Map map = Map.readMap(new FileInputStream("test_res/gui.map"));
+        GameMap map = GameMap.readMap(new FileInputStream("test_res/gui.map"));
         assertEquals(1, map.size());
         Place p = map.getStartingPoint();
         assertThat(p, instanceOf(GUIPlace.class));

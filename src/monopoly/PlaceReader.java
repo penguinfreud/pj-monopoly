@@ -3,5 +3,5 @@ package monopoly;
 import java.util.Scanner;
 
 public interface PlaceReader {
-    Place read(MapReader reader, Scanner sc) throws Exception;
+    Place read(GameMapReader reader, Scanner sc) throws Exception;
 }

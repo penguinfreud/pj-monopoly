@@ -1,9 +1,6 @@
 package monopoly.card;
 
-import monopoly.AbstractPlayer;
-import monopoly.CardInterface;
-import monopoly.Game;
-import monopoly.Place;
+import monopoly.*;
 import monopoly.util.Consumer0;
 
 public class ControlledDice extends Card {
@@ -16,22 +13,21 @@ public class ControlledDice extends Card {
         super("ControlledDice");
     }
 
-    public void use(Game g, CardInterface ci, Consumer0 cb) {
+    @Override
+    public void use(Game g, Consumer0 cb) {
         AbstractPlayer player = g.getCurrentPlayer();
-        player.askForPlace(getName(), (place) -> {
-            synchronized (ci.lock) {
-                if (place == null) {
-                    cb.run();
+        ((Cards.IPlayerWithCards) player).askForTargetPlace(getName(), g.sync(place -> {
+            if (place == null) {
+                cb.run();
+            } else {
+                int reach = g.getConfig("dice-sides");
+                int steps = Place.withinPlayersReach(player, place, reach);
+                if (steps != 0) {
+                    g.startWalking(steps);
                 } else {
-                    int reach = g.getConfig("dice-sides");
-                    int steps = Place.withPlayersReach(player, place, reach);
-                    if (steps != 0) {
-                        ci.walk(steps);
-                    } else {
-                        cb.run();
-                    }
+                    cb.run();
                 }
             }
-        });
+        }));
     }
 }

@@ -1,11 +1,11 @@
 package monopoly.place;
 
-import monopoly.Map;
+import monopoly.GameMap;
 import monopoly.Property;
 
 public class Land extends Property {
     static {
-        Map.registerPlaceReader("Land", (r, sc) -> new Land(sc.next(), sc.nextInt(), r.getStreet(sc.next())));
+        GameMap.registerPlaceReader("Land", (r, sc) -> new Land(sc.next(), sc.nextInt(), r.getStreet(sc.next())));
     }
 
     private final Street street;

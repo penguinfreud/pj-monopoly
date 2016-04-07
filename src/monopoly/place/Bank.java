@@ -5,7 +5,7 @@ import monopoly.util.Consumer0;
 
 public class Bank extends Place {
     static {
-        Map.registerPlaceReader("Bank", (r, sc) -> new Bank());
+        GameMap.registerPlaceReader("Bank", (r, sc) -> new Bank());
     }
 
     private Bank() {
@@ -13,12 +13,12 @@ public class Bank extends Place {
     }
 
     @Override
-    public void onPassingBy(Game g, PlaceInterface pi, Consumer0 cb) {
-        pi.depositOrWithdraw(cb);
+    public void passBy(Game g, Consumer0 cb) {
+        g.getCurrentPlayer().depositOrWithdraw(cb);
     }
 
     @Override
-    public void onLanded(Game g, PlaceInterface pi, Consumer0 cb) {
-        onPassingBy(g, pi, cb);
+    public void arriveAt(Game g, Consumer0 cb) {
+        passBy(g, cb);
     }
 }

@@ -1,6 +1,6 @@
 package monopoly.card;
 
-import monopoly.CardInterface;
+import monopoly.Card;
 import monopoly.Game;
 import monopoly.util.Consumer0;
 
@@ -15,7 +15,7 @@ public class StayCard extends Card {
     }
 
     @Override
-    public void use(Game g, CardInterface ci, Consumer0 cb) {
-        ci.walk(0);
+    public void use(Game g, Consumer0 cb) {
+        g.startWalking(0);
     }
 }

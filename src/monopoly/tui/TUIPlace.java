@@ -9,7 +9,7 @@ import java.util.List;
 
 public class TUIPlace extends DelegatePlace {
     static {
-        Map.registerPlaceReader("TUIPlace", (r, sc) -> new TUIPlace(sc.nextInt(), sc.nextInt(), r.readPlace(sc)));
+        GameMap.registerPlaceReader("TUIPlace", (r, sc) -> new TUIPlace(sc.nextInt(), sc.nextInt(), r.readPlace(sc)));
     }
 
     private final int x, y;

@@ -1,13 +1,13 @@
 package monopoly.gui;
 
 import monopoly.*;
-import monopoly.place.DelegatePlace;
+import monopoly.DelegatePlace;
 
 import java.awt.Graphics;
 
 public class GUIPlace extends DelegatePlace {
     static {
-        Map.registerPlaceReader("GUIPlace", (r, sc) -> new GUIPlace(sc.nextInt(), sc.nextInt(), r.readPlace(sc)));
+        GameMap.registerPlaceReader("GUIPlace", (r, sc) -> new GUIPlace(sc.nextInt(), sc.nextInt(), r.readPlace(sc)));
     }
 
     private final int x, y;

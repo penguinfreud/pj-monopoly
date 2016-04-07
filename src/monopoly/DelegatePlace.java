@@ -1,6 +1,5 @@
-package monopoly.place;
+package monopoly;
 
-import monopoly.*;
 import monopoly.util.Consumer0;
 
 public class DelegatePlace extends Place {
@@ -22,13 +21,13 @@ public class DelegatePlace extends Place {
     }
 
     @Override
-    public void onLanded(Game g, PlaceInterface pi, Consumer0 cb) {
-        place.onLanded(g, pi, cb);
+    protected void arriveAt(Game g, Consumer0 cb) {
+        place.arriveAt(g, cb);
     }
 
     @Override
-    public void onPassingBy(Game g, PlaceInterface pi, Consumer0 cb) {
-        place.onPassingBy(g, pi, cb);
+    protected void passBy(Game g, Consumer0 cb) {
+        place.passBy(g, cb);
     }
 
     protected Place getPlace() {

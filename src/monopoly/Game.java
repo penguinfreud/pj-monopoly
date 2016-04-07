@@ -31,10 +31,10 @@ public class Game implements Serializable, Host {
     private State state = State.OVER;
     private final Config config;
     private transient ResourceBundle messages;
-    private Map map;
+    private GameMap map;
     private final Players players = new Players();
     private boolean hadBankrupt = false;
-    private final java.util.Map<Object, Object> storage = new Hashtable<>();
+    private final Map<Object, Object> storage = new Hashtable<>();
 
     public static void putDefaultConfig(String key, Object value) {
         defaultConfig.put(key, value);
@@ -72,6 +72,14 @@ public class Game implements Serializable, Host {
         updateMessages();
     }
 
+    public final <T> Consumer1<T> sync(Consumer1<T> cb) {
+        return t -> {
+            synchronized (lock) {
+                cb.run(t);
+            }
+        };
+    }
+
     public final State getState() {
         return state;
     }
@@ -99,7 +107,7 @@ public class Game implements Serializable, Host {
             e.printStackTrace();
             return "";
         } catch(MissingResourceException e) {
-            //logger.log(Level.SEVERE, "Unknown key: " + key);
+            //logger.log(Level.INFO, "Unknown key: " + key);
             return key;
         }
     }
@@ -108,11 +116,11 @@ public class Game implements Serializable, Host {
         return MessageFormat.format(getText(key), args);
     }
 
-    public final Map getMap() {
+    public final GameMap getMap() {
         return map;
     }
 
-    public final void setMap(Map map) {
+    public final void setMap(GameMap map) {
         synchronized (lock) {
             if (state == State.OVER) {
                 this.map = map;
@@ -202,33 +210,37 @@ public class Game implements Serializable, Host {
     private boolean inEndTurn = false;
     private boolean tailRecursion = false;
 
-    private void startWalking() {
-        int dice = ThreadLocalRandom.current().nextInt(getConfig("dice-sides")) + 1;
-        startWalking(dice);
-    }
-
-    void startWalking(int steps) {
-        if (state == State.TURN_STARTING) {
-            state = State.TURN_WALKING;
-            if (players.count() <= 1) {
-                endGame();
-            } else {
-                if (steps == 0) {
-                    endWalking();
-                } else {
-                    players.getCurrentPlayer().startWalking(steps);
-                }
-            }
-        } else {
-            logger.log(Level.WARNING, WRONG_STATE);
+    public final void startWalking() {
+        synchronized (lock) {
+            int dice = ThreadLocalRandom.current().nextInt(getConfig("dice-sides")) + 1;
+            startWalking(dice);
         }
     }
 
-    void endWalking() {
+    public final void startWalking(int steps) {
+        synchronized (lock) {
+            if (state == State.TURN_STARTING) {
+                state = State.TURN_WALKING;
+                if (players.count() <= 1) {
+                    endGame();
+                } else {
+                    if (steps == 0) {
+                        endWalking();
+                    } else {
+                        players.getCurrentPlayer().startWalking(steps);
+                    }
+                }
+            } else {
+                logger.log(Level.WARNING, WRONG_STATE);
+            }
+        }
+    }
+
+    final void endWalking() {
         if (state == State.TURN_WALKING) {
             state = State.TURN_LANDED;
             _onLanded.get(this).trigger();
-            players.getCurrentPlayer().onLanded(this::endTurn);
+            players.getCurrentPlayer().getCurrentPlace().arriveAt(this, this::endTurn);
         } else {
             logger.log(Level.WARNING, WRONG_STATE);
         }

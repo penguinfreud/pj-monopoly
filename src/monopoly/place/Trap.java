@@ -5,7 +5,7 @@ import monopoly.util.Consumer0;
 
 public class Trap extends Place {
     static {
-        Map.registerPlaceReader("Trap", (r, sc) -> new Trap());
+        GameMap.registerPlaceReader("Trap", (r, sc) -> new Trap());
     }
 
     private Trap() {
@@ -13,13 +13,13 @@ public class Trap extends Place {
     }
 
     @Override
-    public void onPassingBy(Game g, PlaceInterface pi, Consumer0 cb) {
+    public void passBy(Game g, Consumer0 cb) {
         AbstractPlayer player = g.getCurrentPlayer();
-        pi.pay(g.getCurrentPlayer(), null, player.getTotalPossessions() + 1, g.format("trap", player.getName()), cb);
+        player.pay(null, player.getTotalPossessions() + 1, g.format("trap", player.getName()), cb);
     }
 
     @Override
-    public void onLanded(Game g, PlaceInterface pi, Consumer0 cb) {
-        onPassingBy(g, pi, cb);
+    public void arriveAt(Game g, Consumer0 cb) {
+        passBy(g, cb);
     }
 }

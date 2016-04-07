@@ -2,7 +2,7 @@ package monopoly.tui;
 
 import monopoly.*;
 import monopoly.Properties;
-import monopoly.card.Card;
+import monopoly.Card;
 import monopoly.stock.Stock;
 import monopoly.stock.StockMarket;
 import monopoly.util.Consumer0;
@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class TUIPlayer extends AbstractPlayer implements Properties.IPlayerWithProperties {
+public class TUIPlayer extends AbstractPlayer implements Properties.IPlayerWithProperties, Cards.IPlayerWithCards {
     public TUIPlayer() {}
 
     public TUIPlayer(String name) {
@@ -138,27 +138,24 @@ public class TUIPlayer extends AbstractPlayer implements Properties.IPlayerWithP
     }
 
     @Override
-    protected void askWhichCardToBuy(Consumer1<Card> cb) {
-        String question = getGame().format("ask_which_card_to_buy", getCoupons());
+    public void askWhichCardToBuy(Consumer1<Card> cb) {
+        String question = getGame().format("ask_which_card_to_buy", Cards.get(this).getCoupons());
         cb.run(choose(question, Card.getCards(), true));
     }
 
     private void viewMap(Game g, boolean raw) {
-        ((TUIMap) g.getMap()).print(g, System.out, raw);
+        ((TUIGameMap) g.getMap()).print(g, System.out, raw);
     }
 
     private void _askWhichCardToUse() {
-        List<Card> cards = getCards();
+        List<Card> cards = Cards.get(this).getCards();
         if (cards.size() == 0) {
             System.out.println(getGame().getText("you_have_no_card"));
         } else {
-            while (true) {
-                String question = getGame().getText("ask_which_card_to_use");
-                Card card = choose(question, cards, true);
-                if (card == null) {
-                    break;
-                }
-                useCard(card, () -> {});
+            String question = getGame().getText("ask_which_card_to_use");
+            Card card = choose(question, cards, true);
+            if (card != null) {
+                useCard(card, this::_askWhichCardToUse);
             }
         }
     }
@@ -197,7 +194,7 @@ public class TUIPlayer extends AbstractPlayer implements Properties.IPlayerWithP
                     player.getCash(),
                     player.getDeposit(),
                     Properties.get(player).getPropertiesCount(),
-                    player.getCoupons(),
+                    Cards.get(player).getCoupons(),
                     player.getTotalPossessions()));
         }
     }
@@ -229,7 +226,8 @@ public class TUIPlayer extends AbstractPlayer implements Properties.IPlayerWithP
     private String formatStockItem(Map.Entry<Stock, StockMarket.StockTrend> entry) {
         Stock stock = entry.getKey();
         double price = entry.getValue().getPrice(0);
-        return getGame().format("stock_item", stock.toString(getGame()), formatStockPrice(price), getHolding(stock));
+        return getGame().format("stock_item", stock.toString(getGame()), formatStockPrice(price),
+                Shareholding.get(this).getHolding(stock));
     }
 
     private void menuBuyStock() {
@@ -246,7 +244,7 @@ public class TUIPlayer extends AbstractPlayer implements Properties.IPlayerWithP
             int max = g.getConfig("stock-max-trade");
             int amount = getInt(g.getText("ask_how_much_to_buy"), 0, max, -1);
             if (amount > 0) {
-                buyStock(choice.getKey(), amount);
+                Shareholding.get(this).buy(choice.getKey(), amount);
             }
         }
     }
@@ -264,7 +262,7 @@ public class TUIPlayer extends AbstractPlayer implements Properties.IPlayerWithP
             int max = g.getConfig("stock-max-trade");
             int amount = getInt(g.getText("ask_how_much_to_sell"), 0, max, -1);
             if (amount > 0) {
-                sellStock(choice.getKey(), amount);
+                Shareholding.get(this).sell(choice.getKey(), amount);
             }
         }
     }
@@ -351,7 +349,7 @@ public class TUIPlayer extends AbstractPlayer implements Properties.IPlayerWithP
     }
 
     @Override
-    protected void askHowMuchToDepositOrWithdraw(Consumer1<Integer> cb) {
+    public void askHowMuchToDepositOrWithdraw(Consumer1<Integer> cb) {
         Game g = getGame();
         int maxTransfer = g.getConfig("bank-max-transfer");
         String question = g.format("ask_how_much_to_deposit_or_withdraw", getCash(), getDeposit());
@@ -359,7 +357,7 @@ public class TUIPlayer extends AbstractPlayer implements Properties.IPlayerWithP
     }
 
     @Override
-    public void askForPlayer(String reason, Consumer1<AbstractPlayer> cb) {
+    public void askForTargetPlayer(String reason, Consumer1<AbstractPlayer> cb) {
         Game g = getGame();
         if (reason.equals("ReverseCard")) {
             String question = g.getText("ask_whom_to_reverse");
@@ -372,7 +370,7 @@ public class TUIPlayer extends AbstractPlayer implements Properties.IPlayerWithP
     }
 
     @Override
-    public void askForPlace(String reason, Consumer1<Place> cb) {
+    public void askForTargetPlace(String reason, Consumer1<Place> cb) {
         Game g = getGame();
         if (reason.equals("ControlledDice")) {
             int steps = getInt(g.format("ask_where_to_go", getCurrentPlace().getName()), 1, 6, 0);

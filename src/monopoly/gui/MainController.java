@@ -1,7 +1,7 @@
 package monopoly.gui;
 
 import monopoly.AbstractPlayer;
-import monopoly.Map;
+import monopoly.GameMap;
 
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
@@ -101,7 +101,7 @@ public class MainController {
                 mapFile != null && mapFile.exists() && players.size() >= 2) {
                 try {
                     game = new GUIGame();
-                    Map map = Map.readMap(new FileInputStream(mapFile));
+                    GameMap map = GameMap.readMap(new FileInputStream(mapFile));
                     game.setMap(map);
                     game.setPlayers(players);
                     switchTo(gamePane);

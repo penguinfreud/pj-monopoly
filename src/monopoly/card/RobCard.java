@@ -1,9 +1,6 @@
 package monopoly.card;
 
-import monopoly.AbstractPlayer;
-import monopoly.CardInterface;
-import monopoly.Game;
-import monopoly.Place;
+import monopoly.*;
 import monopoly.util.Consumer0;
 
 import java.util.List;
@@ -21,20 +18,20 @@ public class RobCard extends Card {
     }
 
     @Override
-    public void use(Game g, CardInterface ci, Consumer0 cb) {
+    public void use(Game g, Consumer0 cb) {
         AbstractPlayer current = g.getCurrentPlayer();
-        current.askForPlayer(getName(), (player) -> {
+        ((Cards.IPlayerWithCards) current).askForTargetPlayer(getName(), g.sync(player -> {
             int reach = g.getConfig("rob-card-reach");
             if (player != null &&
                     Place.withinReach(current.getCurrentPlace(), player.getCurrentPlace(), reach) >= 0) {
-                List<Card> cards = player.getCards();
+                List<Card> cards = Cards.get(player).getCards();
                 if (!cards.isEmpty()) {
                     Card card = cards.get(ThreadLocalRandom.current().nextInt(cards.size()));
-                    ci.removeCard(player, card);
-                    ci.addCard(current, card);
+                    Cards.get(player).removeCard(card);
+                    Cards.get(current).addCard(card);
                 }
             }
             cb.run();
-        });
+        }));
     }
 }

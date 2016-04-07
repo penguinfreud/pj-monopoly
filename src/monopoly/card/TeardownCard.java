@@ -16,7 +16,7 @@ public class TeardownCard extends Card {
     }
 
     @Override
-    public void use(Game g, CardInterface ci, Consumer0 cb) {
+    public void use(Game g, Consumer0 cb) {
         Place place = g.getCurrentPlayer().getCurrentPlace();
         Property prop = place.asProperty();
         if (prop != null && prop instanceof Land) {
@@ -26,10 +26,10 @@ public class TeardownCard extends Card {
                 if (owner != null) {
                     int amount = land.getMortgagePrice() * 3/2;
                     String msg = g.format("teardown", owner.getName(), amount);
-                    ci.changeCash(owner, amount, msg);
-                    ci.resetOwner(land);
+                    owner.changeCash(amount, msg);
+                    land.resetOwner(g);
                 }
-                ci.resetLevel(land);
+                land.resetLevel(g);
             }
         } else {
             g.triggerException("not_on_a_removable_land");

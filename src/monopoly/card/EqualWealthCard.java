@@ -1,7 +1,7 @@
 package monopoly.card;
 
 import monopoly.AbstractPlayer;
-import monopoly.CardInterface;
+import monopoly.Card;
 import monopoly.Game;
 import monopoly.util.Consumer0;
 
@@ -18,13 +18,13 @@ public class EqualWealthCard extends Card {
     }
 
     @Override
-    public void use(Game g, CardInterface ci, Consumer0 cb) {
+    public void use(Game g, Consumer0 cb) {
         List<AbstractPlayer> players = g.getPlayers();
         int average = players.stream().map(AbstractPlayer::getCash).reduce(0, (a, b) -> a + b) / players.size();
         for (AbstractPlayer player: players) {
             int amount = average - player.getCash();
             String msg = g.format(amount >= 0? "equal_wealth_get": "equal_wealth_give", player.getName(), amount);
-            ci.changeCash(player, amount, msg);
+            player.changeCash(amount, msg);
         }
         cb.run();
     }

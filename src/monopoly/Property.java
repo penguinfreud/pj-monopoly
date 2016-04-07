@@ -67,16 +67,20 @@ public abstract class Property extends Place {
         }
     }
 
-    void resetLevel() {
-        level = 1;
+    public void resetLevel(Game g) {
+        synchronized (g.lock) {
+            level = 1;
+        }
     }
 
-    void resetOwner() {
-        owner = null;
+    public void resetOwner(Game g) {
+        synchronized (g.lock) {
+            owner = null;
+        }
     }
 
     @Override
-    public void onLanded(Game g, PlaceInterface pi, Consumer0 cb) {
+    public void arriveAt(Game g, Consumer0 cb) {
         if (g.getState() == Game.State.TURN_LANDED) {
             AbstractPlayer p = g.getCurrentPlayer();
             if (owner == null) {

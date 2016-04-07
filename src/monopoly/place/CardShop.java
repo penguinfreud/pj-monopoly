@@ -5,7 +5,7 @@ import monopoly.util.Consumer0;
 
 public class CardShop extends Place {
     static {
-        Map.registerPlaceReader("CardShop", (r, sc) -> new CardShop());
+        GameMap.registerPlaceReader("CardShop", (r, sc) -> new CardShop());
     }
 
     private CardShop() {
@@ -13,7 +13,7 @@ public class CardShop extends Place {
     }
 
     @Override
-    public void onLanded(Game g, PlaceInterface pi, Consumer0 cb) {
-        pi.buyCards(cb);
+    public void arriveAt(Game g, Consumer0 cb) {
+        Cards.get(g.getCurrentPlayer()).buyCards(cb);
     }
 }

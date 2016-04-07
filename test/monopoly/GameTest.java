@@ -9,16 +9,16 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 public class GameTest {
-    private Map map;
+    private GameMap map;
     private AbstractPlayer firstPlayer, secondPlayer;
     private Game game;
 
     @Before
     public void setUp() throws Exception {
-        Class.forName("monopoly.MapReader");
+        Class.forName("monopoly.GameMapReader");
         Class.forName("monopoly.place.Land");
         Class.forName("monopoly.place.Trap");
-        map = Map.readMap(GameTest.class.getResourceAsStream("/test.map"));
+        map = GameMap.readMap(GameTest.class.getResourceAsStream("/test.map"));
 
         List<AbstractPlayer> players = new ArrayList<>();
         firstPlayer = new AIPlayer("player A");

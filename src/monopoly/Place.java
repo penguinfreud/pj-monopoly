@@ -1,9 +1,9 @@
 package monopoly;
 
 import monopoly.util.Consumer0;
+import monopoly.util.Parasite;
 
 import java.io.Serializable;
-import java.util.stream.Stream;
 
 public abstract class Place implements Serializable, GameObject {
     private final String name;
@@ -35,19 +35,21 @@ public abstract class Place implements Serializable, GameObject {
         return roadblocks > 0;
     }
 
-    final void setRoadblock() {
-        ++roadblocks;
+    public final void setRoadblock(Game g) {
+        synchronized (g.lock) {
+            ++roadblocks;
+        }
     }
 
     final void clearRoadblocks() {
         roadblocks = 0;
     }
 
-    public void onLanded(Game g, PlaceInterface pi, Consumer0 cb) {
+    protected void arriveAt(Game g, Consumer0 cb) {
         cb.run();
     }
 
-    public void onPassingBy(Game g, PlaceInterface pi, Consumer0 cb) {
+    protected void passBy(Game g, Consumer0 cb) {
         cb.run();
     }
     
@@ -70,7 +72,7 @@ public abstract class Place implements Serializable, GameObject {
         return -1;
     }
 
-    public static int withPlayersReach(AbstractPlayer player, Place place, int steps) {
+    public static int withinPlayersReach(AbstractPlayer player, Place place, int steps) {
         Place cur = player.getCurrentPlace();
         for (int i = 0; i<steps; i++) {
             cur = player.isReversed()? cur.getPrev(): cur.getNext();

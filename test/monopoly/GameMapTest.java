@@ -10,22 +10,22 @@ import java.io.*;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
 
-public class MapTest {
+public class GameMapTest {
     private File tempFile;
 
     @Before
     public void setUp() throws IOException, ClassNotFoundException {
-        Class.forName("monopoly.MapReader");
+        Class.forName("monopoly.GameMapReader");
         Class.forName("monopoly.place.Land");
         tempFile = File.createTempFile("map", "txt");
         PrintStream ps = new PrintStream(new FileOutputStream(tempFile));
-        ps.print("Map,foo,Land,myStreet,10,s");
+        ps.print("GameMap,foo,Land,myStreet,10,s");
         ps.close();
     }
 
     @Test
     public void testMapFromFile() throws Exception {
-        Map map = Map.readMap(new FileInputStream(tempFile));
+        GameMap map = GameMap.readMap(new FileInputStream(tempFile));
         assertEquals(1, map.size());
         Place p = map.getStartingPoint();
         assertThat(p, instanceOf(Land.class));

@@ -1,20 +1,20 @@
 package monopoly.tui;
 
 import monopoly.Game;
-import monopoly.Map;
-import monopoly.MapReader;
+import monopoly.GameMap;
+import monopoly.GameMapReader;
 import monopoly.Place;
 
 import java.io.PrintStream;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class TUIMap extends Map {
+public class TUIGameMap extends GameMap {
     static {
-        Map.registerMapReader("TUIMap", new MapReader() {
+        GameMap.registerMapReader("TUIGameMap", new GameMapReader() {
             @Override
-            protected Map createMap() {
-                return new TUIMap();
+            protected GameMap createMap() {
+                return new TUIGameMap();
             }
         });
     }

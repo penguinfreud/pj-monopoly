@@ -1,11 +1,11 @@
 package monopoly.place;
 
-import monopoly.Map;
+import monopoly.GameMap;
 import monopoly.Place;
 
 public class Empty extends Place {
     static {
-        Map.registerPlaceReader("Empty", (r, sc) -> new Empty());
+        GameMap.registerPlaceReader("Empty", (r, sc) -> new Empty());
     }
 
     private Empty() {

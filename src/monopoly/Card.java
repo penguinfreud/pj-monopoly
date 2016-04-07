@@ -1,9 +1,7 @@
-package monopoly.card;
+package monopoly;
 
-import monopoly.CardInterface;
-import monopoly.Game;
-import monopoly.GameObject;
 import monopoly.util.Consumer0;
+import monopoly.util.Parasite;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -31,7 +29,7 @@ public abstract class Card implements Serializable, GameObject {
         return (Integer) g.getConfig(uncamelize(name) + "-price");
     }
 
-    public void use(Game g, CardInterface ci, Consumer0 cb) {
+    protected void use(Game g, Consumer0 cb) {
         cb.run();
     }
 

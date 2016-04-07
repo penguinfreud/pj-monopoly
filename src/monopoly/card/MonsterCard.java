@@ -16,11 +16,11 @@ public class MonsterCard extends Card {
     }
 
     @Override
-    public void use(Game g, CardInterface ci, Consumer0 cb) {
+    public void use(Game g, Consumer0 cb) {
         Property prop = g.getCurrentPlayer().getCurrentPlace().asProperty();
         if (prop != null && prop instanceof Land) {
             Street street = ((Land) prop).getStreet();
-            street.getLands().stream().forEach(ci::resetLevel);
+            street.getLands().stream().forEach(land -> land.resetLevel(g));
         } else {
             g.triggerException("not_on_a_removable_land");
         }
