@@ -186,6 +186,7 @@ public class Properties implements Serializable {
         synchronized (game.lock) {
             if (force) {
                 _buyProperty(property, true);
+                cb.run();
             } else {
                 int price = property.getPurchasePrice();
                 if (property.isFree() && player.getCash() >= price) {

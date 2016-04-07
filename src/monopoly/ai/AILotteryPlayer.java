@@ -24,5 +24,6 @@ public interface AILotteryPlayer extends IPlayer {
                 buyLottery(ThreadLocalRandom.current().nextInt(max + 1));
             }
         }
+        cb.run();
     }
 }

@@ -133,6 +133,9 @@ public class GameSerializationTest {
         Class.forName("monopoly.Cards");
         Class.forName("monopoly.place.PropertyNews");
         Class.forName("monopoly.place.CardNews");
+        Class.forName("monopoly.GameCalendar");
+        Class.forName("monopoly.Bank");
+        Class.forName("monopoly.Lottery");
         
         GameMap map = GameMap.readMap(GameTest.class.getResourceAsStream("/card_rich.map"));
 

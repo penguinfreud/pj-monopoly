@@ -2,13 +2,14 @@ package monopoly;
 
 import monopoly.util.Parasite;
 
+import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Lottery {
+public class Lottery implements Serializable {
     static {
         Game.putDefaultConfig("lottery-number-max", 20);
         Game.putDefaultConfig("lottery-price", 200);

@@ -36,6 +36,7 @@ public class Main {
             Class.forName("monopoly.place.CardNews");
             Class.forName("monopoly.Shareholding");
             Class.forName("monopoly.Lottery");
+            Class.forName("monopoly.Bank");
 
             StockMarket.addStock(new Stock("baidu"));
             StockMarket.addStock(new Stock("google"));
