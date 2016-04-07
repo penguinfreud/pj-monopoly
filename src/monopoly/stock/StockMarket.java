@@ -31,7 +31,7 @@ public class StockMarket implements Serializable {
             Game.putDefaultConfig("stock-max-changing-rate", 0.1);
         }
 
-        private Game game;
+        private final Game game;
         private final List<Double> prices = new CopyOnWriteArrayList<>();
         private boolean red = false, black = false;
 

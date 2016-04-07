@@ -16,7 +16,7 @@ public class Main {
         startGame();
     }
 
-    public static void startGame() {
+    private static void startGame() {
         try {
             Class.forName("monopoly.GameMapReader");
             Class.forName("monopoly.tui.TUIGameMap");
@@ -33,8 +33,7 @@ public class Main {
             StockMarket.addStock(new Stock("facebook"));
             StockMarket.addStock(new Stock("microsoft"));
 
-            GameMap map = null;
-                map = GameMap.readMap(Main.class.getResourceAsStream("/maps/default_tui.map"));
+            GameMap map = GameMap.readMap(Main.class.getResourceAsStream("/maps/default_tui.map"));
 
             players = new ArrayList<>();
 

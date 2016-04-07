@@ -1,6 +1,5 @@
 package monopoly.card;
 
-import monopoly.BasePlayer;
 import monopoly.Game;
 import monopoly.IPlayer;
 import monopoly.Properties;

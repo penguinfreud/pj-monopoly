@@ -93,7 +93,7 @@ public class Game implements Serializable, Host {
         }
     }
 
-    protected final void putConfig(String key, Object value) {
+    final void putConfig(String key, Object value) {
         synchronized (lock) {
             config.put(key, value);
             if (key.equals("bundle-name") || key.equals("locale")) {
@@ -160,7 +160,7 @@ public class Game implements Serializable, Host {
         synchronized (lock) {
             if (state == State.OVER) {
                 state = State.STARTING;
-                players.init(this);
+                players.init();
                 _onGameStart.get(this).trigger();
                 startTurn();
             } else {
@@ -190,6 +190,9 @@ public class Game implements Serializable, Host {
         }
     }
 
+    private boolean inEndTurn = false;
+    private boolean tailRecursion = false;
+
     private void endTurn() {
         synchronized (lock) {
             if (state == State.TURN_LANDED) {
@@ -212,9 +215,6 @@ public class Game implements Serializable, Host {
             }
         }
     }
-
-    private boolean inEndTurn = false;
-    private boolean tailRecursion = false;
 
     public void startWalking() {
         synchronized (lock) {
@@ -331,7 +331,7 @@ public class Game implements Serializable, Host {
         _onException.get(this).trigger(format(key, args));
     }
 
-    protected static final Game readData(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+    protected static Game readData(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         synchronized (staticLock) {
             Game game = (Game) ois.readObject();
             triggerGameInit(game);

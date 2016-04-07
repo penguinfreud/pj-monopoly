@@ -1,7 +1,6 @@
 package monopoly;
 
 import monopoly.util.Consumer0;
-import monopoly.util.Parasite;
 
 import java.io.Serializable;
 import java.util.Arrays;

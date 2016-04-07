@@ -37,7 +37,7 @@ class Players implements Serializable {
         Collections.shuffle(players);
     }
 
-    void init(Game g) {
+    void init() {
         players.forEach(IPlayer::init);
     }
 

@@ -8,7 +8,7 @@ public class Trap extends Place {
         GameMap.registerPlaceReader("Trap", (r, sc) -> new Trap(sc.nextInt()));
     }
 
-    private int amount;
+    private final int amount;
 
     private Trap(int amount) {
         super("Trap");
@@ -16,13 +16,13 @@ public class Trap extends Place {
     }
 
     @Override
-    public void passBy(Game g, Consumer0 cb) {
+    protected void passBy(Game g, Consumer0 cb) {
         IPlayer player = g.getCurrentPlayer();
         player.pay(null, amount, g.format("trap", player.getName(), amount), cb);
     }
 
     @Override
-    public void arriveAt(Game g, Consumer0 cb) {
+    protected void arriveAt(Game g, Consumer0 cb) {
         passBy(g, cb);
     }
 }

@@ -24,7 +24,7 @@ public class GodOfLandCard extends Card {
             public void run() {
                 if (g.getCurrentPlayer() == player) {
                     if (duration > 0) {
-                        Properties.get(player).robLand();
+                        Properties.get(player).robLand(player.getCurrentPlace().asProperty());
                         duration--;
                         if (duration == 0) {
                             Game.onTurn.removeListener(g, this);

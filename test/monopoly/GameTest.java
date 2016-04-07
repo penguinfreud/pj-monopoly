@@ -125,7 +125,7 @@ public class GameTest {
         players.add(playerC);
         game.setPlayers(players);
         List<IPlayer> bankrupted = new ArrayList<>();
-        Game.onBankrupt.addListener(game, player -> bankrupted.add(player));
+        Game.onBankrupt.addListener(game, bankrupted::add);
         game.forwardUntil = -1;
         game.start();
         assertEquals(2, bankrupted.size());

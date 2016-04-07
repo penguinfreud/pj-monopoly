@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MyGame extends Game {
-    List<Integer> dices = new ArrayList<>();
-    int turnNo = 0;
+    private int turnNo = 0;
     int forwardUntil = 0;
 
     @Override
@@ -14,8 +13,6 @@ public class MyGame extends Game {
             if (turnNo < forwardUntil || forwardUntil == -1) {
                 super.startWalking();
             }
-        } else if (turnNo < dices.size()) {
-            startWalking(dices.get(turnNo));
         }
     }
 }

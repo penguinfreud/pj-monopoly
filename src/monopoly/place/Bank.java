@@ -13,12 +13,12 @@ public class Bank extends Place {
     }
 
     @Override
-    public void passBy(Game g, Consumer0 cb) {
+    protected void passBy(Game g, Consumer0 cb) {
         g.getCurrentPlayer().depositOrWithdraw(cb);
     }
 
     @Override
-    public void arriveAt(Game g, Consumer0 cb) {
+    protected void arriveAt(Game g, Consumer0 cb) {
         passBy(g, cb);
     }
 }

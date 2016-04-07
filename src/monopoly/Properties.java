@@ -63,7 +63,7 @@ public class Properties implements Serializable {
         return player;
     }
 
-    public final int getValue() {
+    private final int getValue() {
         synchronized (game.lock) {
             return properties.stream().map(Property::getMortgagePrice).reduce(0, (a, b) -> a + b);
         }
@@ -183,14 +183,14 @@ public class Properties implements Serializable {
     public final void buyProperty(Property property, Consumer0 cb, boolean force) {
         synchronized (game.lock) {
             if (force) {
-                _buyProperty(property, force);
+                _buyProperty(property, true);
             } else {
                 int price = property.getPurchasePrice();
                 if (property.isFree() && player.getCash() >= price) {
                     ((IPlayerWithProperties) player).askWhetherToBuyProperty((ok) -> {
                         synchronized (game.lock) {
                             if (ok) {
-                                _buyProperty(property, force);
+                                _buyProperty(property, false);
                             }
                             cb.run();
                         }
@@ -228,21 +228,17 @@ public class Properties implements Serializable {
         }
     }
 
-    final void robLand(Property property) {
-        if (property != null) {
-            IPlayer owner = property.getOwner();
-            property.changeOwner(player);
-            if (owner != null) {
-                get(owner).properties.remove(property);
-                _onPropertyChange.get(game).trigger(owner, false, property);
-            }
-            _onPropertyChange.get(game).trigger(player, true, property);
-        }
-    }
-
-    public final void robLand() {
+    public final void robLand(Property property) {
         synchronized (game.lock) {
-            robLand(player.getCurrentPlace().asProperty());
+            if (property != null) {
+                IPlayer owner = property.getOwner();
+                property.changeOwner(player);
+                if (owner != null) {
+                    get(owner).properties.remove(property);
+                    _onPropertyChange.get(game).trigger(owner, false, property);
+                }
+                _onPropertyChange.get(game).trigger(player, true, property);
+            }
         }
     }
 

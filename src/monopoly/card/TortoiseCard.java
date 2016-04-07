@@ -1,6 +1,5 @@
 package monopoly.card;
 
-import monopoly.BasePlayer;
 import monopoly.Card;
 import monopoly.Game;
 import monopoly.IPlayer;
@@ -21,7 +20,7 @@ public class TortoiseCard extends Card {
     protected void use(Game g, Consumer0 cb) {
         Game.onTurn.addListener(g, new Consumer0() {
             private int duration = g.getConfig("tortoise-card-duration");
-            private IPlayer player = g.getCurrentPlayer();
+            private final IPlayer player = g.getCurrentPlayer();
 
             @Override
             public void run() {

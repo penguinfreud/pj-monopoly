@@ -3,7 +3,7 @@ package monopoly;
 import java.io.Serializable;
 import java.util.Hashtable;
 
-class Config implements Serializable {
+public class Config implements Serializable {
     private final Hashtable<String, Object> configTable = new Hashtable<>();
     private Config base;
 
@@ -27,7 +27,7 @@ class Config implements Serializable {
         }
     }
 
-    Object get(String key) {
+    public Object get(String key) {
         if (configTable.containsKey(key)) {
             return configTable.get(key);
         } else if (base != null) {
@@ -37,15 +37,15 @@ class Config implements Serializable {
         }
     }
 
-    void put(String key, Object value) {
+    public void put(String key, Object value) {
         configTable.put(key, value);
     }
 
-    void remove(String key) {
+    public void remove(String key) {
         configTable.remove(key);
     }
 
-    void clear() {
+    public void clear() {
         configTable.clear();
     }
 }

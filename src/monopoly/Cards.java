@@ -96,7 +96,7 @@ public class Cards implements Serializable {
         return new CopyOnWriteArrayList<>(cards);
     }
 
-    final void useCard(Card card, Consumer0 cb) {
+    private void useCard(Card card, Consumer0 cb) {
         synchronized (game.lock) {
             if (game.getState() == Game.State.TURN_STARTING) {
                 if (cards.contains(card)) {
@@ -160,13 +160,5 @@ public class Cards implements Serializable {
         synchronized (game.lock) {
             _buyCards(cb);
         }
-    }
-
-    public final void askForTargetPlayer(String reason, Consumer1<IPlayer> cb) {
-        ((IPlayerWithCards) player).askForTargetPlayer(reason, cb);
-    }
-
-    public final void askForTargetPlace(String reason, Consumer1<Place> cb) {
-        ((IPlayerWithCards) player).askForTargetPlace(reason, cb);
     }
 }

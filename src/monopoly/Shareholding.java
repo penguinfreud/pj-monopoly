@@ -55,7 +55,7 @@ public class Shareholding implements Serializable {
         game = player.getGame();
     }
 
-    public final int getValue() {
+    private final int getValue() {
         return (int)(double) (holdingMap.entrySet().stream().map(Map.Entry::getValue)
                 .map(StockHolding::getTotalCost).reduce(0.0, (a, b) -> a + b));
     }
