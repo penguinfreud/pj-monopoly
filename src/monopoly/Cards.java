@@ -105,13 +105,22 @@ public class Cards implements Serializable {
         return new CopyOnWriteArrayList<>(cards);
     }
 
-    private void useCard(Card card, Consumer0 cb) {
+    public final int getCardsCount() {
+        return cards.size();
+    }
+
+    public void useCard(Card card, Consumer0 cb) {
         synchronized (game.lock) {
             if (game.getState() == Game.State.TURN_STARTING) {
                 if (cards.contains(card)) {
                     cards.remove(card);
                     _onCardChange.get(game).trigger(player, false, card);
-                    card.use(game, cb);
+                    card.use(game, (ok) -> {
+                        if (!ok) {
+                            cards.add(card);
+                        }
+                        cb.run();
+                    });
                 } else {
                     game.triggerException("you_do_not_have_this_card");
                     cb.run();

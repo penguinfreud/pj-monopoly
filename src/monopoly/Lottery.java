@@ -13,22 +13,24 @@ public class Lottery implements Serializable {
     static {
         Game.putDefaultConfig("lottery-number-max", 20);
         Game.putDefaultConfig("lottery-price", 200);
+        Game.putDefaultConfig("lottery-pool", 2000);
     }
 
     private static final Parasite<Game, Lottery> parasites = new Parasite<>("Lottery", Game::onInit, Lottery::new);
 
     private final Game game;
-    private int value = 0;
+    private int value, cheatNumber = -1;
     private final Map<Integer, List<IPlayer>> entries = new Hashtable<>();
 
     private Lottery(Game g) {
         game = g;
+        value = g.getConfig("lottery-pool");
         GameCalendar.onMonth.addListener(g, this::selectLotteryWinner);
     }
 
     private void selectLotteryWinner() {
         int max = game.getConfig("lottery-number-max");
-        int winningNumber = ThreadLocalRandom.current().nextInt(max);
+        int winningNumber = cheatNumber >= 0? cheatNumber: ThreadLocalRandom.current().nextInt(max);
         game.triggerException("lottery", winningNumber);
         List<IPlayer> winners = entries.get(winningNumber);
         if (winners != null) {
@@ -40,7 +42,8 @@ public class Lottery implements Serializable {
         } else {
             game.triggerException("no_one_wins_lottery");
         }
-        value = 0;
+        value = game.getConfig("lottery-pool");
+        cheatNumber = -1;
         entries.clear();
     }
 
@@ -66,6 +69,13 @@ public class Lottery implements Serializable {
             }
         } else {
             g.triggerException("short_of_cash");
+        }
+    }
+
+    public static void cheat(Game g, int number) {
+        int max = g.getConfig("lottery-number-max");
+        if (number >= 0 && number <= max) {
+            parasites.get(g).cheatNumber = number;
         }
     }
 }

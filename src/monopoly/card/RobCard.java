@@ -2,6 +2,7 @@ package monopoly.card;
 
 import monopoly.*;
 import monopoly.util.Consumer0;
+import monopoly.util.Consumer1;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -18,7 +19,7 @@ public class RobCard extends Card {
     }
 
     @Override
-    public void use(Game g, Consumer0 cb) {
+    public void use(Game g, Consumer1<Boolean> cb) {
         IPlayer current = g.getCurrentPlayer();
         ((Cards.IPlayerWithCards) current).askForTargetPlayer(getName(), g.sync(player -> {
             int reach = g.getConfig("rob-card-reach");
@@ -29,9 +30,13 @@ public class RobCard extends Card {
                     Card card = cards.get(ThreadLocalRandom.current().nextInt(cards.size()));
                     Cards.get(player).removeCard(card);
                     Cards.get(current).addCard(card);
+                    cb.run(true);
+                } else {
+                    cb.run(false);
                 }
+            } else {
+                cb.run(false);
             }
-            cb.run();
         }));
     }
 }

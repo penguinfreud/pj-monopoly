@@ -2,6 +2,7 @@ package monopoly.card;
 
 import monopoly.*;
 import monopoly.util.Consumer0;
+import monopoly.util.Consumer1;
 
 public class LotteryCard extends Card {
     static {
@@ -14,16 +15,16 @@ public class LotteryCard extends Card {
     }
 
     @Override
-    protected void use(Game g, Consumer0 cb) {
+    protected void use(Game g, Consumer1<Boolean> cb) {
         IPlayer player = g.getCurrentPlayer();
-        int price = g.getConfig("lottery-price");
-        if (player.getCash() > price) {
-            ((Cards.IPlayerWithCards) player).askForInt(getName(), number -> {
-                Lottery.buyLottery(player, number);
-                cb.run();
-            });
-        } else {
-            cb.run();
-        }
+        ((Cards.IPlayerWithCards) player).askForInt(getName(), number -> {
+            int max = g.getConfig("lottery-number-max");
+            if (number >= 0 && number <= max) {
+                Lottery.cheat(g, number);
+                cb.run(true);
+            } else {
+                cb.run(false);
+            }
+        });
     }
 }

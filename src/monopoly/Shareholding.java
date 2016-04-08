@@ -14,9 +14,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Shareholding implements Serializable {
-    static class StockHolding implements Serializable {
+    public static class StockHolding implements Serializable {
         private double cost = 0.0;
-        private int amount;
+        private int amount = 0;
 
         private StockHolding() {}
 
@@ -60,8 +60,26 @@ public class Shareholding implements Serializable {
                 .map(StockHolding::getTotalCost).reduce(0.0, (a, b) -> a + b));
     }
 
-    public final StockHolding getHolding(Stock stock) {
+    public final StockHolding get(Stock stock) {
         return holdingMap.get(stock);
+    }
+
+    public final int getAmount(Stock stock) {
+        StockHolding holding = holdingMap.get(stock);
+        if (holding == null) {
+            return 0;
+        } else {
+            return holding.getAmount();
+        }
+    }
+
+    public final double getAverageCost(Stock stock) {
+        StockHolding holding = holdingMap.get(stock);
+        if (holding == null) {
+            return Double.NaN;
+        } else {
+            return holding.getAverageCost();
+        }
     }
 
     public final void buy(Stock stock, int amount) {

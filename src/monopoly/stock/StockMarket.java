@@ -53,7 +53,8 @@ public class StockMarket implements Serializable {
         private void initPrice() {
             double min = game.getConfig("stock-init-price-min"),
             max = game.getConfig("stock-init-price-max");
-            prices.add(ThreadLocalRandom.current().nextDouble(max - min) + min);
+            double price = ThreadLocalRandom.current().nextDouble(max - min) + min;
+            prices.add(price);
         }
 
         private void calcNextPrice() {
@@ -66,7 +67,8 @@ public class StockMarket implements Serializable {
             } else {
                 k = ThreadLocalRandom.current().nextDouble(rate + rate) - rate;
             }
-            prices.add(prices.get(prices.size() - 1) * k);
+            double price = prices.get(prices.size() - 1) * (1 + k);
+            prices.add(price);
             red = black = false;
         }
 

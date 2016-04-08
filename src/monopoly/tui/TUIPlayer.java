@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithProperties, Cards.IPlayerWithCards {
+public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithProperties, Cards.IPlayerWithCards, IPlayerWithCardsAndStock {
     public TUIPlayer() {}
 
     public TUIPlayer(String name) {
@@ -139,23 +139,28 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
 
     @Override
     public void askWhichCardToBuy(Consumer1<Card> cb) {
-        String question = getGame().format("ask_which_card_to_buy", Cards.get(this).getCoupons());
-        cb.run(choose(question, Card.getCards(), true));
+        Game g = getGame();
+        String question = g.format("ask_which_card_to_buy", Cards.get(this).getCoupons());
+        cb.run(choose(question, Card.getCards(), true,
+                card -> g.format("card_and_price", card.toString(g), card.getPrice(g))));
     }
 
     private void viewMap(Game g, boolean raw) {
         ((TUIGameMap) g.getMap()).print(g, System.out, raw);
     }
 
-    private void _askWhichCardToUse() {
+    private void _askWhichCardToUse(Consumer0 cb) {
         List<Card> cards = Cards.get(this).getCards();
         if (cards.size() == 0) {
             System.out.println(getGame().getText("you_have_no_card"));
+            startTurn(cb);
         } else {
             String question = getGame().getText("ask_which_card_to_use");
             Card card = choose(question, cards, true);
             if (card != null) {
-                useCard(card, this::_askWhichCardToUse);
+                Cards.get(this).useCard(card, () -> _askWhichCardToUse(cb));
+            } else {
+                startTurn(cb);
             }
         }
     }
@@ -178,8 +183,8 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     private void viewPlace() {
         Game g = getGame();
         while (true) {
-            int steps = getInt(g.getText("ask_which_place_to_view"), 0, 10, -1);
-            if (steps == -1) {
+            int steps = getInt(g.getText("ask_which_place_to_view"), -10, 10, -11);
+            if (steps == -11) {
                 break;
             }
             ((TUIPlace)nthPlace(steps)).printDetail(g, System.out);
@@ -190,11 +195,14 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
         Game g = getGame();
         System.out.println(g.getText("player_info_table_head"));
         for (IPlayer player: g.getPlayers()) {
+            Cards cards = Cards.get(player);
             System.out.println(g.format("player_info_table_row",
+                    player.getName(),
                     player.getCash(),
                     player.getDeposit(),
                     Properties.get(player).getPropertiesCount(),
-                    Cards.get(player).getCoupons(),
+                    cards.getCoupons(),
+                    cards.getCardsCount(),
                     player.getTotalPossessions()));
         }
     }
@@ -212,22 +220,37 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     private void menuViewStock() {
         Game g = getGame();
         Set<Map.Entry<Stock, StockMarket.StockTrend>> stocks = StockMarket.getMarket(g).getStockEntries();
+        for (int i = 1; i<=5; i++) {
+            System.out.print(i + "\t\t");
+        }
+        for (IPlayer player: g.getPlayers()) {
+            System.out.print(g.format("player_holding_head", player.getName()));
+        }
+        System.out.println();
         for (Map.Entry<Stock, StockMarket.StockTrend>entry: stocks) {
+            Stock stock = entry.getKey();
             StockMarket.StockTrend trend = entry.getValue();
-            System.out.println(g.format("stock_table_row", entry.getKey().toString(g),
-                    formatStockPrice(trend.getPrice(-4)),
-                    formatStockPrice(trend.getPrice(-3)),
-                    formatStockPrice(trend.getPrice(-2)),
-                    formatStockPrice(trend.getPrice(-1)),
+            System.out.print(g.format("stock_table_row", stock.toString(g),
+                    formatStockPrice(trend.getPrice(4)),
+                    formatStockPrice(trend.getPrice(3)),
+                    formatStockPrice(trend.getPrice(2)),
+                    formatStockPrice(trend.getPrice(1)),
                     formatStockPrice(trend.getPrice(0))));
+
+            for (IPlayer player: g.getPlayers()) {
+                System.out.print(g.format("player_holding_row",
+                        Shareholding.get(player).getAmount(stock)));
+            }
+            System.out.println();
         }
     }
 
     private String formatStockItem(Map.Entry<Stock, StockMarket.StockTrend> entry) {
         Stock stock = entry.getKey();
         double price = entry.getValue().getPrice(0);
+        Shareholding holding = Shareholding.get(this);
         return getGame().format("stock_item", stock.toString(getGame()), formatStockPrice(price),
-                Shareholding.get(this).getHolding(stock));
+                holding.getAmount(stock), formatStockPrice(holding.getAverageCost(stock)));
     }
 
     private void menuBuyStock() {
@@ -337,7 +360,7 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
                     viewMap(g, true);
                     break;
                 case 2:
-                    _askWhichCardToUse();
+                    _askWhichCardToUse(cb);
                     break loop;
                 case 3:
                     checkAlert(g);
@@ -370,7 +393,7 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
         Game g = getGame();
         int maxTransfer = g.getConfig("bank-max-transfer");
         String question = g.format("ask_how_much_to_deposit_or_withdraw", getCash(), getDeposit());
-        cb.run(getInt(question, -maxTransfer, maxTransfer, 0));
+        cb.run(getInt(question, -getDeposit(), getCash(), 0));
     }
 
     @Override
@@ -393,17 +416,43 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
             int steps = getInt(g.format("ask_where_to_go", getCurrentPlace().getName()), 1, 6, 0);
             if (steps == 0) {
                 cb.run(null);
+            } else {
+                Place place = nthPlace(steps);
+                cb.run(place);
             }
-            Place place = nthPlace(steps);
-            cb.run(place);
         } else if (reason.equals("Roadblock")) {
             int steps = getInt(g.format("ask_where_to_set_roadblock", getCurrentPlace().getName()), -8, 8, -9);
             if (steps == -9) {
                 cb.run(null);
+            } else {
+                cb.run(nthPlace(steps));
             }
-            cb.run(nthPlace(steps));
         } else {
             cb.run(null);
+        }
+    }
+
+    @Override
+    public void askForInt(String reason, Consumer1<Integer> cb) {
+        if (reason.equals("LotteryCard")) {
+            Game g = getGame();
+            int max = g.getConfig("lottery-number-max");
+            cb.run(getInt(g.getText("ask_for_lottery_number"), 0, max, -1));
+        } else {
+            cb.run(0);
+        }
+    }
+
+    @Override
+    public void askForTargetStock(Consumer1<Stock> cb) {
+        Game g = getGame();
+        StockMarket market = StockMarket.getMarket(g);
+        List<Map.Entry<Stock, StockMarket.StockTrend>> stocks = new ArrayList<>(market.getStockEntries());
+        Map.Entry<Stock, StockMarket.StockTrend> entry = choose(g.format("ask_for_target_stock"), stocks, true, this::formatStockItem);
+        if (entry == null) {
+            cb.run(null);
+        } else {
+            cb.run(entry.getKey());
         }
     }
 }

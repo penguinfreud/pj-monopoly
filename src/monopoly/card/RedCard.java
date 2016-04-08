@@ -3,8 +3,10 @@ package monopoly.card;
 import monopoly.Card;
 import monopoly.Game;
 import monopoly.IPlayerWithCardsAndStock;
+import monopoly.stock.Stock;
 import monopoly.stock.StockMarket;
 import monopoly.util.Consumer0;
+import monopoly.util.Consumer1;
 
 public class RedCard extends Card {
     static {
@@ -17,12 +19,19 @@ public class RedCard extends Card {
     }
 
     @Override
-    protected void use(Game g, Consumer0 cb) {
+    protected void use(Game g, Consumer1<Boolean> cb) {
         ((IPlayerWithCardsAndStock) g.getCurrentPlayer()).askForTargetStock(stock -> {
             if (stock != null) {
-                StockMarket.getMarket(g).setRed(stock);
+                StockMarket market = StockMarket.getMarket(g);
+                if (market.hasStock(stock)) {
+                    StockMarket.getMarket(g).setRed(stock);
+                    cb.run(true);
+                } else {
+                    cb.run(false);
+                }
+            } else {
+                cb.run(false);
             }
-            cb.run();
         });
     }
 }

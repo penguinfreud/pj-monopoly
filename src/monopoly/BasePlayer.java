@@ -154,7 +154,7 @@ public class BasePlayer implements IPlayer {
     @Override
     public void changeCash(int amount, String msg) {
         synchronized (game.lock) {
-            if (cash + amount >= 0) {
+            if (cash + amount >= 0 || cash < 0 && amount >= 0) {
                 cash += amount;
                 _onMoneyChange.get(game).trigger(this, amount, msg);
             } else {
@@ -291,12 +291,6 @@ public class BasePlayer implements IPlayer {
         } else {
             logger.log(Level.WARNING, Game.WRONG_STATE);
             (new Exception()).printStackTrace();
-        }
-    }
-
-    protected void useCard(Card card, Consumer0 cb) {
-        synchronized (game.lock) {
-            card.use(game, cb);
         }
     }
 }

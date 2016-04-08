@@ -4,6 +4,7 @@ import monopoly.Card;
 import monopoly.Game;
 import monopoly.IPlayer;
 import monopoly.util.Consumer0;
+import monopoly.util.Consumer1;
 
 import java.util.List;
 
@@ -18,7 +19,7 @@ public class EqualWealthCard extends Card {
     }
 
     @Override
-    public void use(Game g, Consumer0 cb) {
+    public void use(Game g, Consumer1<Boolean> cb) {
         List<IPlayer> players = g.getPlayers();
         int average = players.stream().map(IPlayer::getCash).reduce(0, (a, b) -> a + b) / players.size();
         for (IPlayer player: players) {
@@ -31,6 +32,6 @@ public class EqualWealthCard extends Card {
             }
             player.changeCash(amount, msg);
         }
-        cb.run();
+        cb.run(true);
     }
 }

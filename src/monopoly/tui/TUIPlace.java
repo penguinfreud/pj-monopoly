@@ -78,6 +78,8 @@ public class TUIPlace extends DelegatePlace {
             out.println(prop.getPrice());
             out.print(g.getText("land_level"));
             out.println(prop.getLevel());
+            out.print(g.getText("land_purchase_price"));
+            out.println(prop.getPurchasePrice());
             out.print(g.getText("land_rent"));
             out.println(prop.getRent());
         } else {

@@ -5,6 +5,7 @@ import monopoly.Game;
 import monopoly.IPlayerWithCardsAndStock;
 import monopoly.stock.StockMarket;
 import monopoly.util.Consumer0;
+import monopoly.util.Consumer1;
 
 public class BlackCard extends Card {
     static {
@@ -17,12 +18,19 @@ public class BlackCard extends Card {
     }
 
     @Override
-    protected void use(Game g, Consumer0 cb) {
+    protected void use(Game g, Consumer1<Boolean> cb) {
         ((IPlayerWithCardsAndStock) g.getCurrentPlayer()).askForTargetStock(stock -> {
             if (stock != null) {
-                StockMarket.getMarket(g).setBlack(stock);
+                StockMarket market = StockMarket.getMarket(g);
+                if (market.hasStock(stock)) {
+                    market.setBlack(stock);
+                    cb.run(true);
+                } else {
+                    cb.run(false);
+                }
+            } else {
+                cb.run(false);
             }
-            cb.run();
         });
     }
 }

@@ -2,6 +2,7 @@ package monopoly.card;
 
 import monopoly.*;
 import monopoly.util.Consumer0;
+import monopoly.util.Consumer1;
 
 public class TaxCard extends Card {
     static {
@@ -15,7 +16,7 @@ public class TaxCard extends Card {
     }
 
     @Override
-    public void use(Game g, Consumer0 cb) {
+    public void use(Game g, Consumer1<Boolean> cb) {
         IPlayer current = g.getCurrentPlayer();
         ((Cards.IPlayerWithCards) current).askForTargetPlayer(getName(), g.sync(player -> {
             int reach = g.getConfig("tax-card-reach");
@@ -24,8 +25,10 @@ public class TaxCard extends Card {
                 int amount = player.getDeposit() * 3 / 10;
                 String msg = g.format("pay_tax", player.getName(), amount);
                 player.changeDeposit(-amount, msg);
+                cb.run(true);
+            } else {
+                cb.run(false);
             }
-            cb.run();
         }));
     }
 }

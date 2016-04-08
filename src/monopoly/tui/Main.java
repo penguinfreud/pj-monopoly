@@ -43,7 +43,7 @@ public class Main {
             StockMarket.addStock(new Stock("facebook"));
             StockMarket.addStock(new Stock("microsoft"));
 
-            GameMap map = GameMap.readMap(Main.class.getResourceAsStream("/maps/default_tui.map"));
+            GameMap map = GameMap.readMap(Main.class.getResourceAsStream("/maps/card_rich.map"));
 
             players = new ArrayList<>();
 
@@ -62,8 +62,8 @@ public class Main {
         players.clear();
         System.out.println(game.getText("ask_player_names"));
         Scanner scanner = game.getScanner();
-        players.add(new Player(scanner.nextLine()));
-        players.add(new Player(scanner.nextLine()));
+        players.add(new TUIPlayer(scanner.nextLine()));
+        players.add(new TUIPlayer(scanner.nextLine()));
         try {
             game.setPlayers(players);
             game.start();

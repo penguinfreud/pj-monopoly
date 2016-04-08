@@ -2,6 +2,7 @@ package monopoly.card;
 
 import monopoly.*;
 import monopoly.util.Consumer0;
+import monopoly.util.Consumer1;
 
 public class ControlledDice extends Card {
     static {
@@ -14,18 +15,18 @@ public class ControlledDice extends Card {
     }
 
     @Override
-    public void use(Game g, Consumer0 cb) {
+    public void use(Game g, Consumer1<Boolean> cb) {
         IPlayer player = g.getCurrentPlayer();
         ((Cards.IPlayerWithCards) player).askForTargetPlace(getName(), g.sync(place -> {
             if (place == null) {
-                cb.run();
+                cb.run(false);
             } else {
                 int reach = g.getConfig("dice-sides");
                 int steps = Place.withinPlayersReach(player, place, reach);
                 if (steps != 0) {
                     g.startWalking(steps);
                 } else {
-                    cb.run();
+                    cb.run(false);
                 }
             }
         }));

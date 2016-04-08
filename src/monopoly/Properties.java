@@ -235,12 +235,15 @@ public class Properties implements Serializable {
         synchronized (game.lock) {
             if (property != null) {
                 IPlayer owner = property.getOwner();
-                property.changeOwner(player);
-                if (owner != null) {
-                    get(owner).properties.remove(property);
-                    _onPropertyChange.get(game).trigger(owner, false, property);
+                if (owner != player) {
+                    property.changeOwner(player);
+                    properties.add(property);
+                    if (owner != null) {
+                        get(owner).properties.remove(property);
+                        _onPropertyChange.get(game).trigger(owner, false, property);
+                    }
+                    _onPropertyChange.get(game).trigger(player, true, property);
                 }
-                _onPropertyChange.get(game).trigger(player, true, property);
             }
         }
     }

@@ -3,6 +3,7 @@ package monopoly.card;
 import monopoly.Card;
 import monopoly.Game;
 import monopoly.util.Consumer0;
+import monopoly.util.Consumer1;
 
 public class StayCard extends Card {
     static {
@@ -15,7 +16,7 @@ public class StayCard extends Card {
     }
 
     @Override
-    public void use(Game g, Consumer0 cb) {
+    public void use(Game g, Consumer1<Boolean> cb) {
         g.startWalking(0);
     }
 }
