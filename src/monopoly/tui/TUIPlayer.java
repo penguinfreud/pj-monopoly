@@ -400,14 +400,17 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     @Override
     public void askForTargetPlayer(String reason, Consumer1<IPlayer> cb) {
         Game g = getGame();
+        String question;
         if (reason.equals("ReverseCard")) {
-            String question = g.getText("ask_whom_to_reverse");
-            List<IPlayer> players = g.getPlayers();
-            IPlayer player = choose(question, players, true);
-            cb.run(player);
+            question = g.getText("ask_whom_to_reverse");
+        } else if (reason.equals("TaxCard")) {
+            question = g.getText("ask_whom_to_tax");
         } else {
-            cb.run(null);
+            question = "";
         }
+        List<IPlayer> players = g.getPlayers();
+        IPlayer player = choose(question, players, true);
+        cb.run(player);
     }
 
     @Override

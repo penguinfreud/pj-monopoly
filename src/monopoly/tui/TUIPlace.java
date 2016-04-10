@@ -2,7 +2,6 @@ package monopoly.tui;
 
 import monopoly.*;
 import monopoly.place.*;
-import monopoly.place.Bank;
 
 import java.io.PrintStream;
 import java.util.List;

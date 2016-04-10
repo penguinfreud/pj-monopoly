@@ -54,13 +54,32 @@ public class Cards implements Serializable {
 
         @Override
         default void startTurn(Consumer0 cb) {
-            Cards cards = Cards.get(this);
-            List<Card> cardList = cards.getCards();
-            if (cardList.isEmpty()) {
+            Cards cardsInterface = Cards.get(this);
+            List<Card> cards = cardsInterface.cards;
+            if (cards.isEmpty()) {
                 cb.run();
             } else {
-                Card card = cardList.get(ThreadLocalRandom.current().nextInt(cardList.size()));
-                cards.useCard(card, () -> startTurn(cb));
+                int l = cards.size();
+                cardsInterface.useCard(cards.get(l - 1), new Consumer0() {
+                    private int count = l,
+                    i = l - 1;
+                    private Card card = cards.get(0);
+
+                    @Override
+                    public void run() {
+                        if (cards.size() == count && cards.get(count - 1) == card) {
+                            i--;
+                        } else {
+                            count = cards.size();
+                        }
+                        if (i < 0 || i >= count) {
+                            cb.run();
+                        } else {
+                            card = cards.get(i);
+                            cardsInterface.useCard(card, this);
+                        }
+                    }
+                });
             }
         }
     }
@@ -77,11 +96,12 @@ public class Cards implements Serializable {
     }
 
     public static void init(Game g) {
-        onCouponChange.set(g, new Event2<>());
-        onCardChange.set(g, new Event3<>());
-        BasePlayer.onAddPlayer.get(g).addListener(player -> {
-            parasites.set(player, new Cards(player));
-        });
+        if (onCouponChange.get(g) == null) {
+            onCouponChange.set(g, new Event2<>());
+            onCardChange.set(g, new Event3<>());
+            BasePlayer.onAddPlayer.get(g).addListener(player ->
+                    parasites.set(player, new Cards(player)));
+        }
     }
 
     private final Game game;

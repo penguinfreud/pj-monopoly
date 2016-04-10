@@ -1,6 +1,5 @@
 package monopoly;
 
-import monopoly.util.Consumer0;
 import monopoly.util.Consumer1;
 
 import java.io.Serializable;
@@ -29,9 +28,7 @@ public abstract class Card implements Serializable, GameObject {
         return (Integer) g.getConfig(uncamelize(name) + "-price");
     }
 
-    protected void use(Game g, Consumer1<Boolean> cb) {
-        cb.run(true);
-    }
+    protected abstract void use(Game g, Consumer1<Boolean> cb);
 
     private static final List<Card> cards = new CopyOnWriteArrayList<>();
 

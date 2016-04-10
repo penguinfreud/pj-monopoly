@@ -17,23 +17,31 @@ public class Main {
 
     private static List<IPlayer> players;
     private static TUIGame game;
+    private static boolean isAI = false;
 
     public static void main(String[] args) {
-        startGame();
+        startGame(args);
     }
 
-    private static void startGame() {
+    private static void startGame(String[] args) {
+        for (String arg: args) {
+            if (arg.equals("--ai")) {
+                isAI = true;
+            }
+        }
         try {
             Class.forName("monopoly.tui.TUIGameMap");
             Class.forName("monopoly.tui.TUIPlace");
             Place.loadAll();
             Card.loadAll();
+            Class.forName("monopoly.place.PropertyNews");
+            Class.forName("monopoly.place.CardNews");
             StockMarket.addStock(new Stock("baidu"));
             StockMarket.addStock(new Stock("google"));
             StockMarket.addStock(new Stock("facebook"));
             StockMarket.addStock(new Stock("microsoft"));
 
-            GameMap map = GameMap.readMap(Main.class.getResourceAsStream("/maps/card_rich.map"));
+            GameMap map = GameMap.readMap(Main.class.getResourceAsStream("/maps/default_tui.map"));
 
             players = new ArrayList<>();
 
@@ -48,12 +56,20 @@ public class Main {
         }
     }
 
+    private static IPlayer createPlayer(String name) {
+        if (isAI) {
+            return new Player(name, game);
+        } else {
+            return new TUIPlayer(name, game);
+        }
+    }
+
     private static void newGame() {
         players.clear();
         System.out.println(game.getText("ask_player_names"));
         Scanner scanner = game.getScanner();
-        players.add(new TUIPlayer(scanner.nextLine(), game));
-        players.add(new TUIPlayer(scanner.nextLine(), game));
+        players.add(createPlayer(scanner.nextLine()));
+        players.add(createPlayer(scanner.nextLine()));
         try {
             game.setPlayers(players);
             game.start();
