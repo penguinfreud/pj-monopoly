@@ -19,7 +19,7 @@ public class TortoiseCard extends Card {
 
     @Override
     protected void use(Game g, Consumer1<Boolean> cb) {
-        Game.onTurn.addListener(g, new Consumer0() {
+        g.onTurn.addListener(new Consumer0() {
             private int duration = g.getConfig("tortoise-card-duration");
             private final IPlayer player = g.getCurrentPlayer();
 
@@ -29,7 +29,7 @@ public class TortoiseCard extends Card {
                     if (--duration > 0) {
                         g.setDice(1);
                     } else {
-                        Game.onTurn.removeListener(g, this);
+                        g.onTurn.removeListener(this);
                     }
                 }
             }

@@ -1,6 +1,9 @@
 package monopoly.place;
 
-import monopoly.*;
+import monopoly.Place;
+import monopoly.Game;
+import monopoly.GameMap;
+import monopoly.Cards;
 import monopoly.util.Consumer0;
 
 import java.util.concurrent.ThreadLocalRandom;

@@ -3,7 +3,6 @@ package monopoly;
 import monopoly.util.*;
 
 import java.io.*;
-import java.lang.ref.WeakReference;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.*;
@@ -15,8 +14,7 @@ public class Game implements Serializable, Host {
     public static final String WRONG_STATE = "wrong state";
     private static final SerializableObject staticLock = new SerializableObject();
 
-    private static final List<Consumer1<Game>> _onGameInit = new CopyOnWriteArrayList<>();
-    private static final List<WeakReference<Game>> games = new CopyOnWriteArrayList<>();
+    public static final InitEvent<Game> onInit = new InitEvent<>();
     private static final Config defaultConfig = new Config();
 
     static {
@@ -50,18 +48,15 @@ public class Game implements Serializable, Host {
     }
 
     protected Game(Config c) {
-        synchronized (staticLock) {
-            if (c == null) {
-                c = defaultConfig;
-            } else {
-                c.setBase(defaultConfig);
-            }
-            config = new Config(c);
-
-            updateMessages();
-            triggerGameInit(this);
-            games.add(new WeakReference<>(this));
+        if (c == null) {
+            c = defaultConfig;
+        } else {
+            c.setBase(defaultConfig);
         }
+        config = new Config(c);
+
+        updateMessages();
+        onInit.trigger(this);
     }
     
     private void updateMessages() {
@@ -136,7 +131,6 @@ public class Game implements Serializable, Host {
     public final void setPlayers(List<IPlayer> playersList) throws Exception {
         synchronized (lock) {
             if (state == State.OVER) {
-                playersList.stream().forEach((player) -> player.setGame(this));
                 players.set(playersList);
                 if ((boolean) config.get("shuffle-players")) {
                     players.shuffle();
@@ -161,7 +155,7 @@ public class Game implements Serializable, Host {
             if (state == State.OVER) {
                 state = State.STARTING;
                 players.init();
-                _onGameStart.get(this).trigger();
+                onGameStart.trigger();
                 startTurn();
             } else {
                 logger.log(Level.WARNING, WRONG_STATE);
@@ -180,9 +174,9 @@ public class Game implements Serializable, Host {
                 hadBankrupt = false;
                 dice = -1;
                 if (players.isNewCycle() && notFirst) {
-                    _onCycle.get(this).trigger();
+                    onCycle.trigger();
                 }
-                _onTurn.get(this).trigger();
+                onTurn.trigger();
                 players.getCurrentPlayer().startTurn(this::startWalking);
             } else {
                 logger.log(Level.WARNING, WRONG_STATE);
@@ -271,7 +265,7 @@ public class Game implements Serializable, Host {
             if (hadBankrupt) {
                 endTurn();
             } else {
-                _onLanded.get(this).trigger();
+                onLanded.trigger();
                 players.getCurrentPlayer().getCurrentPlace().arriveAt(this, this::endTurn);
             }
         } else {
@@ -283,7 +277,7 @@ public class Game implements Serializable, Host {
     private void endGame() {
         if (state != State.OVER) {
             state = State.OVER;
-            _onGameOver.get(this).trigger();
+            onGameOver.trigger();
         } else {
             logger.log(Level.WARNING, WRONG_STATE);
             (new Exception()).printStackTrace();
@@ -301,48 +295,19 @@ public class Game implements Serializable, Host {
         storage.put(key, value);
     }
 
-    public static void onInit(Consumer1<Game> listener) {
-        synchronized (staticLock) {
-            _onGameInit.add(listener);
-            for (int i = games.size() - 1; i>=0; i--) {
-                Game g = games.get(i).get();
-                if (g == null) {
-                    games.remove(i);
-                } else {
-                    listener.run(g);
-                }
-            }
-        }
-    }
-
-    private static void triggerGameInit(Game g) {
-        synchronized (staticLock) {
-            for (Consumer1<Game> listener : _onGameInit) {
-                listener.run(g);
-            }
-        }
-    }
-
-    private static final Parasite<Game, Event0> _onGameStart = new Parasite<>("Game.onGameStart", Game::onInit, Event0::New),
-            _onGameOver = new Parasite<>("Game.onGameOver", Game::onInit, Event0::New),
-            _onTurn = new Parasite<>("Game.onTurn", Game::onInit, Event0::New),
-            _onLanded = new Parasite<>("Game.onLanded", Game::onInit, Event0::New),
-            _onCycle = new Parasite<>("Game.onCycle", Game::onInit, Event0::New);
-    private static final Parasite<Game, Event1<String>> _onException = new Parasite<>("Game.onException", Game::onInit, Event1::New);
-    private static final Parasite<Game, Event1<IPlayer>> _onBankrupt = new Parasite<>("Game.onBankrupt", Game::onInit, Event1::New);
-    public static final EventWrapper<Game, Consumer0> onGameStart = new EventWrapper<>(_onGameStart),
-            onGameOver = new EventWrapper<>(_onGameOver),
-            onTurn = new EventWrapper<>(_onTurn),
-            onLanded = new EventWrapper<>(_onLanded),
-            onCycle = new EventWrapper<>(_onCycle);
-    public static final EventWrapper<Game, Consumer1<String>> onException = new EventWrapper<>(_onException);
-    public static final EventWrapper<Game, Consumer1<IPlayer>> onBankrupt = new EventWrapper<>(_onBankrupt);
+    public final Event0 onGameStart = new Event0(),
+            onGameOver = new Event0(),
+            onTurn = new Event0(),
+            onLanded = new Event0(),
+            onCycle = new Event0();
+    public final Event1<String> onException = new Event1<>();
+    public final Event1<IPlayer> onBankrupt = new Event1<>();
 
     final void triggerBankrupt(IPlayer player) {
         if (state != State.OVER) {
             players.remove(player);
             hadBankrupt = true;
-            _onBankrupt.get(this).trigger( player);
+            onBankrupt.trigger( player);
         } else {
             logger.log(Level.WARNING, WRONG_STATE);
             (new Exception()).printStackTrace();
@@ -350,14 +315,13 @@ public class Game implements Serializable, Host {
     }
 
     public final void triggerException(String key, Object ...args) {
-        _onException.get(this).trigger(format(key, args));
+        onException.trigger(format(key, args));
     }
 
     protected static Game readData(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         synchronized (staticLock) {
             Game game = (Game) ois.readObject();
-            triggerGameInit(game);
-            games.add(new WeakReference<>(game));
+            onInit.trigger(game);
             return game;
         }
     }

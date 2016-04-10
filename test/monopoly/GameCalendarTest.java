@@ -11,8 +11,8 @@ import static org.junit.Assert.*;
 
 public class GameCalendarTest {
     private static class Player extends BasePlayer implements Properties.IPlayerWithProperties {
-        Player(String name) {
-            super(name);
+        Player(String name, Game g) {
+            super(name, g);
         }
     }
 
@@ -21,14 +21,15 @@ public class GameCalendarTest {
     public GameCalendarTest() throws Exception {
         Class.forName("monopoly.GameMapReader");
         Class.forName("monopoly.place.Land");
-        Class.forName("monopoly.GameCalendar");
         Class.forName("monopoly.place.Trap");
         GameMap map = GameMap.readMap(GameTest.class.getResourceAsStream("/test.map"));
         game.setMap(map);
         List<IPlayer> players = new ArrayList<>();
-        players.add(new Player("player A"));
-        players.add(new Player("player A"));
+        players.add(new Player("player A", game));
+        players.add(new Player("player A", game));
         game.setPlayers(players);
+        GameCalendar.init(game);
+        Properties.init(game);
     }
 
     private String formatDate(Calendar calendar) {
@@ -41,10 +42,8 @@ public class GameCalendarTest {
     @Test
     public void testGetDate() throws Exception {
         Calendar calendar = Calendar.getInstance();
-        Game.onTurn.addListener(game, () -> assertEquals(formatDate(calendar), GameCalendar.getDate(game)));
-
-        Game.onCycle.addListener(game, () -> calendar.add(Calendar.DATE, 1));
-
+        game.onTurn.addListener(() -> assertEquals(formatDate(calendar), GameCalendar.getDate(game)));
+        game.onCycle.addListener(() -> calendar.add(Calendar.DATE, 1));
         game.forwardUntil = 70;
         game.start();
     }

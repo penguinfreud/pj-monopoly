@@ -15,10 +15,12 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithProperties, Cards.IPlayerWithCards, IPlayerWithCardsAndStock {
-    public TUIPlayer() {}
+    public TUIPlayer(Game g) {
+        super(g);
+    }
 
-    public TUIPlayer(String name) {
-        setName(name);
+    public TUIPlayer(String name, Game g) {
+        super(name, g);
     }
 
     private boolean yesOrNo(String question) {
@@ -324,9 +326,8 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     private final List<String> gameMenuItems = new ArrayList<>();
     private final List<String> stockMenuItems = new ArrayList<>();
 
-    @Override
-    public void setGame(Game game) {
-        super.setGame(game);
+    {
+        Game game = getGame();
         gameMenuItems.clear();
         gameMenuItems.add(game.getText("menu_view_map"));
         gameMenuItems.add(game.getText("menu_view_raw_map"));

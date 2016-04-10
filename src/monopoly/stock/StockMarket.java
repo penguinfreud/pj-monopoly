@@ -18,7 +18,7 @@ public class StockMarket implements Serializable {
         stocks.add(stock);
     }
 
-    private static final Parasite<Game, StockMarket> markets = new Parasite<>("StockMarket", Game::onInit, StockMarket::new);
+    private static final Parasite<Game, StockMarket> markets = new Parasite<>("StockMarket");
 
     public static StockMarket getMarket(Game g) {
         return markets.get(g);
@@ -37,8 +37,6 @@ public class StockMarket implements Serializable {
 
         private StockTrend(Game g) {
             game = g;
-            Game.onGameStart.addListener(g, this::initPrice);
-            Game.onCycle.addListener(g, this::calcNextPrice);
         }
 
         public double getPrice(int daysAgo) {
@@ -83,12 +81,18 @@ public class StockMarket implements Serializable {
         }
     }
 
+    public static void init(Game g) {
+        markets.set(g, new StockMarket(g));
+    }
+
     private final Map<Stock, StockTrend> priceMap = new Hashtable<>();
 
     private StockMarket(Game g) {
         for (Stock stock: stocks) {
             priceMap.put(stock, new StockTrend(g));
         }
+        g.onGameStart.addListener(() -> priceMap.forEach((k, v) -> v.initPrice()));
+        g.onCycle.addListener(() -> priceMap.forEach((k, v) -> v.calcNextPrice()));
     }
 
     public final boolean hasStock(Stock stock) {

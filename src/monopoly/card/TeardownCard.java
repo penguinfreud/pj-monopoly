@@ -1,9 +1,12 @@
 package monopoly.card;
 
-import monopoly.*;
+import monopoly.Card;
+import monopoly.Game;
+import monopoly.Place;
+import monopoly.IPlayer;
+import monopoly.Property;
 import monopoly.place.Land;
 import monopoly.place.Street;
-import monopoly.util.Consumer0;
 import monopoly.util.Consumer1;
 
 public class TeardownCard extends Card {

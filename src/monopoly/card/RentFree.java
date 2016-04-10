@@ -14,7 +14,7 @@ class RentFree implements Consumer0 {
         this.player = player;
         game = player.getGame();
         this.duration = duration;
-        Game.onTurn.addListener(game, this);
+        game.onTurn.addListener(this);
     }
 
     @Override
@@ -24,7 +24,7 @@ class RentFree implements Consumer0 {
                 Properties.get(player).setRentFree();
                 duration--;
                 if (duration == 0) {
-                    Game.onTurn.removeListener(game, this);
+                    game.onTurn.removeListener(this);
                 }
             }
         }

@@ -33,18 +33,27 @@ public class Shareholding implements Serializable {
         }
     }
 
-    private static final Parasite<IPlayer, Shareholding> parasites = new Parasite<>("Shareholding", BasePlayer::onInit, Shareholding::new);
-    private static final Parasite<Game, Event3<IPlayer, Stock, Integer>> _onStockHoldingChange = new Parasite<>("Shareholding.onStockHoldingChange", Game::onInit, Event3::New);
-    public static final EventWrapper<Game, Consumer3<IPlayer, Stock, Integer>> onStockHoldingChange = new EventWrapper<>(_onStockHoldingChange);
+    private static final Parasite<IPlayer, Shareholding> parasites = new Parasite<>("Shareholding");
+    public static final Parasite<Game, Event3<IPlayer, Stock, Integer>> onStockHoldingChange = new Parasite<>("Shareholding.onStockHoldingChange");
+
+    static {
+        Game.putDefaultConfig("stock-max-trade", 10000);
+    }
+
+    public static void init(Game g) {
+        GameCalendar.init(g);
+        onStockHoldingChange.set(g, new Event3<>());
+        BasePlayer.onAddPlayer.get(g).addListener(player -> {
+            Shareholding holding = new Shareholding(player);
+            parasites.set(player, holding);
+            player.addPossession(holding::getValue);
+        });
+    }
 
     public static Shareholding get(IPlayer player) {
         return parasites.get(player);
     }
 
-    static {
-        Game.putDefaultConfig("stock-max-trade", 10000);
-        BasePlayer.addPossession(player -> get(player).getValue());
-    }
 
     private final Game game;
     private final IPlayer player;
@@ -104,7 +113,7 @@ public class Shareholding implements Serializable {
                             holding.cost += price;
                             String msg = game.format("buy_stock", player.getName(), stock.toString(game), amount, price);
                             player.changeCash(-price, msg);
-                            _onStockHoldingChange.get(game).trigger(player, stock, amount);
+                            onStockHoldingChange.get(game).trigger(player, stock, amount);
                         } else {
                             game.triggerException("short_of_cash");
                         }
@@ -141,7 +150,7 @@ public class Shareholding implements Serializable {
                             holding.cost = holding.cost * holding.amount / oldAmount;
                             String msg = game.format("sell_stock", player.getName(), stock.toString(game), amount, price);
                             player.changeCash(price, msg);
-                            _onStockHoldingChange.get(this.game).trigger(player, stock, -amount);
+                            onStockHoldingChange.get(this.game).trigger(player, stock, -amount);
                         }
                     } else {
                         game.triggerException("stock_non_existent", stock.toString(game));

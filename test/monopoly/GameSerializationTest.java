@@ -1,7 +1,10 @@
 package monopoly;
 
+import monopoly.stock.Stock;
+import monopoly.stock.StockMarket;
 import monopoly.util.Consumer0;
 import monopoly.util.Consumer1;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -22,8 +25,8 @@ public class GameSerializationTest {
         private Consumer1<IPlayer> cba;
         private String reason;
 
-        public Player(String name) {
-            setName(name);
+        public Player(String name, Game g) {
+            super(name, g);
         }
 
         @Override
@@ -127,26 +130,29 @@ public class GameSerializationTest {
         Class.forName("monopoly.GameMapReader");
         Place.loadAll();
         Card.loadAll();
-        Class.forName("monopoly.Shareholding");
-        Class.forName("monopoly.stock.StockMarket");
-        Class.forName("monopoly.Properties");
-        Class.forName("monopoly.Cards");
-        Class.forName("monopoly.place.PropertyNews");
-        Class.forName("monopoly.place.CardNews");
-        Class.forName("monopoly.GameCalendar");
-        Class.forName("monopoly.Bank");
-        Class.forName("monopoly.Lottery");
         
         GameMap map = GameMap.readMap(GameTest.class.getResourceAsStream("/card_rich.map"));
 
         game.putConfig("original", true);
         game.setMap(map);
         List<IPlayer> players = new ArrayList<>();
-        players.add(new Player("player A"));
-        players.add(new Player("player B"));
-        players.add(new Player("player C"));
-        players.add(new Player("player D"));
+        players.add(new Player("player A", game));
+        players.add(new Player("player B", game));
+        players.add(new Player("player C", game));
+        players.add(new Player("player D", game));
         game.setPlayers(players);
+
+        Properties.init(game);
+        Cards.init(game);
+        BankSystem.init(game);
+        Lottery.init(game);
+        StockMarket.init(game);
+        Shareholding.init(game);
+
+        StockMarket.addStock(new Stock("baidu"));
+        StockMarket.addStock(new Stock("google"));
+        StockMarket.addStock(new Stock("facebook"));
+        StockMarket.addStock(new Stock("microsoft"));
     }
     
     private static void serialize(Game game, int i) {

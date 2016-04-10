@@ -1,6 +1,9 @@
 package monopoly.place;
 
-import monopoly.*;
+import monopoly.Game;
+import monopoly.Place;
+import monopoly.GameMap;
+import monopoly.IPlayer;
 import monopoly.util.Consumer0;
 import monopoly.util.Consumer1;
 

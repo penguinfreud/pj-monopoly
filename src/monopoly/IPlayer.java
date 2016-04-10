@@ -3,12 +3,12 @@ package monopoly;
 import monopoly.util.Consumer0;
 import monopoly.util.Consumer1;
 import monopoly.util.Host;
+import monopoly.util.Supplier;
 
 import java.io.Serializable;
 
 public interface IPlayer extends Serializable, Host, GameObject {
     Game getGame();
-    void setGame(Game g);
     String getName();
     Place getCurrentPlace();
     boolean isReversed();
@@ -16,6 +16,8 @@ public interface IPlayer extends Serializable, Host, GameObject {
     int getCash();
     int getDeposit();
     int getTotalPossessions();
+    void addPossession(Supplier<Integer> possession);
+    void addPropertySeller(Consumer1<Consumer0> cb);
 
     void init();
     void giveUp();

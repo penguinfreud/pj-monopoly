@@ -11,33 +11,35 @@ import static org.hamcrest.CoreMatchers.*;
 
 public class GameTest {
     private static class Player extends BasePlayer implements Properties.IPlayerWithProperties {
-        Player(String name) {
-            super(name);
+        Player(String name, Game g) {
+            super(name, g);
         }
     }
 
     private GameMap map;
     private List<IPlayer> players = new ArrayList<>();
-    private IPlayer playerA = new Player("player A"),
-            playerB = playerA = new Player("player B"),
-            playerC = playerA = new Player("player C");
+    private IPlayer playerA, playerB, playerC;
 
     private MyGame game;
 
     public GameTest() throws Exception {
         Class.forName("monopoly.GameMapReader");
         Class.forName("monopoly.place.Land");
+        Class.forName("monopoly.place.Trap");
         map = GameMap.readMap(GameTest.class.getResourceAsStream("/test.map"));
-
-        players.add(playerA);
-        players.add(playerB);
     }
 
     @Before
     public void setUp() throws Exception {
         game = new MyGame();
         game.setMap(map);
+        playerA = new Player("player A", game);
+        playerB = new Player("player B", game);
+        playerC = new Player("player C", game);
+        players.add(playerA);
+        players.add(playerB);
         game.setPlayers(players);
+        Properties.init(game);
     }
 
     @Test
@@ -56,11 +58,11 @@ public class GameTest {
     @Test
     public void testGetState() {
         assertEquals(Game.State.OVER, game.getState());
-        Game.onGameStart.addListener(game, () -> assertEquals(Game.State.STARTING, game.getState()));
-        Game.onTurn.addListener(game, () -> assertEquals(Game.State.TURN_STARTING, game.getState()));
-        Game.onCycle.addListener(game, () -> assertEquals(Game.State.TURN_STARTING, game.getState()));
-        Game.onGameOver.addListener(game, () -> assertEquals(Game.State.OVER, game.getState()));
-        Game.onLanded.addListener(game, () -> assertEquals(Game.State.TURN_LANDED, game.getState()));
+        game.onGameStart.addListener(() -> assertEquals(Game.State.STARTING, game.getState()));
+        game.onTurn.addListener(() -> assertEquals(Game.State.TURN_STARTING, game.getState()));
+        game.onCycle.addListener(() -> assertEquals(Game.State.TURN_STARTING, game.getState()));
+        game.onGameOver.addListener(() -> assertEquals(Game.State.OVER, game.getState()));
+        game.onLanded.addListener(() -> assertEquals(Game.State.TURN_LANDED, game.getState()));
         game.start();
     }
 
@@ -125,7 +127,7 @@ public class GameTest {
         players.add(playerC);
         game.setPlayers(players);
         List<IPlayer> bankrupted = new ArrayList<>();
-        Game.onBankrupt.addListener(game, bankrupted::add);
+        game.onBankrupt.addListener(bankrupted::add);
         game.forwardUntil = -1;
         game.start();
         assertEquals(2, bankrupted.size());

@@ -1,6 +1,9 @@
 package monopoly.card;
 
-import monopoly.*;
+import monopoly.Card;
+import monopoly.Game;
+import monopoly.IPlayer;
+import monopoly.Properties;
 import monopoly.util.Consumer0;
 import monopoly.util.Consumer1;
 
@@ -17,7 +20,7 @@ public class GodOfLandCard extends Card {
 
     @Override
     public void use(Game g, Consumer1<Boolean> cb) {
-        Game.onTurn.addListener(g, new Consumer0() {
+        g.onTurn.addListener(new Consumer0() {
             private int duration = (Integer) g.getConfig("god-of-land-card-duration");
             private final IPlayer player = g.getCurrentPlayer();
 
@@ -28,7 +31,7 @@ public class GodOfLandCard extends Card {
                         Properties.get(player).robLand(player.getCurrentPlace().asProperty());
                         duration--;
                         if (duration == 0) {
-                            Game.onTurn.removeListener(g, this);
+                            g.onTurn.removeListener(this);
                         }
                     }
                 }

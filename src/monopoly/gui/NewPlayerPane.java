@@ -26,7 +26,7 @@ public class NewPlayerPane extends Pane {
         JButton btnOk = new JButton("OK");
         btnOk.addActionListener((e) -> {
             synchronized (controller.lock) {
-                controller.addPlayer(new BasePlayer(txtName.getText()));
+                controller.addPlayer(new BasePlayer(txtName.getText(), controller.getGame()));
             }
         });
         return btnOk;

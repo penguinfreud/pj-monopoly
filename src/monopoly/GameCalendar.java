@@ -7,15 +7,20 @@ import java.text.MessageFormat;
 import java.util.Calendar;
 
 public final class GameCalendar implements Serializable {
+    public static final Parasite<Game, Event0> onMonth = new Parasite<>("GameCalendar.onMonth");
+    private static final Parasite<Game, GameCalendar> calendars = new Parasite<>("GameCalendar");
+
+    public static void init(Game g) {
+        onMonth.set(g, new Event0());
+        calendars.set(g, new GameCalendar(g));
+    }
+
     private final Game game;
     private final Calendar calendar = Calendar.getInstance();
-    private static final Parasite<Game, Event0> _onMonth = new Parasite<>("GameCalendar.onMonth", Game::onInit, Event0::New);
-    private static final Parasite<Game, GameCalendar> calendars = new Parasite<>("GameCalendar", Game::onInit, GameCalendar::new);
-    public static final EventWrapper<Game, Consumer0> onMonth = new EventWrapper<>(_onMonth);
 
     private GameCalendar(Game g) {
         game = g;
-        Game.onCycle.addListener(g, this::increment);
+        g.onCycle.addListener(this::increment);
     }
 
     private void increment() {
@@ -23,7 +28,7 @@ public final class GameCalendar implements Serializable {
         calendar.add(Calendar.DATE, 1);
         int newMoth = calendar.get(Calendar.MONTH);
         if (oldMonth < newMoth) {
-            _onMonth.get(game).trigger();
+            onMonth.get(game).trigger();
         }
     }
 

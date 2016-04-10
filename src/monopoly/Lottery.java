@@ -16,7 +16,12 @@ public class Lottery implements Serializable {
         Game.putDefaultConfig("lottery-pool", 2000);
     }
 
-    private static final Parasite<Game, Lottery> parasites = new Parasite<>("Lottery", Game::onInit, Lottery::new);
+    private static final Parasite<Game, Lottery> parasites = new Parasite<>("Lottery");
+
+    public static void init(Game g) {
+        GameCalendar.init(g);
+        parasites.set(g, new Lottery(g));
+    }
 
     private final Game game;
     private int value, cheatNumber = -1;
@@ -25,7 +30,7 @@ public class Lottery implements Serializable {
     private Lottery(Game g) {
         game = g;
         value = g.getConfig("lottery-pool");
-        GameCalendar.onMonth.addListener(g, this::selectLotteryWinner);
+        GameCalendar.onMonth.get(g).addListener(this::selectLotteryWinner);
     }
 
     private void selectLotteryWinner() {

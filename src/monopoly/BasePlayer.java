@@ -2,7 +2,6 @@ package monopoly;
 
 import monopoly.util.*;
 
-import java.lang.ref.WeakReference;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -11,58 +10,20 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class BasePlayer implements IPlayer {
+    private static final Logger logger = Logger.getLogger(BasePlayer.class.getName());
+
+    public static final Parasite<Game, InitEvent<IPlayer>> onAddPlayer = new Parasite<>("BasePlayer.onAddPlayer");
+    public static final Parasite<Game, Event3<IPlayer, Integer, String>> onMoneyChange = new Parasite<>("BasePlayer.onMoneyChange");
+    public static final InitEvent<IPlayer> onInit = new InitEvent<>();
+
     static {
         Game.putDefaultConfig("init-cash", 2000);
         Game.putDefaultConfig("init-deposit", 2000);
         Game.putDefaultConfig("bank-max-transfer", 100000);
-    }
-
-    private static final Logger logger = Logger.getLogger(BasePlayer.class.getName());
-
-    private static final Parasite<Game, Event3<IPlayer, Integer, String>> _onMoneyChange = new Parasite<>("BasePlayer.onMoneyChange", Game::onInit, Event3::New);
-
-    public static final EventWrapper<Game, Consumer3<IPlayer, Integer, String>> onMoneyChange = new EventWrapper<>(_onMoneyChange);
-
-    private static final SerializableObject staticLock = new SerializableObject();
-    private static final List<Consumer1<IPlayer>> _onInit = new CopyOnWriteArrayList<>();
-    private static final List<WeakReference<IPlayer>> players = new CopyOnWriteArrayList<>();
-
-    private static final List<Function1<IPlayer, Integer>> possessions = new CopyOnWriteArrayList<>();
-    private static final List<Consumer2<IPlayer, Consumer0>> propertySellers = new CopyOnWriteArrayList<>();
-
-    static void addPossession(Function1<IPlayer, Integer> possession) {
-        possessions.add(possession);
-    }
-
-    static void addPropertySeller(Consumer2<IPlayer, Consumer0> fn) {
-        propertySellers.add(fn);
-    }
-
-    static {
-        possessions.add(IPlayer::getCash);
-        possessions.add(IPlayer::getDeposit);
-    }
-
-    public static void onInit(Consumer1<IPlayer> listener) {
-        synchronized (staticLock) {
-            _onInit.add(listener);
-            for (int i = players.size() - 1; i>=0; i--) {
-                IPlayer player = players.get(i).get();
-                if (player == null) {
-                    players.remove(i);
-                } else {
-                    listener.run(player);
-                }
-            }
-        }
-    }
-
-    private static void triggerPlayerInit(BasePlayer player) {
-        synchronized (staticLock) {
-            for (Consumer1<IPlayer> listener: _onInit) {
-                listener.run(player);
-            }
-        }
+        Game.onInit.addListener(game -> {
+            onAddPlayer.set(game, new InitEvent<>());
+            onMoneyChange.set(game, new Event3<>());
+        });
     }
 
     private Game game;
@@ -71,6 +32,8 @@ public class BasePlayer implements IPlayer {
     private int cash, deposit;
     private int stepsToAdvance;
     private boolean reversed = false, bankrupted = false;
+    private final List<Supplier<Integer>> possessions = new CopyOnWriteArrayList<>();
+    private final List<Consumer1<Consumer0>> propertySellers = new CopyOnWriteArrayList<>();
     private final Map<Object, Object> storage = new Hashtable<>();
 
     @Override
@@ -84,10 +47,19 @@ public class BasePlayer implements IPlayer {
         storage.put(key, value);
     }
 
-    public BasePlayer() {}
+    public BasePlayer(Game g) {
+        this("", g);
+    }
 
-    public BasePlayer(String name) {
-        this.name = name;
+    public BasePlayer(String name, Game g) {
+        synchronized (g.lock) {
+            game = g;
+            this.name = name;
+            addPossession(this::getCash);
+            addPossession(this::getDeposit);
+            onInit.trigger(this);
+            onAddPlayer.get(g).trigger(this);
+        }
     }
 
     @Override
@@ -110,6 +82,16 @@ public class BasePlayer implements IPlayer {
     }
 
     @Override
+    public final void addPossession(Supplier<Integer> possession) {
+        possessions.add(possession);
+    }
+
+    @Override
+    public final void addPropertySeller(Consumer1<Consumer0> fn) {
+        propertySellers.add(fn);
+    }
+
+    @Override
     public final int getCash() {
         return cash;
     }
@@ -127,7 +109,7 @@ public class BasePlayer implements IPlayer {
     @Override
     public final int getTotalPossessions() {
         synchronized (game.lock) {
-            return possessions.stream().map(f -> f.run(this)).reduce(0, (a, b) -> (a + b));
+            return possessions.stream().map(Supplier::run).reduce(0, (a, b) -> (a + b));
         }
     }
 
@@ -141,7 +123,7 @@ public class BasePlayer implements IPlayer {
         reversed = !reversed;
     }
 
-    void bankrupt() {
+    private void bankrupt() {
         bankrupted = true;
         game.triggerBankrupt(this);
     }
@@ -156,7 +138,7 @@ public class BasePlayer implements IPlayer {
         synchronized (game.lock) {
             if (cash + amount >= 0 || cash < 0 && amount >= 0) {
                 cash += amount;
-                _onMoneyChange.get(game).trigger(this, amount, msg);
+                onMoneyChange.get(game).trigger(this, amount, msg);
             } else {
                 game.triggerException("short_of_cash");
             }
@@ -168,7 +150,7 @@ public class BasePlayer implements IPlayer {
         synchronized (game.lock) {
             if (deposit + amount >= 0) {
                 deposit += amount;
-                _onMoneyChange.get(game).trigger(this, amount, msg);
+                onMoneyChange.get(game).trigger(this, amount, msg);
             } else {
                 game.triggerException("short_of_deposit");
             }
@@ -193,7 +175,7 @@ public class BasePlayer implements IPlayer {
 
     private void sellProperties(int i, Consumer0 cb) {
         if (i < propertySellers.size()) {
-            propertySellers.get(i).run(this, () -> sellProperties(i+1, cb));
+            propertySellers.get(i).run(() -> sellProperties(i+1, cb));
         } else {
             cb.run();
         }
@@ -204,7 +186,7 @@ public class BasePlayer implements IPlayer {
         synchronized (game.lock) {
             assert amount >= 0;
             cash -= amount;
-            _onMoneyChange.get(game).trigger(this, -amount, msg);
+            onMoneyChange.get(game).trigger(this, -amount, msg);
             if (receiver != null) {
                 receiver.changeCash(Math.min(amount, getTotalPossessions() + amount), "");
             }
@@ -272,14 +254,6 @@ public class BasePlayer implements IPlayer {
         } else {
             logger.log(Level.WARNING, Game.WRONG_STATE);
             (new Exception()).printStackTrace();
-        }
-    }
-    @Override
-    public void setGame(Game g) {
-        synchronized (g.lock) {
-            game = g;
-            triggerPlayerInit(this);
-            players.add(new WeakReference<>(this));
         }
     }
 

@@ -1,6 +1,7 @@
 package monopoly.gui;
 
-import monopoly.*;
+import monopoly.GameMap;
+import monopoly.Place;
 import monopoly.DelegatePlace;
 
 import java.awt.Graphics;

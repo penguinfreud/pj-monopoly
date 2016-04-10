@@ -1,6 +1,5 @@
 package monopoly;
 
-import monopoly.place.News;
 import monopoly.util.*;
 
 import java.io.Serializable;
@@ -70,14 +69,19 @@ public class Cards implements Serializable {
         Game.putDefaultConfig("init-coupons", 0);
     }
 
-    private static final Parasite<IPlayer, Cards> parasites = new Parasite<>("Cards", BasePlayer::onInit, Cards::new);
-    private static final Parasite<Game, Event2<IPlayer, Integer>> _onCouponChange = new Parasite<>("Cards.onCouponChange", Game::onInit, Event2::New);
-    private static final Parasite<Game, Event3<IPlayer, Boolean, Card>> _onCardChange = new Parasite<>("Cards.onCardChange", Game::onInit, Event3::New);
-    public static final EventWrapper<Game, Consumer2<IPlayer, Integer>> onCouponChange = new EventWrapper<>(_onCouponChange);
-    public static final EventWrapper<Game, Consumer3<IPlayer, Boolean, Card>> onCardChange = new EventWrapper<>(_onCardChange);
-
+    private static final Parasite<IPlayer, Cards> parasites = new Parasite<>("Cards");
+    public static final Parasite<Game, Event2<IPlayer, Integer>> onCouponChange = new Parasite<>("Cards.onCouponChange");
+    public static final Parasite<Game, Event3<IPlayer, Boolean, Card>> onCardChange = new Parasite<>("Cards.onCardChange");
     public static Cards get(IPlayer player) {
         return parasites.get(player);
+    }
+
+    public static void init(Game g) {
+        onCouponChange.set(g, new Event2<>());
+        onCardChange.set(g, new Event3<>());
+        BasePlayer.onAddPlayer.get(g).addListener(player -> {
+            parasites.set(player, new Cards(player));
+        });
     }
 
     private final Game game;
@@ -93,7 +97,7 @@ public class Cards implements Serializable {
             game.triggerException("interface not implemented: IPlayerWithCards");
         }
 
-        Game.onGameStart.addListener(game, () ->
+        game.onGameStart.addListener(() ->
             coupons = game.getConfig("init-coupons"));
     }
 
@@ -114,7 +118,7 @@ public class Cards implements Serializable {
             if (game.getState() == Game.State.TURN_STARTING) {
                 if (cards.contains(card)) {
                     cards.remove(card);
-                    _onCardChange.get(game).trigger(player, false, card);
+                    onCardChange.get(game).trigger(player, false, card);
                     card.use(game, (ok) -> {
                         if (!ok) {
                             cards.add(card);
@@ -154,14 +158,14 @@ public class Cards implements Serializable {
     public final void addCoupons(int amount) {
         synchronized (game.lock) {
             coupons += amount;
-            _onCouponChange.get(game).trigger(player, amount);
+            onCouponChange.get(game).trigger(player, amount);
         }
     }
 
     public final void addCard(Card card) {
         synchronized (game.lock) {
             cards.add(card);
-            _onCardChange.get(game).trigger(player, true, card);
+            onCardChange.get(game).trigger(player, true, card);
         }
     }
 
@@ -169,7 +173,7 @@ public class Cards implements Serializable {
         synchronized (game.lock) {
             if (cards.contains(card)) {
                 cards.remove(card);
-                _onCardChange.get(game).trigger(player, false, card);
+                onCardChange.get(game).trigger(player, false, card);
             }
         }
     }

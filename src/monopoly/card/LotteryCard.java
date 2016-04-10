@@ -1,7 +1,10 @@
 package monopoly.card;
 
-import monopoly.*;
-import monopoly.util.Consumer0;
+import monopoly.Card;
+import monopoly.Game;
+import monopoly.IPlayer;
+import monopoly.Lottery;
+import monopoly.Cards;
 import monopoly.util.Consumer1;
 
 public class LotteryCard extends Card {

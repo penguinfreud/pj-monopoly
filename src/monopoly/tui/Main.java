@@ -10,8 +10,8 @@ import java.util.Scanner;
 
 public class Main {
     private static class Player extends BasePlayer implements IPlayerWithCardsAndStock, Properties.IPlayerWithProperties {
-        Player(String name) {
-            setName(name);
+        Player(String name, Game g) {
+            super(name, g);
         }
     }
 
@@ -24,20 +24,10 @@ public class Main {
 
     private static void startGame() {
         try {
-            Class.forName("monopoly.GameMapReader");
             Class.forName("monopoly.tui.TUIGameMap");
             Class.forName("monopoly.tui.TUIPlace");
             Place.loadAll();
             Card.loadAll();
-            Class.forName("monopoly.GameCalendar");
-            Class.forName("monopoly.Properties");
-            Class.forName("monopoly.Cards");
-            Class.forName("monopoly.place.PropertyNews");
-            Class.forName("monopoly.place.CardNews");
-            Class.forName("monopoly.Shareholding");
-            Class.forName("monopoly.Lottery");
-            Class.forName("monopoly.Bank");
-
             StockMarket.addStock(new Stock("baidu"));
             StockMarket.addStock(new Stock("google"));
             StockMarket.addStock(new Stock("facebook"));
@@ -50,7 +40,7 @@ public class Main {
             game = new TUIGame();
             game.setMap(map);
 
-            Game.onGameOver.addListener(game, Main::newGame);
+            game.onGameOver.addListener(Main::newGame);
 
             newGame();
         } catch (Exception e) {
@@ -62,8 +52,8 @@ public class Main {
         players.clear();
         System.out.println(game.getText("ask_player_names"));
         Scanner scanner = game.getScanner();
-        players.add(new TUIPlayer(scanner.nextLine()));
-        players.add(new TUIPlayer(scanner.nextLine()));
+        players.add(new TUIPlayer(scanner.nextLine(), game));
+        players.add(new TUIPlayer(scanner.nextLine(), game));
         try {
             game.setPlayers(players);
             game.start();

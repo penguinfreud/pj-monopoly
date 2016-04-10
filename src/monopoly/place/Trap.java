@@ -1,6 +1,9 @@
 package monopoly.place;
 
-import monopoly.*;
+import monopoly.Place;
+import monopoly.Game;
+import monopoly.GameMap;
+import monopoly.IPlayer;
 import monopoly.util.Consumer0;
 
 public class Trap extends Place {

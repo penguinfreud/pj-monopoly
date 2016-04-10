@@ -1,10 +1,8 @@
 package monopoly;
 
-import monopoly.place.News;
 import monopoly.util.*;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
@@ -25,13 +23,17 @@ public class Properties implements Serializable {
         }
     }
 
-    private static final Parasite<IPlayer, Properties> parasites = new Parasite<>("Properties", BasePlayer::onInit, Properties::new);
-    private static final Parasite<Game, Event3<IPlayer, Boolean, Property>> _onPropertyChange = new Parasite<>("Properties.onPropertyChange", Game::onInit, Event3::New);
-    public static final EventWrapper<Game, Consumer3<IPlayer, Boolean, Property>> onPropertyChange = new EventWrapper<>(_onPropertyChange);
+    private static final Parasite<IPlayer, Properties> parasites = new Parasite<>("Properties");
+    public static final Parasite<Game, Event3<IPlayer, Boolean, Property>> onPropertyChange = new Parasite<>("Properties.onPropertyChange");
 
-    static {
-        BasePlayer.addPossession(player -> parasites.get(player).getValue());
-        BasePlayer.addPropertySeller(Properties::sellProperties);
+    public static void init(Game g) {
+        onPropertyChange.set(g, new Event3<>());
+        BasePlayer.onAddPlayer.get(g).addListener(player -> {
+            Properties properties = new Properties(player);
+            parasites.set(player, properties);
+            player.addPossession(properties::getValue);
+            player.addPropertySeller(properties::sellProperties);
+        });
     }
 
     public static Properties get(IPlayer player) {
@@ -51,7 +53,7 @@ public class Properties implements Serializable {
             game.triggerException("interface not implemented: IPlayerWithProperties");
         }
 
-        Game.onGameStart.addListener(game, () -> {
+        game.onGameStart.addListener(() -> {
             properties.clear();
             rentFree = false;
         });
@@ -79,8 +81,8 @@ public class Properties implements Serializable {
         return properties.size();
     }
 
-    private static void sellProperties(IPlayer player, Consumer0 cb) {
-        parasites.get(player).sellProperties((Property)null, cb);
+    private void sellProperties(Consumer0 cb) {
+        sellProperties(null, cb);
     }
 
     private void sellProperties(Property property, Consumer0 cb) {
@@ -92,7 +94,7 @@ public class Properties implements Serializable {
                     properties.remove(property);
                     property.resetOwner(game);
                     player.changeCash(amount, msg);
-                    _onPropertyChange.get(game).trigger(player, false, property);
+                    onPropertyChange.get(game).trigger(player, false, property);
                 } else {
                     game.triggerException("not_your_property");
                 }
@@ -143,7 +145,7 @@ public class Properties implements Serializable {
                 get(owner).properties.remove(property);
             }
             property.changeOwner(player);
-            _onPropertyChange.get(game).trigger(player, true, property);
+            onPropertyChange.get(game).trigger(player, true, property);
         }
     }
 
@@ -240,9 +242,9 @@ public class Properties implements Serializable {
                     properties.add(property);
                     if (owner != null) {
                         get(owner).properties.remove(property);
-                        _onPropertyChange.get(game).trigger(owner, false, property);
+                        onPropertyChange.get(game).trigger(owner, false, property);
                     }
-                    _onPropertyChange.get(game).trigger(player, true, property);
+                    onPropertyChange.get(game).trigger(player, true, property);
                 }
             }
         }

@@ -1,7 +1,10 @@
 package monopoly.card;
 
-import monopoly.*;
-import monopoly.util.Consumer0;
+import monopoly.Game;
+import monopoly.IPlayer;
+import monopoly.Property;
+import monopoly.Card;
+import monopoly.Properties;
 import monopoly.util.Consumer1;
 
 public class BuyLandCard extends Card {

@@ -1,6 +1,8 @@
 package monopoly.place;
 
-import monopoly.*;
+import monopoly.Place;
+import monopoly.GameMap;
+import monopoly.Game;
 import monopoly.util.Consumer0;
 
 public class Bank extends Place {
