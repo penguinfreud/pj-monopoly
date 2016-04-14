@@ -1,5 +1,9 @@
 package monopoly;
 
+import monopoly.extension.BankSystem;
+import monopoly.extension.Lottery;
+import monopoly.place.GameMap;
+import monopoly.place.Place;
 import monopoly.stock.Stock;
 import monopoly.stock.StockMarket;
 import monopoly.util.Consumer0;
@@ -127,7 +131,7 @@ public class GameSerializationTest {
     }
     
     public GameSerializationTest() throws Exception {
-        Class.forName("monopoly.GameMapReader");
+        Class.forName("monopoly.place.GameMapReader");
         Place.loadAll();
         Card.loadAll();
         

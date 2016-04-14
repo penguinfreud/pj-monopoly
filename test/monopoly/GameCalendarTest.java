@@ -1,5 +1,7 @@
 package monopoly;
 
+import monopoly.extension.GameCalendar;
+import monopoly.place.GameMap;
 import org.junit.Test;
 
 import java.text.MessageFormat;
@@ -19,7 +21,7 @@ public class GameCalendarTest {
     private MyGame game = new MyGame();
 
     public GameCalendarTest() throws Exception {
-        Class.forName("monopoly.GameMapReader");
+        Class.forName("monopoly.place.GameMapReader");
         Class.forName("monopoly.place.Land");
         Class.forName("monopoly.place.Trap");
         GameMap map = GameMap.readMap(GameTest.class.getResourceAsStream("/test.map"));

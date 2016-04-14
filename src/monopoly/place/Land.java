@@ -1,6 +1,5 @@
 package monopoly.place;
 
-import monopoly.GameMap;
 import monopoly.Property;
 
 public class Land extends Property {

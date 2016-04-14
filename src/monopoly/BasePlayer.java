@@ -1,5 +1,6 @@
 package monopoly;
 
+import monopoly.place.Place;
 import monopoly.util.*;
 
 import java.util.Hashtable;
@@ -26,7 +27,7 @@ public class BasePlayer implements IPlayer {
         });
     }
 
-    private Game game;
+    private final Game game;
     private String name;
     private Place currentPlace;
     private int cash, deposit;

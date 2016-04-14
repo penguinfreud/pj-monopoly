@@ -1,5 +1,6 @@
-package monopoly;
+package monopoly.extension;
 
+import monopoly.Game;
 import monopoly.util.*;
 
 import java.io.Serializable;

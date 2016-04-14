@@ -1,5 +1,9 @@
-package monopoly;
+package monopoly.place;
 
+import monopoly.Game;
+import monopoly.GameObject;
+import monopoly.IPlayer;
+import monopoly.Property;
 import monopoly.util.Consumer0;
 
 import java.io.Serializable;
@@ -40,15 +44,15 @@ public abstract class Place implements Serializable, GameObject {
         }
     }
 
-    final void clearRoadblocks() {
+    public final void clearRoadblocks() {
         roadblocks = 0;
     }
 
-    protected void arriveAt(Game g, Consumer0 cb) {
+    public void arriveAt(Game g, Consumer0 cb) {
         cb.run();
     }
 
-    protected void passBy(Game g, Consumer0 cb) {
+    public void passBy(Game g, Consumer0 cb) {
         cb.run();
     }
     

@@ -1,4 +1,4 @@
-package monopoly;
+package monopoly.place;
 
 import java.io.*;
 import java.util.Hashtable;

@@ -3,7 +3,7 @@ package monopoly.card;
 import monopoly.Card;
 import monopoly.Game;
 import monopoly.IPlayer;
-import monopoly.Lottery;
+import monopoly.extension.Lottery;
 import monopoly.Cards;
 import monopoly.util.Consumer1;
 

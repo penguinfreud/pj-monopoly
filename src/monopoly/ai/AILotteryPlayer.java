@@ -1,9 +1,9 @@
 package monopoly.ai;
 
 import monopoly.Game;
-import monopoly.GameCalendar;
+import monopoly.extension.GameCalendar;
 import monopoly.IPlayer;
-import monopoly.Lottery;
+import monopoly.extension.Lottery;
 import monopoly.util.Consumer0;
 
 import java.util.Calendar;

@@ -1,6 +1,8 @@
 package monopoly;
 
 import monopoly.gui.GUIPlace;
+import monopoly.place.GameMap;
+import monopoly.place.Place;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -28,7 +30,7 @@ public class GUIGameMapTest {
         assertEquals(10, ((GUIPlace) p).getY());
         assertEquals("a", p.getName());
         assertEquals(15, p.asProperty().getPrice());
-        assertEquals(p, p.prev);
-        assertEquals(p, p.next);
+        assertEquals(p, p.getPrev());
+        assertEquals(p, p.getNext());
     }
 }

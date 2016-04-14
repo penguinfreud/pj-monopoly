@@ -1,5 +1,6 @@
 package monopoly;
 
+import monopoly.place.Place;
 import monopoly.util.Consumer0;
 
 import java.util.logging.Level;
@@ -9,8 +10,6 @@ public abstract class Property extends Place {
     static {
         Game.putDefaultConfig("property-max-level", 6);
     }
-
-    private static final Logger logger = Logger.getLogger(Property.class.getName());
 
     private IPlayer owner;
     private int price = 0, level = 1;
@@ -95,7 +94,7 @@ public abstract class Property extends Place {
                 Properties.get(player).payRent(this, cb);
             }
         } else {
-            logger.log(Level.WARNING, Game.WRONG_STATE);
+            Logger.getAnonymousLogger().log(Level.WARNING, Game.WRONG_STATE);
         }
     }
     

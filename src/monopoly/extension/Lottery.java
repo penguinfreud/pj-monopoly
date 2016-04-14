@@ -1,5 +1,7 @@
-package monopoly;
+package monopoly.extension;
 
+import monopoly.Game;
+import monopoly.IPlayer;
 import monopoly.util.Parasite;
 
 import java.io.Serializable;

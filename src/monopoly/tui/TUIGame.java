@@ -1,6 +1,8 @@
 package monopoly.tui;
 
 import monopoly.*;
+import monopoly.extension.BankSystem;
+import monopoly.extension.Lottery;
 import monopoly.stock.StockMarket;
 
 import java.util.Scanner;

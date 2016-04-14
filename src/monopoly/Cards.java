@@ -1,5 +1,6 @@
 package monopoly;
 
+import monopoly.place.Place;
 import monopoly.util.*;
 
 import java.io.Serializable;
@@ -176,7 +177,7 @@ public class Cards implements Serializable {
     }
 
     public final void addCoupons(int amount) {
-        synchronized (game.lock) {
+        synchronized (game) {
             coupons += amount;
             onCouponChange.get(game).trigger(player, amount);
         }

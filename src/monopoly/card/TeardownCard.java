@@ -2,7 +2,7 @@ package monopoly.card;
 
 import monopoly.Card;
 import monopoly.Game;
-import monopoly.Place;
+import monopoly.place.Place;
 import monopoly.IPlayer;
 import monopoly.Property;
 import monopoly.place.Land;

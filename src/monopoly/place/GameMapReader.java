@@ -1,6 +1,4 @@
-package monopoly;
-
-import monopoly.place.Street;
+package monopoly.place;
 
 import java.util.Hashtable;
 import java.util.Map;

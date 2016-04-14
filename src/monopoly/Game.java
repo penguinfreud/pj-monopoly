@@ -1,5 +1,6 @@
 package monopoly;
 
+import monopoly.place.GameMap;
 import monopoly.util.*;
 
 import java.io.*;
@@ -12,7 +13,6 @@ import java.util.logging.Logger;
 public class Game implements Serializable, Host {
     private static final Logger logger = Logger.getLogger(Game.class.getName());
     public static final String WRONG_STATE = "wrong state";
-    private static final SerializableObject staticLock = new SerializableObject();
 
     public static final InitEvent<Game> onInit = new InitEvent<>();
     private static final Config defaultConfig = new Config();
@@ -27,7 +27,8 @@ public class Game implements Serializable, Host {
     enum State {
         OVER, STARTING, TURN_STARTING, TURN_WALKING, TURN_LANDED
     }
-    
+
+    public final SerializableObject lock = new SerializableObject();
     private State state = State.OVER;
     private final Config config;
     private transient ResourceBundle messages;
@@ -39,9 +40,6 @@ public class Game implements Serializable, Host {
     public static void putDefaultConfig(String key, Object value) {
         defaultConfig.put(key, value);
     }
-
-
-    final SerializableObject lock = new SerializableObject();
 
     public Game() {
         this(null);
@@ -69,14 +67,6 @@ public class Game implements Serializable, Host {
         updateMessages();
     }
 
-    public final <T> Consumer1<T> sync(Consumer1<T> cb) {
-        return t -> {
-            synchronized (lock) {
-                cb.run(t);
-            }
-        };
-    }
-
     public final State getState() {
         return state;
     }
@@ -89,11 +79,9 @@ public class Game implements Serializable, Host {
     }
 
     final void putConfig(String key, Object value) {
-        synchronized (lock) {
-            config.put(key, value);
-            if (key.equals("bundle-name") || key.equals("locale")) {
-                updateMessages();
-            }
+        config.put(key, value);
+        if (key.equals("bundle-name") || key.equals("locale")) {
+            updateMessages();
         }
     }
 
@@ -319,11 +307,9 @@ public class Game implements Serializable, Host {
     }
 
     protected static Game readData(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-        synchronized (staticLock) {
-            Game game = (Game) ois.readObject();
-            onInit.trigger(game);
-            return game;
-        }
+        Game game = (Game) ois.readObject();
+        onInit.trigger(game);
+        return game;
     }
 
     protected final void writeData(ObjectOutputStream oos) throws IOException {

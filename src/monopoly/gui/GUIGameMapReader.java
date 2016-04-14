@@ -1,7 +1,7 @@
 package monopoly.gui;
 
-import monopoly.GameMap;
-import monopoly.GameMapReader;
+import monopoly.place.GameMap;
+import monopoly.place.GameMapReader;
 
 public class GUIGameMapReader extends GameMapReader {
     protected GUIGameMapReader() {}

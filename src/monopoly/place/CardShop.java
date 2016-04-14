@@ -1,8 +1,6 @@
 package monopoly.place;
 
 import monopoly.Game;
-import monopoly.GameMap;
-import monopoly.Place;
 import monopoly.Cards;
 import monopoly.util.Consumer0;
 

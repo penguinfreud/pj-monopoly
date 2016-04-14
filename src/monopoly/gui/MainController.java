@@ -1,6 +1,6 @@
 package monopoly.gui;
 
-import monopoly.GameMap;
+import monopoly.place.GameMap;
 import monopoly.IPlayer;
 
 import javax.swing.*;

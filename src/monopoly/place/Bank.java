@@ -1,7 +1,5 @@
 package monopoly.place;
 
-import monopoly.Place;
-import monopoly.GameMap;
 import monopoly.Game;
 import monopoly.util.Consumer0;
 
@@ -15,12 +13,12 @@ public class Bank extends Place {
     }
 
     @Override
-    protected void passBy(Game g, Consumer0 cb) {
+    public void passBy(Game g, Consumer0 cb) {
         g.getCurrentPlayer().depositOrWithdraw(cb);
     }
 
     @Override
-    protected void arriveAt(Game g, Consumer0 cb) {
+    public void arriveAt(Game g, Consumer0 cb) {
         passBy(g, cb);
     }
 }

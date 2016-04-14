@@ -1,5 +1,6 @@
 package monopoly;
 
+import monopoly.place.GameMap;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -23,7 +24,7 @@ public class GameTest {
     private MyGame game;
 
     public GameTest() throws Exception {
-        Class.forName("monopoly.GameMapReader");
+        Class.forName("monopoly.place.GameMapReader");
         Class.forName("monopoly.place.Land");
         Class.forName("monopoly.place.Trap");
         map = GameMap.readMap(GameTest.class.getResourceAsStream("/test.map"));

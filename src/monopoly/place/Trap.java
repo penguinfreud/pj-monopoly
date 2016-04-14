@@ -1,8 +1,6 @@
 package monopoly.place;
 
-import monopoly.Place;
 import monopoly.Game;
-import monopoly.GameMap;
 import monopoly.IPlayer;
 import monopoly.util.Consumer0;
 
@@ -19,13 +17,13 @@ public class Trap extends Place {
     }
 
     @Override
-    protected void passBy(Game g, Consumer0 cb) {
+    public void passBy(Game g, Consumer0 cb) {
         IPlayer player = g.getCurrentPlayer();
         player.pay(null, amount, g.format("trap", player.getName(), amount), cb);
     }
 
     @Override
-    protected void arriveAt(Game g, Consumer0 cb) {
+    public void arriveAt(Game g, Consumer0 cb) {
         passBy(g, cb);
     }
 }

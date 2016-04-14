@@ -4,7 +4,7 @@ import monopoly.Card;
 import monopoly.Game;
 import monopoly.Cards;
 import monopoly.IPlayer;
-import monopoly.Place;
+import monopoly.place.Place;
 import monopoly.util.Consumer1;
 
 public class Roadblock extends Card {
@@ -21,7 +21,8 @@ public class Roadblock extends Card {
     @Override
     public void use(Game g, Consumer1<Boolean> cb) {
         IPlayer player = g.getCurrentPlayer();
-        ((Cards.IPlayerWithCards) player).askForTargetPlace(getName(), g.sync(place -> {
+        ((Cards.IPlayerWithCards) player).askForTargetPlace(getName(), place -> {
+            synchronized (g.lock) {
                 int reach = g.getConfig("roadblock-reach");
                 if (place != null &&
                         Place.withinReach(player.getCurrentPlace(), place, reach) >= 0) {
@@ -30,6 +31,7 @@ public class Roadblock extends Card {
                 } else {
                     cb.run(false);
                 }
-        }));
+            }
+        });
     }
 }

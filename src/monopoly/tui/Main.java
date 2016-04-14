@@ -1,6 +1,8 @@
 package monopoly.tui;
 
 import monopoly.*;
+import monopoly.place.GameMap;
+import monopoly.place.Place;
 import monopoly.stock.Stock;
 import monopoly.stock.StockMarket;
 
