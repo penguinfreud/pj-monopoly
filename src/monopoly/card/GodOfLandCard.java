@@ -1,21 +1,24 @@
 package monopoly.card;
 
-import monopoly.Card;
-import monopoly.Game;
-import monopoly.IPlayer;
-import monopoly.Properties;
+import monopoly.*;
 import monopoly.util.Consumer0;
 import monopoly.util.Consumer1;
 
 public class GodOfLandCard extends Card {
+    private static final Card instance = new GodOfLandCard();
+
     static {
-        registerCard(new GodOfLandCard());
         Game.putDefaultConfig("god-of-land-card-price", 15);
         Game.putDefaultConfig("god-of-land-card-duration", 5);
     }
 
     private GodOfLandCard() {
         super("GodOfLandCard");
+    }
+
+    public static void enable(Game g) {
+        Cards.enableCard(g, instance);
+        Properties.init(g);
     }
 
     @Override

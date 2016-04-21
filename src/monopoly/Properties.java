@@ -27,13 +27,15 @@ public class Properties implements Serializable {
     public static final Parasite<Game, Event3<IPlayer, Boolean, Property>> onPropertyChange = new Parasite<>("Properties.onPropertyChange");
 
     public static void init(Game g) {
-        onPropertyChange.set(g, new Event3<>());
-        BasePlayer.onAddPlayer.get(g).addListener(player -> {
-            Properties properties = new Properties(player);
-            parasites.set(player, properties);
-            player.addPossession(properties::getValue);
-            player.addPropertySeller(properties::sellProperties);
-        });
+        if (onPropertyChange.get(g) == null) {
+            onPropertyChange.set(g, new Event3<>());
+            BasePlayer.onAddPlayer.get(g).addListener(player -> {
+                Properties properties = new Properties(player);
+                parasites.set(player, properties);
+                player.addPossession(properties::getValue);
+                player.addPropertySeller(properties::sellProperties);
+            });
+        }
     }
 
     public static Properties get(IPlayer player) {

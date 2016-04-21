@@ -1,14 +1,15 @@
 package monopoly.card;
 
-import monopoly.Card;
 import monopoly.Game;
+import monopoly.Card;
+import monopoly.Cards;
+import monopoly.Properties;
 import monopoly.IPlayer;
-import monopoly.util.Consumer0;
 import monopoly.util.Consumer1;
 
 public class GodOfFortuneCard extends Card {
+    private static final Card instance = new GodOfFortuneCard();
     static {
-        registerCard(new GodOfFortuneCard());
         Game.putDefaultConfig("god-of-fortune-card-price", 13);
         Game.putDefaultConfig("god-of-fortune-card-award", 10000);
         Game.putDefaultConfig("god-of-fortune-card-duration", 8);
@@ -16,6 +17,11 @@ public class GodOfFortuneCard extends Card {
 
     private GodOfFortuneCard() {
         super("GodOfFortuneCard");
+    }
+
+    public static void enable(Game g) {
+        Cards.enableCard(g, instance);
+        Properties.init(g);
     }
 
     @Override

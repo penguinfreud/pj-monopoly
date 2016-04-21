@@ -1,20 +1,23 @@
 package monopoly.card;
 
-import monopoly.Card;
-import monopoly.Game;
-import monopoly.IPlayer;
+import monopoly.*;
 import monopoly.extension.Lottery;
-import monopoly.Cards;
 import monopoly.util.Consumer1;
 
 public class LotteryCard extends Card {
+    private static final Card instance = new LotteryCard();
+
     static {
-        registerCard(new LotteryCard());
         Game.putDefaultConfig("lottery-card-price", 9);
     }
 
     private LotteryCard() {
         super("LotteryCard");
+    }
+
+    public static void enable(Game g) {
+        Cards.enableCard(g, instance);
+        Lottery.init(g);
     }
 
     @Override

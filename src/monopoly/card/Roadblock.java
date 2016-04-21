@@ -8,14 +8,18 @@ import monopoly.place.Place;
 import monopoly.util.Consumer1;
 
 public class Roadblock extends Card {
+    private static final Card instance = new Roadblock();
     static {
-        registerCard(new Roadblock());
         Game.putDefaultConfig("roadblock-price", 5);
         Game.putDefaultConfig("roadblock-reach", 8);
     }
 
     private Roadblock() {
         super("Roadblock");
+    }
+
+    public static void enable(Game g) {
+        Cards.enableCard(g, instance);
     }
 
     @Override

@@ -35,7 +35,6 @@ public class Main {
             Class.forName("monopoly.tui.TUIGameMap");
             Class.forName("monopoly.tui.TUIPlace");
             Place.loadAll();
-            Card.loadAll();
             Class.forName("monopoly.place.PropertyNews");
             Class.forName("monopoly.place.CardNews");
             StockMarket.addStock(new Stock("baidu"));

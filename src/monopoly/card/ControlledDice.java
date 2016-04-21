@@ -8,13 +8,17 @@ import monopoly.place.Place;
 import monopoly.util.Consumer1;
 
 public class ControlledDice extends Card {
+    private static final Card instance = new ControlledDice();
     static {
-        registerCard(new ControlledDice());
         Game.putDefaultConfig("controlled-dice-price", 5);
     }
 
     private ControlledDice() {
         super("ControlledDice");
+    }
+
+    public static void enable(Game g) {
+        Cards.enableCard(g, instance);
     }
 
     @Override

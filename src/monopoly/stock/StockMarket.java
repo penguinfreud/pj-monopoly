@@ -82,7 +82,9 @@ public class StockMarket implements Serializable {
     }
 
     public static void init(Game g) {
-        markets.set(g, new StockMarket(g));
+        if (markets.get(g) == null) {
+            markets.set(g, new StockMarket(g));
+        }
     }
 
     private final Map<Stock, StockTrend> priceMap = new Hashtable<>();

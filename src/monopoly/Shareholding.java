@@ -40,13 +40,15 @@ public class Shareholding implements Serializable {
     }
 
     public static void init(Game g) {
-        GameCalendar.init(g);
-        onStockHoldingChange.set(g, new Event3<>());
-        BasePlayer.onAddPlayer.get(g).addListener(player -> {
-            Shareholding holding = new Shareholding(player);
-            parasites.set(player, holding);
-            player.addPossession(holding::getValue);
-        });
+        if (onStockHoldingChange.get(g) == null) {
+            GameCalendar.init(g);
+            onStockHoldingChange.set(g, new Event3<>());
+            BasePlayer.onAddPlayer.get(g).addListener(player -> {
+                Shareholding holding = new Shareholding(player);
+                parasites.set(player, holding);
+                player.addPossession(holding::getValue);
+            });
+        }
     }
 
     public static Shareholding get(IPlayer player) {

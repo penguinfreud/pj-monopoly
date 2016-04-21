@@ -1,6 +1,7 @@
 package monopoly.card;
 
 import monopoly.Card;
+import monopoly.Cards;
 import monopoly.Game;
 import monopoly.IPlayer;
 import monopoly.util.Consumer0;
@@ -9,13 +10,17 @@ import monopoly.util.Consumer1;
 import java.util.List;
 
 public class EqualWealthCard extends Card {
+    private static final Card instance = new EqualWealthCard();
     static {
-        registerCard(new EqualWealthCard());
         Game.putDefaultConfig("equal-wealth-card-price", 11);
     }
 
     private EqualWealthCard() {
         super("EqualWealthCard");
+    }
+
+    public static void enable(Game g) {
+        Cards.enableCard(g, instance);
     }
 
     @Override

@@ -1,20 +1,25 @@
 package monopoly.card;
 
 import monopoly.Card;
+import monopoly.Cards;
 import monopoly.Game;
 import monopoly.IPlayer;
 import monopoly.util.Consumer0;
 import monopoly.util.Consumer1;
 
 public class TortoiseCard extends Card {
+    private static final Card instance = new TortoiseCard();
     static {
-        registerCard(new TortoiseCard());
         Game.putDefaultConfig("tortoise-card-price", 3);
         Game.putDefaultConfig("tortoise-card-duration", 3);
     }
 
     private TortoiseCard() {
         super("TortoiseCard");
+    }
+
+    public static void enable(Game g) {
+        Cards.enableCard(g, instance);
     }
 
     @Override

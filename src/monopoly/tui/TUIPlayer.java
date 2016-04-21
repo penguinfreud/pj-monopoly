@@ -146,7 +146,7 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     public void askWhichCardToBuy(Consumer1<Card> cb) {
         Game g = getGame();
         String question = g.format("ask_which_card_to_buy", Cards.get(this).getCoupons());
-        cb.run(choose(question, Card.getCards(), true,
+        cb.run(choose(question, Cards.getAvailableCards(g), true,
                 card -> g.format("card_and_price", card.toString(g), card.getPrice(g))));
     }
 

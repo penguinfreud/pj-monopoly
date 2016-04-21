@@ -133,7 +133,7 @@ public class GameSerializationTest {
     public GameSerializationTest() throws Exception {
         Class.forName("monopoly.place.GameMapReader");
         Place.loadAll();
-        Card.loadAll();
+        Card.enableAll(game);
         
         GameMap map = GameMap.readMap(GameTest.class.getResourceAsStream("/card_rich.map"));
 

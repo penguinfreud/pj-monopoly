@@ -1,21 +1,24 @@
 package monopoly.card;
 
-import monopoly.Card;
-import monopoly.Game;
-import monopoly.IPlayerWithCardsAndStock;
+import monopoly.*;
 import monopoly.stock.Stock;
 import monopoly.stock.StockMarket;
 import monopoly.util.Consumer0;
 import monopoly.util.Consumer1;
 
 public class RedCard extends Card {
+    private static final Card instance = new RedCard();
     static {
-        registerCard(new RedCard());
         Game.putDefaultConfig("red-card-price", 5);
     }
 
     private RedCard() {
         super("RedCard");
+    }
+
+    public static void enable(Game g) {
+        Cards.enableCard(g, instance);
+        StockMarket.init(g);
     }
 
     @Override

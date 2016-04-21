@@ -16,7 +16,7 @@ public class CardSite extends Place {
 
     @Override
     public void arriveAt(Game g, Consumer0 cb) {
-        Card card = Card.getRandomCard(g, true);
+        Card card = Cards.getRandomCard(g, true);
         if (card != null) {
             Cards.get(g.getCurrentPlayer()).addCard(card);
         }

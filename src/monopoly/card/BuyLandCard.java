@@ -1,20 +1,21 @@
 package monopoly.card;
 
-import monopoly.Game;
-import monopoly.IPlayer;
-import monopoly.Property;
-import monopoly.Card;
-import monopoly.Properties;
+import monopoly.*;
 import monopoly.util.Consumer1;
 
 public class BuyLandCard extends Card {
+    private static final Card instance = new BuyLandCard();
     static {
-        registerCard(new BuyLandCard());
         Game.putDefaultConfig("buy-land-card-price", 7);
     }
 
     private BuyLandCard() {
         super("BuyLandCard");
+    }
+
+    public static void enable(Game g) {
+        Cards.enableCard(g, instance);
+        Properties.init(g);
     }
 
     @Override

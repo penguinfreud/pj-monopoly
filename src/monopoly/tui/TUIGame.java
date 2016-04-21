@@ -19,6 +19,7 @@ public class TUIGame extends Game {
         Lottery.init(this);
         StockMarket.init(this);
         Shareholding.init(this);
+        Card.enableAll(this);
 
         onGameOver.addListener(() ->
             System.out.println(format("game_over", getCurrentPlayer().getName())));

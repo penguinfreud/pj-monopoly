@@ -11,14 +11,18 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class RobCard extends Card {
+    private static final Card instance = new RobCard();
     static {
-        registerCard(new RobCard());
         Game.putDefaultConfig("rob-card-price", 7);
         Game.putDefaultConfig("rob-card-reach", 5);
     }
 
     private RobCard() {
         super("RobCard");
+    }
+
+    public static void enable(Game g) {
+        Cards.enableCard(g, instance);
     }
 
     @Override

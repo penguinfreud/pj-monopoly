@@ -1,14 +1,11 @@
 package monopoly.card;
 
-import monopoly.Card;
-import monopoly.Game;
-import monopoly.IPlayer;
-import monopoly.Cards;
+import monopoly.*;
 import monopoly.util.Consumer1;
 
 public class GodOfLuckCard extends Card {
+    private static final Card instance = new GodOfLuckCard();
     static {
-        registerCard(new GodOfLuckCard());
         Game.putDefaultConfig("god-of-luck-card-price", 13);
         Game.putDefaultConfig("god-of-luck-card-duration", 8);
     }
@@ -17,10 +14,15 @@ public class GodOfLuckCard extends Card {
         super("GodOfLuckCard");
     }
 
+    public static void enable(Game g) {
+        Cards.enableCard(g, instance);
+        Properties.init(g);
+    }
+
     @Override
     public void use(Game g, Consumer1<Boolean> cb) {
         IPlayer player = g.getCurrentPlayer();
-        Cards.get(player).addCard(Card.getRandomCard(g, false));
+        Cards.get(player).addCard(Cards.getRandomCard(g, false));
         new RentFree(player, g.getConfig("god-of-luck-card-duration"));
         cb.run(true);
     }

@@ -4,6 +4,7 @@ import monopoly.place.Place;
 import monopoly.util.*;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
@@ -17,7 +18,8 @@ public class Cards implements Serializable {
             if (coupons == 0) {
                 cb.run(null);
             } else {
-                Object[] buyableCards = Card.getCards().stream().filter((card) -> card.getPrice(getGame()) <= coupons).toArray();
+                Object[] buyableCards = availableCards.get(getGame()).stream()
+                        .filter((card) -> card.getPrice(getGame()) <= coupons).toArray();
                 if (buyableCards.length == 0) {
                     cb.run(null);
                 } else {
@@ -90,6 +92,7 @@ public class Cards implements Serializable {
     }
 
     private static final Parasite<IPlayer, Cards> parasites = new Parasite<>("Cards");
+    private static final Parasite<Game, List<Card>> availableCards = new Parasite<>("Cards.availableCards");
     public static final Parasite<Game, Event2<IPlayer, Integer>> onCouponChange = new Parasite<>("Cards.onCouponChange");
     public static final Parasite<Game, Event3<IPlayer, Boolean, Card>> onCardChange = new Parasite<>("Cards.onCardChange");
     public static Cards get(IPlayer player) {
@@ -97,12 +100,53 @@ public class Cards implements Serializable {
     }
 
     public static void init(Game g) {
-        if (onCouponChange.get(g) == null) {
+        if (availableCards.get(g) == null) {
+            availableCards.set(g, new CopyOnWriteArrayList<>());
             onCouponChange.set(g, new Event2<>());
             onCardChange.set(g, new Event3<>());
             BasePlayer.onAddPlayer.get(g).addListener(player ->
                     parasites.set(player, new Cards(player)));
         }
+    }
+
+    public static void enableCard(Game g, Card card) {
+        List<Card> cards = availableCards.get(g);
+        if (cards == null) {
+            init(g);
+            cards = availableCards.get(g);
+        }
+        if (!cards.contains(card)) {
+            cards.add(card);
+        }
+    }
+
+    public static Card getRandomCard(Game g, boolean miss) {
+        List<Card> cards = availableCards.get(g);
+        int l = cards.size();
+        int[] prob = new int[l + 1];
+        int sum = 0;
+        for (int i = 0; i<l; i++) {
+            sum += 128 / cards.get(i).getPrice(g);
+            prob[i] = sum;
+        }
+        if (miss) {
+            sum += 32;
+            prob[l] = sum;
+        }
+
+        int index = Arrays.binarySearch(prob, ThreadLocalRandom.current().nextInt(sum));
+        if (index < 0) {
+            index = -index - 1;
+        }
+        if (index == l) {
+            return null;
+        } else {
+            return cards.get(index);
+        }
+    }
+
+    public static List<Card> getAvailableCards(Game g) {
+        return new CopyOnWriteArrayList<>(availableCards.get(g));
     }
 
     private final Game game;

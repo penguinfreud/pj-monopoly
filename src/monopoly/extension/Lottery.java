@@ -21,8 +21,10 @@ public class Lottery implements Serializable {
     private static final Parasite<Game, Lottery> parasites = new Parasite<>("Lottery");
 
     public static void init(Game g) {
-        GameCalendar.init(g);
-        parasites.set(g, new Lottery(g));
+        if (parasites.get(g) == null) {
+            GameCalendar.init(g);
+            parasites.set(g, new Lottery(g));
+        }
     }
 
     private final Game game;

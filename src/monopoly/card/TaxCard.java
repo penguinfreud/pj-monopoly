@@ -8,14 +8,18 @@ import monopoly.place.Place;
 import monopoly.util.Consumer1;
 
 public class TaxCard extends Card {
+    private static final Card instance = new TaxCard();
     static {
-        registerCard(new TaxCard());
         Game.putDefaultConfig("tax-card-price", 7);
         Game.putDefaultConfig("tax-card-reach", 5);
     }
 
     private TaxCard() {
         super("TaxCard");
+    }
+
+    public static void enable(Game g) {
+        Cards.enableCard(g, instance);
     }
 
     @Override

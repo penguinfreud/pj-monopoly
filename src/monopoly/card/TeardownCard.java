@@ -1,22 +1,24 @@
 package monopoly.card;
 
-import monopoly.Card;
-import monopoly.Game;
+import monopoly.*;
 import monopoly.place.Place;
-import monopoly.IPlayer;
-import monopoly.Property;
 import monopoly.place.Land;
 import monopoly.place.Street;
 import monopoly.util.Consumer1;
 
 public class TeardownCard extends Card {
+    private static final Card instance = new TeardownCard();
     static {
-        registerCard(new TeardownCard());
         Game.putDefaultConfig("teardown-card-price", 11);
     }
 
     private TeardownCard() {
         super("TeardownCard");
+    }
+
+    public static void enable(Game g) {
+        Cards.enableCard(g, instance);
+        Properties.init(g);
     }
 
     @Override

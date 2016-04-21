@@ -8,14 +8,18 @@ import monopoly.place.Place;
 import monopoly.util.Consumer1;
 
 public class ReverseCard extends Card {
+    private static final Card instance = new ReverseCard();
     static {
-        registerCard(new ReverseCard());
         Game.putDefaultConfig("reverse-card-price", 3);
         Game.putDefaultConfig("reverse-card-reach", 5);
     }
 
     private ReverseCard() {
         super("ReverseCard");
+    }
+
+    public static void enable(Game g) {
+        Cards.enableCard(g, instance);
     }
 
     @Override

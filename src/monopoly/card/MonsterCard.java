@@ -1,20 +1,24 @@
 package monopoly.card;
 
-import monopoly.Card;
-import monopoly.Game;
-import monopoly.Property;
+import monopoly.*;
 import monopoly.place.Land;
 import monopoly.place.Street;
 import monopoly.util.Consumer1;
 
 public class MonsterCard extends Card {
+    private static final Card instance = new MonsterCard();
+
     static {
-        registerCard(new MonsterCard());
         Game.putDefaultConfig("monster-card-price", 9);
     }
 
     private MonsterCard() {
         super("MonsterCard");
+    }
+
+    public static void enable(Game g) {
+        Cards.enableCard(g, instance);
+        Properties.init(g);
     }
 
     @Override
