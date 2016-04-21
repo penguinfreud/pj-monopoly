@@ -1,10 +1,7 @@
 package monopoly;
 
 import monopoly.place.Place;
-import monopoly.util.Consumer0;
-import monopoly.util.Consumer1;
-import monopoly.util.Host;
-import monopoly.util.Supplier;
+import monopoly.util.*;
 
 import java.io.Serializable;
 

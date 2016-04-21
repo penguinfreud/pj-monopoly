@@ -35,6 +35,8 @@ public class Properties implements Serializable {
                 player.addPossession(properties::getValue);
                 player.addPropertySeller(properties::sellProperties);
             });
+            BasePlayer.onBankrupt.get(g).addListener(player ->
+                parasites.get(player).properties.forEach(property -> property.resetOwner(g)));
         }
     }
 
@@ -84,7 +86,7 @@ public class Properties implements Serializable {
     }
 
     private void sellProperties(Consumer0 cb) {
-        sellProperties(null, cb);
+        sellProperties((Property)null, cb);
     }
 
     private void sellProperties(Property property, Consumer0 cb) {

@@ -15,6 +15,7 @@ public class BasePlayer implements IPlayer {
 
     public static final Parasite<Game, InitEvent<IPlayer>> onAddPlayer = new Parasite<>("BasePlayer.onAddPlayer");
     public static final Parasite<Game, Event3<IPlayer, Integer, String>> onMoneyChange = new Parasite<>("BasePlayer.onMoneyChange");
+    public static final Parasite<Game, Event1<IPlayer>> onBankrupt = new Parasite<>("BasePlayer.onBankrupt");
     public static final InitEvent<IPlayer> onInit = new InitEvent<>();
 
     static {
@@ -24,6 +25,7 @@ public class BasePlayer implements IPlayer {
         Game.onInit.addListener(game -> {
             onAddPlayer.set(game, new InitEvent<>());
             onMoneyChange.set(game, new Event3<>());
+            onBankrupt.set(game, new Event1<>());
         });
     }
 
@@ -126,12 +128,15 @@ public class BasePlayer implements IPlayer {
 
     private void bankrupt() {
         bankrupted = true;
+        onBankrupt.get(game).trigger(this);
         game.triggerBankrupt(this);
     }
 
     @Override
     public void giveUp() {
-        bankrupt();
+        synchronized (game.lock) {
+            bankrupt();
+        }
     }
 
     @Override
