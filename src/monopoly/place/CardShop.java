@@ -14,6 +14,11 @@ public class CardShop extends Place {
     }
 
     @Override
+    public void init(Game g) {
+        Cards.init(g);
+    }
+
+    @Override
     public void arriveAt(Game g, Consumer0 cb) {
         Cards.get(g.getCurrentPlayer()).buyCards(cb);
     }

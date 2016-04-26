@@ -24,6 +24,11 @@ public abstract class Property extends Place {
         return g.getText(getName());
     }
 
+    @Override
+    public void init(Game g) {
+        Properties.init(g);
+    }
+
     public boolean isFree() {
         return owner == null;
     }

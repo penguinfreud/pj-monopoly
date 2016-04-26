@@ -1,5 +1,7 @@
 package monopoly.place;
 
+import monopoly.Game;
+
 import java.io.*;
 import java.util.Hashtable;
 import java.util.Map;
@@ -39,6 +41,16 @@ public class GameMap implements Serializable {
             head.prev = place;
         }
         ++_size;
+    }
+
+    public void init(Game g) {
+        Place place = head;
+        if (place != null) {
+            do {
+                place.init(g);
+                place = place.next;
+            } while (place != head);
+        }
     }
 
     public static GameMap readMap(InputStream is) throws Exception {

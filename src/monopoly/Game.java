@@ -142,6 +142,7 @@ public class Game implements Serializable, Host {
         synchronized (lock) {
             if (state == State.OVER) {
                 state = State.STARTING;
+                map.init(this);
                 players.init();
                 onGameStart.trigger();
                 startTurn();

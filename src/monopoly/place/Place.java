@@ -34,6 +34,8 @@ public abstract class Place implements Serializable, GameObject {
         return next;
     }
 
+    public void init(Game g) {}
+
     public final boolean hasRoadblock() {
         return roadblocks > 0;
     }

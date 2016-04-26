@@ -15,6 +15,11 @@ public class CardSite extends Place {
     }
 
     @Override
+    public void init(Game g) {
+        Cards.init(g);
+    }
+
+    @Override
     public void arriveAt(Game g, Consumer0 cb) {
         Card card = Cards.getRandomCard(g, true);
         if (card != null) {
