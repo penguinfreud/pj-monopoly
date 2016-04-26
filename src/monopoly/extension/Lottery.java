@@ -14,8 +14,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public class Lottery implements Serializable {
     static {
         Game.putDefaultConfig("lottery-number-max", 20);
-        Game.putDefaultConfig("lottery-price", 200);
-        Game.putDefaultConfig("lottery-pool", 2000);
+        Game.putDefaultConfig("lottery-price", 200.0);
+        Game.putDefaultConfig("lottery-pool", 2000.0);
     }
 
     private static final Parasite<Game, Lottery> parasites = new Parasite<>("Lottery");
@@ -28,7 +28,8 @@ public class Lottery implements Serializable {
     }
 
     private final Game game;
-    private int value, cheatNumber = -1;
+    private double value;
+    private int cheatNumber = -1;
     private final Map<Integer, List<IPlayer>> entries = new Hashtable<>();
 
     private Lottery(Game g) {
@@ -43,7 +44,7 @@ public class Lottery implements Serializable {
         game.triggerException("lottery", winningNumber);
         List<IPlayer> winners = entries.get(winningNumber);
         if (winners != null) {
-            int amount = value / winners.size();
+            double amount = value / winners.size();
             for (IPlayer player: winners) {
                 String msg = game.format("win_lottery", player.getName(), amount);
                 player.changeCash(amount, msg);
@@ -58,7 +59,7 @@ public class Lottery implements Serializable {
 
     public static void buyLottery(IPlayer player, int number) {
         Game g = player.getGame();
-        int price = g.getConfig("lottery-price");
+        double price = g.getConfig("lottery-price");
         if (player.getCash() >= price) {
             Lottery lottery = parasites.get(g);
             Map<Integer, List<IPlayer>> entries = lottery.entries;

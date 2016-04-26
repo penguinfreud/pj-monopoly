@@ -30,7 +30,7 @@ public class TeardownCard extends Card {
             for (Land land: street.getLands()) {
                 IPlayer owner = land.getOwner();
                 if (owner != null) {
-                    int amount = land.getMortgagePrice() * 3/2;
+                    double amount = land.getMortgagePrice() * 3/2;
                     String msg = g.format("teardown", owner.getName(), amount);
                     owner.changeCash(amount, msg);
                     land.resetOwner(g);

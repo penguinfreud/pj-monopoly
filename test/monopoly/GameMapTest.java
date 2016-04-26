@@ -32,7 +32,7 @@ public class GameMapTest {
         Place p = map.getStartingPoint();
         assertThat(p, instanceOf(Land.class));
         assertEquals("myStreet", p.getName());
-        assertEquals(10, ((Land) p).getPrice());
+        assertEquals(10, ((Land) p).getPrice(), 1e-8);
         assertEquals(p, p.getPrev());
         assertEquals(p, p.getNext());
     }

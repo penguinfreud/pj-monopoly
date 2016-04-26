@@ -12,14 +12,14 @@ public class PropertyNews {
         News.addNews(g -> {
             List<IPlayer> players = getSortedPlayers(g);
             IPlayer player = players.get(0);
-            int award = News.getRandomAward(g);
+            double award = News.getRandomAward(g);
             String msg = g.format("news_poorest_player", player.getName(), award);
             player.changeCash(award, msg);
         });
         News.addNews(g -> {
             List<IPlayer> players = getSortedPlayers(g);
             IPlayer player = players.get(players.size() - 1);
-            int award = News.getRandomAward(g);
+            double award = News.getRandomAward(g);
             String msg = g.format("news_biggest_landlord", player.getName(), award);
             player.changeCash(award, msg);
         });

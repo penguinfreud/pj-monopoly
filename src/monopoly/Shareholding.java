@@ -46,7 +46,6 @@ public class Shareholding implements Serializable {
             BasePlayer.onAddPlayer.get(g).addListener(player -> {
                 Shareholding holding = new Shareholding(player);
                 parasites.set(player, holding);
-                player.addPossession(holding::getValue);
             });
         }
     }
@@ -63,11 +62,6 @@ public class Shareholding implements Serializable {
     private Shareholding(IPlayer player) {
         this.player = player;
         game = player.getGame();
-    }
-
-    private final int getValue() {
-        return (int)(double) (holdingMap.entrySet().stream().map(Map.Entry::getValue)
-                .map(StockHolding::getTotalCost).reduce(0.0, (a, b) -> a + b));
     }
 
     public final StockHolding get(Stock stock) {
@@ -103,7 +97,7 @@ public class Shareholding implements Serializable {
                 } else {
                     StockMarket market = StockMarket.getMarket(game);
                     if (market.hasStock(stock)) {
-                        int price = (int) market.getPrice(stock) * amount;
+                        double price = market.getPrice(stock) * amount;
                         if (player.getCash() >= price) {
                             StockHolding holding = holdingMap.get(stock);
                             if (holding == null) {
@@ -145,7 +139,7 @@ public class Shareholding implements Serializable {
                         } else if (amount > holding.amount) {
                             game.triggerException("sell_too_much_stock");
                         } else {
-                            int price = (int) market.getPrice(stock) * amount;
+                            double price = market.getPrice(stock) * amount;
                             int oldAmount = holding.amount;
                             holding.amount -= amount;
                             holding.cost = holding.cost * holding.amount / oldAmount;

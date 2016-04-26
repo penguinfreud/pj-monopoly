@@ -29,7 +29,7 @@ public class GUIGameMapTest {
         assertEquals(10, ((GUIPlace) p).getX());
         assertEquals(10, ((GUIPlace) p).getY());
         assertEquals("a", p.getName());
-        assertEquals(15, p.asProperty().getPrice());
+        assertEquals(15, p.asProperty().getPrice(), 1e-8);
         assertEquals(p, p.getPrev());
         assertEquals(p, p.getNext());
     }

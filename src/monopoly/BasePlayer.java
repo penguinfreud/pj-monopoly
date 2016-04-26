@@ -14,14 +14,14 @@ public class BasePlayer implements IPlayer {
     private static final Logger logger = Logger.getLogger(BasePlayer.class.getName());
 
     public static final Parasite<Game, InitEvent<IPlayer>> onAddPlayer = new Parasite<>("BasePlayer.onAddPlayer");
-    public static final Parasite<Game, Event3<IPlayer, Integer, String>> onMoneyChange = new Parasite<>("BasePlayer.onMoneyChange");
+    public static final Parasite<Game, Event3<IPlayer, Double, String>> onMoneyChange = new Parasite<>("BasePlayer.onMoneyChange");
     public static final Parasite<Game, Event1<IPlayer>> onBankrupt = new Parasite<>("BasePlayer.onBankrupt");
     public static final InitEvent<IPlayer> onInit = new InitEvent<>();
 
     static {
-        Game.putDefaultConfig("init-cash", 2000);
-        Game.putDefaultConfig("init-deposit", 2000);
-        Game.putDefaultConfig("bank-max-transfer", 100000);
+        Game.putDefaultConfig("init-cash", 2000.0);
+        Game.putDefaultConfig("init-deposit", 2000.0);
+        Game.putDefaultConfig("bank-max-transfer", 100000.0);
         Game.onInit.addListener(game -> {
             onAddPlayer.set(game, new InitEvent<>());
             onMoneyChange.set(game, new Event3<>());
@@ -32,10 +32,10 @@ public class BasePlayer implements IPlayer {
     private final Game game;
     private String name;
     private Place currentPlace;
-    private int cash, deposit;
+    private double cash, deposit;
     private int stepsToAdvance;
     private boolean reversed = false, bankrupted = false;
-    private final List<Supplier<Integer>> possessions = new CopyOnWriteArrayList<>();
+    private final List<Supplier<Double>> possessions = new CopyOnWriteArrayList<>();
     private final List<Consumer1<Consumer0>> propertySellers = new CopyOnWriteArrayList<>();
     private final Map<Object, Object> storage = new Hashtable<>();
 
@@ -85,7 +85,7 @@ public class BasePlayer implements IPlayer {
     }
 
     @Override
-    public final void addPossession(Supplier<Integer> possession) {
+    public final void addPossession(Supplier<Double> possession) {
         possessions.add(possession);
     }
 
@@ -95,12 +95,12 @@ public class BasePlayer implements IPlayer {
     }
 
     @Override
-    public final int getCash() {
+    public final double getCash() {
         return cash;
     }
 
     @Override
-    public final int getDeposit() {
+    public final double getDeposit() {
         return deposit;
     }
 
@@ -110,9 +110,9 @@ public class BasePlayer implements IPlayer {
     }
 
     @Override
-    public final int getTotalPossessions() {
+    public final double getTotalPossessions() {
         synchronized (game.lock) {
-            return possessions.stream().map(Supplier::run).reduce(0, (a, b) -> (a + b));
+            return possessions.stream().map(Supplier::run).reduce(0.0, (a, b) -> (a + b));
         }
     }
 
@@ -140,7 +140,7 @@ public class BasePlayer implements IPlayer {
     }
 
     @Override
-    public void changeCash(int amount, String msg) {
+    public void changeCash(double amount, String msg) {
         synchronized (game.lock) {
             if (cash + amount >= 0 || cash < 0 && amount >= 0) {
                 cash += amount;
@@ -152,7 +152,7 @@ public class BasePlayer implements IPlayer {
     }
 
     @Override
-    public void changeDeposit(int amount, String msg) {
+    public void changeDeposit(double amount, String msg) {
         synchronized (game.lock) {
             if (deposit + amount >= 0) {
                 deposit += amount;
@@ -166,7 +166,7 @@ public class BasePlayer implements IPlayer {
     @Override
     public void depositOrWithdraw(Consumer0 cb) {
         askHowMuchToDepositOrWithdraw((amount) -> {
-            int maxTransfer = game.getConfig("bank-max-transfer");
+            double maxTransfer = game.getConfig("bank-max-transfer");
             if (-maxTransfer <= amount && amount <= maxTransfer) {
                 if (cash - amount >= 0 && deposit + amount >= 0) {
                     cash -= amount;
@@ -188,7 +188,7 @@ public class BasePlayer implements IPlayer {
     }
 
     @Override
-    public void pay(IPlayer receiver, int amount, String msg, Consumer0 cb) {
+    public void pay(IPlayer receiver, double amount, String msg, Consumer0 cb) {
         synchronized (game.lock) {
             assert amount >= 0;
             cash -= amount;

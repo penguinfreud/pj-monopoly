@@ -71,9 +71,9 @@ public class Properties implements Serializable {
         return player;
     }
 
-    private final int getValue() {
+    private double getValue() {
         synchronized (game.lock) {
-            return properties.stream().map(Property::getMortgagePrice).reduce(0, (a, b) -> a + b);
+            return properties.stream().map(Property::getMortgagePrice).reduce(0.0, (a, b) -> a + b);
         }
     }
 
@@ -93,7 +93,7 @@ public class Properties implements Serializable {
         if (player.getCash() <= 0) {
             if (property != null) {
                 if (properties.contains(property)) {
-                    int amount = property.getMortgagePrice();
+                    double amount = property.getMortgagePrice();
                     String msg = game.format("mortgage", player.getName(), property.getName(), amount);
                     properties.remove(property);
                     property.resetOwner(game);
@@ -139,7 +139,7 @@ public class Properties implements Serializable {
     }
 
     private void _buyProperty(Property property, boolean force) {
-        int price = property.getPurchasePrice();
+        double price = property.getPurchasePrice();
         if (checkBuyingCondition(property, force)) {
             IPlayer owner = property.getOwner();
             String msg = game.format("buy_property", player.getName(), price, property.toString(game));
@@ -155,7 +155,7 @@ public class Properties implements Serializable {
 
     private void _upgradeProperty(Property property) {
         if (game.getState() == Game.State.TURN_LANDED) {
-            int price = property.getUpgradePrice();
+            double price = property.getUpgradePrice();
             if (property.getOwner() == player) {
                 if (player.getCash() >= price) {
                     String msg = game.format("upgrade_property", player.getName(), price, property.toString(game), property.getLevel() + 1);
@@ -179,7 +179,7 @@ public class Properties implements Serializable {
                 cb.run();
             } else {
                 IPlayer owner = property.getOwner();
-                int rent = property.getRent();
+                double rent = property.getRent();
                 String msg = game.format("pay_rent", player.getName(), owner.getName(), rent, property.toString(game));
                 player.pay(owner, rent, msg, cb);
             }
@@ -194,7 +194,7 @@ public class Properties implements Serializable {
                 _buyProperty(property, true);
                 cb.run();
             } else {
-                int price = property.getPurchasePrice();
+                double price = property.getPurchasePrice();
                 if (property.isFree() && player.getCash() >= price) {
                     ((IPlayerWithProperties) player).askWhetherToBuyProperty((ok) -> {
                         synchronized (game.lock) {
@@ -219,7 +219,7 @@ public class Properties implements Serializable {
 
     final void upgradeProperty(Property property, Consumer0 cb) {
         if (game.getState() == Game.State.TURN_LANDED) {
-            int price = property.getUpgradePrice();
+            double price = property.getUpgradePrice();
             if (property.getOwner() == player && player.getCash() >= price) {
                 ((IPlayerWithProperties) player).askWhetherToUpgradeProperty((ok) -> {
                     synchronized (game.lock) {

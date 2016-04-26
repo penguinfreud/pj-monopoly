@@ -96,13 +96,13 @@ public class GameTest {
 
     @Test
     public void testStart() throws Exception {
-        game.putConfig("init-cash", 100);
-        game.putConfig("init-deposit", 200);
+        game.putConfig("init-cash", 100.0);
+        game.putConfig("init-deposit", 200.0);
         game.start();
-        assertEquals(100, playerA.getCash());
-        assertEquals(100, playerB.getCash());
-        assertEquals(200, playerA.getDeposit());
-        assertEquals(200, playerB.getDeposit());
+        assertEquals(100, playerA.getCash(), 1e-8);
+        assertEquals(100, playerB.getCash(), 1e-8);
+        assertEquals(200, playerA.getDeposit(), 1e-8);
+        assertEquals(200, playerB.getDeposit(), 1e-8);
     }
 
     @Test

@@ -9,9 +9,9 @@ public class Trap extends Place {
         GameMap.registerPlaceReader("Trap", (r, sc) -> new Trap(sc.nextInt()));
     }
 
-    private final int amount;
+    private final double amount;
 
-    private Trap(int amount) {
+    private Trap(double amount) {
         super("Trap");
         this.amount = amount;
     }

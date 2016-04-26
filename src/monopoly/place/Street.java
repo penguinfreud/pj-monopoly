@@ -24,8 +24,8 @@ public class Street implements Serializable {
         return new CopyOnWriteArrayList<>(lands);
     }
 
-    public int getExtraRent(Land ref) {
+    public double getExtraRent(Land ref) {
         return lands.stream().filter((land) -> land.getOwner() == ref.getOwner())
-                .map(Land::getPrice).reduce(0, (a, b) -> a + b) / 10;
+                .map(Land::getPrice).reduce(0.0, (a, b) -> a + b) / 10;
     }
 }

@@ -21,7 +21,7 @@ public class GameSerializationTest {
     
     private static class Player extends BasePlayer implements Properties.IPlayerWithProperties, IPlayerWithCardsAndStock {
         private Consumer0 cb;
-        private Consumer1<Integer> cbi;
+        private Consumer1<Double> cbd;
         private Consumer1<Boolean> cbb;
         private Consumer1<Property> cbpr;
         private Consumer1<Place> cbpl;
@@ -41,8 +41,8 @@ public class GameSerializationTest {
         }
 
         @Override
-        public void askHowMuchToDepositOrWithdraw(Consumer1<Integer> cb) {
-            cbi = cb;
+        public void askHowMuchToDepositOrWithdraw(Consumer1<Double> cb) {
+            cbd = cb;
             serialize(getGame(), 2);
             super.askHowMuchToDepositOrWithdraw(cb);
         }
@@ -103,7 +103,7 @@ public class GameSerializationTest {
                     super.startTurn(cb);
                     break;
                 case 2:
-                    super.askHowMuchToDepositOrWithdraw(cbi);
+                    super.askHowMuchToDepositOrWithdraw(cbd);
                     break;
                 case 3:
                     IPlayerWithCardsAndStock.super.askWhichCardToBuy(cbc);

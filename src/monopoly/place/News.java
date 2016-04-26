@@ -2,6 +2,7 @@ package monopoly.place;
 
 import monopoly.Game;
 import monopoly.IPlayer;
+import monopoly.Util;
 import monopoly.util.Consumer0;
 import monopoly.util.Consumer1;
 
@@ -17,31 +18,31 @@ public class News extends Place {
 
         newsTypes.add(g -> {
             for (IPlayer player: g.getPlayers()) {
-                int amount = player.getDeposit() / 10;
+                double amount = player.getDeposit() / 10;
                 String msg = g.format("news_interest", player.getName(), amount);
                 player.changeDeposit(amount, msg);
             }
         });
         newsTypes.add(g -> {
             for (IPlayer player: g.getPlayers()) {
-                int amount = player.getDeposit() / 10;
+                double amount = player.getDeposit() / 10;
                 String msg = g.format("news_tax", player.getName(), amount);
                 player.changeDeposit(-amount, msg);
             }
         });
 
-        Game.putDefaultConfig("news-award-min", 100);
-        Game.putDefaultConfig("news-award-max", 200);
+        Game.putDefaultConfig("news-award-min", 100.0);
+        Game.putDefaultConfig("news-award-max", 200.0);
     }
 
     static void addNews(Consumer1<Game> newsType) {
         newsTypes.add(newsType);
     }
 
-    static int getRandomAward(Game g) {
-        int awardMin = g.getConfig("news-award-min"),
+    static double getRandomAward(Game g) {
+        double awardMin = g.getConfig("news-award-min"),
                 awardMax = g.getConfig("news-award-max");
-        return ThreadLocalRandom.current().nextInt(awardMax - awardMin + 1) + awardMin;
+        return ThreadLocalRandom.current().nextDouble(awardMin, awardMax);
     }
 
     private News() {

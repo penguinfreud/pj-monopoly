@@ -26,9 +26,9 @@ public class EqualWealthCard extends Card {
     @Override
     public void use(Game g, Consumer1<Boolean> cb) {
         List<IPlayer> players = g.getPlayers();
-        int average = players.stream().map(IPlayer::getCash).reduce(0, (a, b) -> a + b) / players.size();
+        double average = players.stream().map(IPlayer::getCash).reduce(0.0, (a, b) -> a + b) / players.size();
         for (IPlayer player: players) {
-            int amount = average - player.getCash();
+            double amount = average - player.getCash();
             String msg;
             if (amount >= 0) {
                 msg = g.format("equal_wealth_get", player.getName(), amount);

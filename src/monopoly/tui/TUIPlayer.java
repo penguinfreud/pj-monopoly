@@ -12,7 +12,6 @@ import monopoly.util.Consumer0;
 import monopoly.util.Consumer1;
 import monopoly.util.Function1;
 
-import java.text.DecimalFormat;
 import java.util.*;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -50,6 +49,24 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
             }
             try {
                 int x = Integer.parseInt(str);
+                if (x >= min && x <= max) {
+                    return x;
+                }
+            } catch (NumberFormatException e) {}
+            System.out.println(g.getText("input_error"));
+        }
+    }
+
+    private double getDouble(String question, double min, double max, double noop) {
+        TUIGame g = (TUIGame) getGame();
+        while (true) {
+            System.out.print(question);
+            String str = g.getScanner().nextLine();
+            if (str.toLowerCase().equals("q")) {
+                return noop;
+            }
+            try {
+                double x = Double.parseDouble(str);
                 if (x >= min && x <= max) {
                     return x;
                 }
@@ -125,14 +142,16 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     @Override
     public void askWhetherToBuyProperty(Consumer1<Boolean> cb) {
         Property property = getCurrentPlace().asProperty();
-        String question = getGame().format("ask_whether_to_buy_property", property.getName(), property.getPurchasePrice(), getCash());
+        String question = getGame().format("ask_whether_to_buy_property", property.getName(),
+                property.getPurchasePrice(), getCash());
         cb.run(yesOrNo(question));
     }
 
     @Override
     public void askWhetherToUpgradeProperty(Consumer1<Boolean> cb) {
         Property property = getCurrentPlace().asProperty();
-        String question = getGame().format("ask_whether_to_upgrade_property", property.getName(), property.getUpgradePrice(), getCash());
+        String question = getGame().format("ask_whether_to_upgrade_property", property.getName(),
+                property.getUpgradePrice(), getCash());
         cb.run(yesOrNo(question));
     }
 
@@ -212,16 +231,6 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
         }
     }
 
-    private final DecimalFormat df = new DecimalFormat("#,##0.00");
-
-    private String formatStockPrice(double price) {
-        if (Double.isNaN(price)) {
-            return getGame().getText("n/a");
-        } else {
-            return df.format(price);
-        }
-    }
-
     private void menuViewStock() {
         Game g = getGame();
         Set<Map.Entry<Stock, StockMarket.StockTrend>> stocks = StockMarket.getMarket(g).getStockEntries();
@@ -236,11 +245,11 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
             Stock stock = entry.getKey();
             StockMarket.StockTrend trend = entry.getValue();
             System.out.print(g.format("stock_table_row", stock.toString(g),
-                    formatStockPrice(trend.getPrice(4)),
-                    formatStockPrice(trend.getPrice(3)),
-                    formatStockPrice(trend.getPrice(2)),
-                    formatStockPrice(trend.getPrice(1)),
-                    formatStockPrice(trend.getPrice(0))));
+                    Util.formatNumber(trend.getPrice(4)),
+                    Util.formatNumber(trend.getPrice(3)),
+                    Util.formatNumber(trend.getPrice(2)),
+                    Util.formatNumber(trend.getPrice(1)),
+                    Util.formatNumber(trend.getPrice(0))));
 
             for (IPlayer player: g.getPlayers()) {
                 System.out.print(g.format("player_holding_row",
@@ -254,8 +263,8 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
         Stock stock = entry.getKey();
         double price = entry.getValue().getPrice(0);
         Shareholding holding = Shareholding.get(this);
-        return getGame().format("stock_item", stock.toString(getGame()), formatStockPrice(price),
-                holding.getAmount(stock), formatStockPrice(holding.getAverageCost(stock)));
+        return getGame().format("stock_item", stock.toString(getGame()), price,
+                holding.getAmount(stock), holding.getAverageCost(stock));
     }
 
     private void menuBuyStock() {
@@ -315,7 +324,7 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
 
     private void buyLottery() {
         Game g = getGame();
-        int price = g.getConfig("lottery-price");
+        double price = g.getConfig("lottery-price");
         if (getCash() > price) {
             int max = g.getConfig("lottery-number-max");
             String question = g.getText("ask_what_number_to_bet");
@@ -393,11 +402,10 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     }
 
     @Override
-    public void askHowMuchToDepositOrWithdraw(Consumer1<Integer> cb) {
+    public void askHowMuchToDepositOrWithdraw(Consumer1<Double> cb) {
         Game g = getGame();
-        int maxTransfer = g.getConfig("bank-max-transfer");
         String question = g.format("ask_how_much_to_deposit_or_withdraw", getCash(), getDeposit());
-        cb.run(getInt(question, -getDeposit(), getCash(), 0));
+        cb.run(getDouble(question, -getDeposit(), getCash(), 0));
     }
 
     @Override

@@ -12,9 +12,10 @@ public abstract class Property extends Place {
     }
 
     private IPlayer owner;
-    private int price = 0, level = 1;
+    private double price = 0;
+    private int level = 1;
 
-    protected Property(String name, int price) {
+    protected Property(String name, double price) {
         super(name);
         this.price = price;
     }
@@ -33,23 +34,23 @@ public abstract class Property extends Place {
         return owner == null;
     }
 
-    public int getPrice() {
+    public double getPrice() {
         return price;
     }
 
-    public int getPurchasePrice() {
+    public double getPurchasePrice() {
         return 0;
     }
 
-    public int getUpgradePrice() {
+    public double getUpgradePrice() {
         return 0;
     }
 
-    public int getRent() {
+    public double getRent() {
         return 0;
     }
 
-    public int getMortgagePrice() {
+    public double getMortgagePrice() {
         return 0;
     }
 

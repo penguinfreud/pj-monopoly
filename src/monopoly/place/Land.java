@@ -20,22 +20,22 @@ public class Land extends Property {
     }
 
     @Override
-    public int getPurchasePrice() {
+    public double getPurchasePrice() {
         return getPrice() * getLevel();
     }
 
     @Override
-    public int getUpgradePrice() {
+    public double getUpgradePrice() {
         return getPrice() / 2;
     }
 
     @Override
-    public int getRent() {
+    public double getRent() {
         return getPrice() * 2 / 10 + street.getExtraRent(this);
     }
 
     @Override
-    public int getMortgagePrice() {
+    public double getMortgagePrice() {
         return getPrice() * getLevel();
     }
 }
