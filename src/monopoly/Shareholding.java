@@ -47,13 +47,14 @@ public class Shareholding implements Serializable {
                 Shareholding holding = new Shareholding(player);
                 parasites.set(player, holding);
             });
+            BasePlayer.onBankrupt.get(g).addListener(player ->
+                    parasites.get(player).holdingMap.forEach((stock, holding) -> holding.amount = 0));
         }
     }
 
     public static Shareholding get(IPlayer player) {
         return parasites.get(player);
     }
-
 
     private final Game game;
     private final IPlayer player;

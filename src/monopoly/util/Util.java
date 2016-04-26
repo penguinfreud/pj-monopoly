@@ -1,4 +1,4 @@
-package monopoly;
+package monopoly.util;
 
 import java.text.DecimalFormat;
 

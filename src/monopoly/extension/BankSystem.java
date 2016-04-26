@@ -2,7 +2,6 @@ package monopoly.extension;
 
 import monopoly.Game;
 import monopoly.IPlayer;
-import monopoly.Util;
 import monopoly.util.Parasite;
 
 public final class BankSystem {

@@ -2,7 +2,6 @@ package monopoly.place;
 
 import monopoly.Game;
 import monopoly.IPlayer;
-import monopoly.Util;
 import monopoly.util.Consumer0;
 import monopoly.util.Consumer1;
 
