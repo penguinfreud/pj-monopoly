@@ -46,7 +46,7 @@ public class Main {
 
             players = new ArrayList<>();
 
-            game = new TUIGame();
+            game = new TUIGame(System.in, System.out);
             game.setMap(map);
 
             game.onGameOver.addListener(Main::newGame);

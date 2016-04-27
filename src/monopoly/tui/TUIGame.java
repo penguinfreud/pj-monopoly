@@ -5,13 +5,19 @@ import monopoly.extension.BankSystem;
 import monopoly.extension.Lottery;
 import monopoly.stock.StockMarket;
 
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.Scanner;
 
 public class TUIGame extends Game {
-    private final Scanner scanner = new Scanner(System.in);
+    private final PrintStream out;
+    private final Scanner scanner;
 
-    public TUIGame() {
+    public TUIGame(InputStream in, PrintStream out) {
         super();
+
+        this.out = out;
+        scanner = new Scanner(in);
 
         Properties.init(this);
         Cards.init(this);
@@ -22,31 +28,34 @@ public class TUIGame extends Game {
         Card.enableAll(this);
 
         onGameOver.addListener(() ->
-            System.out.println(format("game_over", getCurrentPlayer().getName())));
+            out.println(format("game_over", getCurrentPlayer().getName())));
         onLanded.addListener (() ->
-            System.out.println(format("you_have_arrived",
+            out.println(format("you_have_arrived",
                     getCurrentPlayer().getCurrentPlace().toString(this))));
         onBankrupt.addListener((p) ->
-            System.out.println(format("bankrupt", p.getName())));
+            out.println(format("bankrupt", p.getName())));
         onException.addListener(System.out::println);
         BasePlayer.onMoneyChange.get(this).addListener((player, amount, msg) -> {
             if (!msg.isEmpty()) {
-                System.out.println(msg);
+                out.println(msg);
             }
         });
         Cards.onCouponChange.get(this).addListener((player, amount) -> {
             if (amount > 0) {
-                System.out.println(format("get_coupons", player.getName(), amount));
+                out.println(format("get_coupons", player.getName(), amount));
             }
         });
         Cards.onCardChange.get(this).addListener((player, isGet, card) -> {
             if (isGet) {
-                System.out.println(format("get_card", player.getName(), card.toString(this)));
+                out.println(format("get_card", player.getName(), card.toString(this)));
             }
         });
     }
 
-    public Scanner getScanner() {
+    Scanner getScanner() {
         return scanner;
+    }
+    PrintStream getOut() {
+        return out;
     }
 }
