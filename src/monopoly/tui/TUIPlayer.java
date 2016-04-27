@@ -13,40 +13,50 @@ import monopoly.util.Consumer1;
 import monopoly.util.Function1;
 import monopoly.util.Util;
 
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.*;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithProperties, Cards.IPlayerWithCards, IPlayerWithCardsAndStock {
+    private Scanner scanner;
+    private PrintStream out;
+    
     public TUIPlayer(Game g) {
-        super(g);
+        this("", g);
     }
 
     public TUIPlayer(String name, Game g) {
+        this(name, g, System.in, System.out);
+    }
+
+    public TUIPlayer(String name, Game g, InputStream in, PrintStream out) {
         super(name, g);
+        scanner = TUI.getScanner(in);
+        TUI.addOutput(g, out);
+        this.out = out;
     }
 
     private boolean yesOrNo(String question) {
         Game g = getGame();
-        TUI tui = TUI.get(g);
         while (true) {
-            tui.getOut().print(question);
-            String answer = tui.getScanner().nextLine().toLowerCase();
+            out.print(question);
+            String answer = scanner.nextLine().toLowerCase();
             if (answer.equals("y") || answer.equals("yes")) {
                 return true;
             } else if (answer.equals("n") || answer.equals("no")) {
                 return false;
             }
-            tui.getOut().println(g.getText("input_error"));
+            out.println(g.getText("input_error"));
         }
     }
 
     private int getInt(String question, int min, int max, int noop) {
         Game g = getGame();
-        TUI tui = TUI.get(g);
         while (true) {
-            tui.getOut().print(question);
-            String str = tui.getScanner().nextLine();
+            out.print(question);
+            String str = scanner.nextLine();
             if (str.toLowerCase().equals("q")) {
                 return noop;
             }
@@ -56,16 +66,15 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
                     return x;
                 }
             } catch (NumberFormatException e) {}
-            tui.getOut().println(g.getText("input_error"));
+            out.println(g.getText("input_error"));
         }
     }
 
     private double getDouble(String question, double min, double max, double noop) {
         Game g = getGame();
-        TUI tui = TUI.get(g);
         while (true) {
-            tui.getOut().print(question);
-            String str = tui.getScanner().nextLine();
+            out.print(question);
+            String str = scanner.nextLine();
             if (str.toLowerCase().equals("q")) {
                 return noop;
             }
@@ -75,26 +84,25 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
                     return x;
                 }
             } catch (NumberFormatException e) {}
-            tui.getOut().println(g.getText("input_error"));
+            out.println(g.getText("input_error"));
         }
     }
 
     private <T> T choose(String question, List<T> options, boolean nullable, Function1<T, String> stringifier) {
         Game g = getGame();
-        TUI tui = TUI.get(g);
         while (true) {
-            tui.getOut().println(question);
+            out.println(question);
             int l = options.size();
             for (int i = 0; i<l; i++) {
                 T item = options.get(i);
                 String option = stringifier.run(item);
-                tui.getOut().println("[" + (i + 1) + "] " + option);
+                out.println("[" + (i + 1) + "] " + option);
             }
             if (nullable) {
-                tui.getOut().println("[" + (l + 1) + "] " + g.getText("return"));
+                out.println("[" + (l + 1) + "] " + g.getText("return"));
             }
-            tui.getOut().print(g.getText("please_choose"));
-            String strChoice = tui.getScanner().nextLine();
+            out.print(g.getText("please_choose"));
+            String strChoice = scanner.nextLine();
             try {
                 int choice = Integer.parseInt(strChoice);
                 if (choice >= 1 && choice <= l) {
@@ -103,7 +111,7 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
                     return null;
                 }
             } catch (NumberFormatException e) {}
-            tui.getOut().println(g.getText("input_error"));
+            out.println(g.getText("input_error"));
         }
     }
 
@@ -113,21 +121,20 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
 
     private int chooseInt(List<String> options) {
         Game g = getGame();
-        TUI tui = TUI.get(g);
         while (true) {
             int l = options.size();
             for (int i = 0; i<l; i++) {
-                tui.getOut().println("[" + (i + 1) + "] " + options.get(i));
+                out.println("[" + (i + 1) + "] " + options.get(i));
             }
-            tui.getOut().print(g.getText("please_choose"));
-            String strChoice = tui.getScanner().nextLine();
+            out.print(g.getText("please_choose"));
+            String strChoice = scanner.nextLine();
             try {
                 int choice = Integer.parseInt(strChoice);
                 if (choice >= 1 && choice <= l) {
                     return choice - 1;
                 }
             } catch (NumberFormatException e) {}
-            tui.getOut().println(g.getText("input_error"));
+            out.println(g.getText("input_error"));
         }
     }
 
@@ -177,14 +184,13 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
 
     private void viewMap(boolean raw) {
         Game g = getGame();
-        TUI tui = TUI.get(g);
-        ((TUIGameMap) g.getMap()).print(g, tui.getOut(), raw);
+        ((TUIGameMap) g.getMap()).print(g, out, raw);
     }
 
     private void _askWhichCardToUse(Consumer0 cb) {
         List<Card> cards = Cards.get(this).getCards();
         if (cards.size() == 0) {
-            TUI.get(getGame()).getOut().println(getGame().getText("you_have_no_card"));
+            out.println(getGame().getText("you_have_no_card"));
             startTurn(cb);
         } else {
             String question = getGame().getText("ask_which_card_to_use");
@@ -199,40 +205,37 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
 
     private void checkAlert() {
         Game g = getGame();
-        TUI tui = TUI.get(g);
         Place place = getCurrentPlace();
         boolean hasRoadblock = false;
         for (int i = 0; i<10; i++) {
             place = place.getNext();
             if (place.hasRoadblock()) {
                 hasRoadblock = true;
-                tui.getOut().println(g.format("has_roadblock", i + 1));
+                out.println(g.format("has_roadblock", i + 1));
             }
         }
         if (!hasRoadblock) {
-            tui.getOut().println(g.getText("has_no_roadblock"));
+            out.println(g.getText("has_no_roadblock"));
         }
     }
 
     private void viewPlace() {
         Game g = getGame();
-        TUI tui = TUI.get(g);
         while (true) {
             int steps = getInt(g.getText("ask_which_place_to_view"), -10, 10, -11);
             if (steps == -11) {
                 break;
             }
-            ((TUIPlace)nthPlace(steps)).printDetail(g, tui.getOut());
+            ((TUIPlace)nthPlace(steps)).printDetail(g, out);
         }
     }
 
     private void viewPlayerInfo() {
         Game g = getGame();
-        TUI tui = TUI.get(g);
-        tui.getOut().println(g.getText("player_info_table_head"));
+        out.println(g.getText("player_info_table_head"));
         for (IPlayer player: g.getPlayers()) {
             Cards cards = Cards.get(player);
-            tui.getOut().println(g.format("player_info_table_row",
+            out.println(g.format("player_info_table_row",
                     player.getName(),
                     player.getCash(),
                     player.getDeposit(),
@@ -245,19 +248,18 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
 
     private void menuViewStock() {
         Game g = getGame();
-        TUI tui = TUI.get(g);
         Set<Map.Entry<Stock, StockMarket.StockTrend>> stocks = StockMarket.getMarket(g).getStockEntries();
         for (int i = 1; i<=5; i++) {
-            tui.getOut().print(i + "\t\t");
+            out.print(i + "\t\t");
         }
         for (IPlayer player: g.getPlayers()) {
-            tui.getOut().print(g.format("player_holding_head", player.getName()));
+            out.print(g.format("player_holding_head", player.getName()));
         }
-        tui.getOut().println();
+        out.println();
         for (Map.Entry<Stock, StockMarket.StockTrend>entry: stocks) {
             Stock stock = entry.getKey();
             StockMarket.StockTrend trend = entry.getValue();
-            tui.getOut().print(g.format("stock_table_row", stock.toString(g),
+            out.print(g.format("stock_table_row", stock.toString(g),
                     Util.formatNumber(trend.getPrice(4)),
                     Util.formatNumber(trend.getPrice(3)),
                     Util.formatNumber(trend.getPrice(2)),
@@ -265,10 +267,10 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
                     Util.formatNumber(trend.getPrice(0))));
 
             for (IPlayer player: g.getPlayers()) {
-                tui.getOut().print(g.format("player_holding_row",
+                out.print(g.format("player_holding_row",
                         Shareholding.get(player).getAmount(stock)));
             }
-            tui.getOut().println();
+            out.println();
         }
     }
 
@@ -373,10 +375,9 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     @Override
     public void startTurn(Consumer0 cb) {
         Game g = getGame();
-        TUI tui = TUI.get(g);
         viewMap(false);
         String direction = g.getText(isReversed()? "anticlockwise": "clockwise");
-        tui.getOut().println(g.format("game_info", GameCalendar.getDate(g), getName(), direction));
+        out.println(g.format("game_info", GameCalendar.getDate(g), getName(), direction));
 
         loop: while (true) {
             switch (chooseInt(gameMenuItems)) {

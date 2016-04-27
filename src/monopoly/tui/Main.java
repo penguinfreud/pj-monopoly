@@ -21,7 +21,6 @@ public class Main {
 
     private static List<IPlayer> players;
     private static Game game;
-    private static TUI tui;
     private static boolean isAI = false;
 
     public static void main(String[] args) {
@@ -60,8 +59,9 @@ public class Main {
             Shareholding.enable(game);
             Card.enableAll(game);
 
-            TUI.enable(game, System.in, System.out);
-            tui = TUI.get(game);
+            if (isAI) {
+                TUI.addOutput(game, System.out);
+            }
 
             newGame();
         } catch (Exception e) {
@@ -80,7 +80,7 @@ public class Main {
     private static void newGame() {
         players.clear();
         System.out.println(game.getText("ask_player_names"));
-        Scanner scanner = tui.getScanner();
+        Scanner scanner = TUI.getScanner(System.in);
         players.add(createPlayer(scanner.nextLine()));
         players.add(createPlayer(scanner.nextLine()));
         try {
