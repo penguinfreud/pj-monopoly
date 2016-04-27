@@ -21,7 +21,7 @@ public class Game implements Serializable, Host {
         defaultConfig.put("bundle-name", "messages");
         defaultConfig.put("locale", "zh-CN");
         defaultConfig.put("dice-sides", 6);
-        defaultConfig.put("shuffle-players", true);
+        defaultConfig.put("shuffle-players", false);
     }
 
     enum State {
