@@ -26,8 +26,8 @@ public class StockMarket implements Serializable {
 
     public static final class StockTrend {
         static {
-            Game.putDefaultConfig("stock-init-price-min", 10.0);
-            Game.putDefaultConfig("stock-init-price-max", 50.0);
+            Game.putDefaultConfig("stock-enable-price-min", 10.0);
+            Game.putDefaultConfig("stock-enable-price-max", 50.0);
             Game.putDefaultConfig("stock-max-changing-rate", 0.1);
         }
 
@@ -49,8 +49,8 @@ public class StockMarket implements Serializable {
         }
 
         private void initPrice() {
-            double min = game.getConfig("stock-init-price-min"),
-            max = game.getConfig("stock-init-price-max");
+            double min = game.getConfig("stock-enable-price-min"),
+            max = game.getConfig("stock-enable-price-max");
             double price = ThreadLocalRandom.current().nextDouble(max - min) + min;
             prices.add(price);
         }
@@ -81,10 +81,14 @@ public class StockMarket implements Serializable {
         }
     }
 
-    public static void init(Game g) {
+    public static void enable(Game g) {
         if (markets.get(g) == null) {
             markets.set(g, new StockMarket(g));
         }
+    }
+
+    public static boolean isEnabled(Game g) {
+        return markets.get(g) != null;
     }
 
     private final Map<Stock, StockTrend> priceMap = new Hashtable<>();

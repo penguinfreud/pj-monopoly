@@ -26,7 +26,7 @@ public class Properties implements Serializable {
     private static final Parasite<IPlayer, Properties> parasites = new Parasite<>("Properties");
     public static final Parasite<Game, Event3<IPlayer, Boolean, Property>> onPropertyChange = new Parasite<>("Properties.onPropertyChange");
 
-    public static void init(Game g) {
+    public static void enable(Game g) {
         if (onPropertyChange.get(g) == null) {
             onPropertyChange.set(g, new Event3<>());
             BasePlayer.onAddPlayer.get(g).addListener(player -> {
@@ -38,6 +38,10 @@ public class Properties implements Serializable {
             BasePlayer.onBankrupt.get(g).addListener(player ->
                 parasites.get(player).properties.forEach(property -> property.resetOwner(g)));
         }
+    }
+
+    public static boolean isEnabled(Game g) {
+        return onPropertyChange.get(g) != null;
     }
 
     public static Properties get(IPlayer player) {

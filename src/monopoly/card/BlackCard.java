@@ -5,7 +5,6 @@ import monopoly.Cards;
 import monopoly.Game;
 import monopoly.IPlayerWithCardsAndStock;
 import monopoly.stock.StockMarket;
-import monopoly.util.Consumer0;
 import monopoly.util.Consumer1;
 
 public class BlackCard extends Card {
@@ -21,7 +20,7 @@ public class BlackCard extends Card {
 
     public static void enable(Game g) {
         Cards.enableCard(g, instance);
-        StockMarket.init(g);
+        StockMarket.enable(g);
     }
 
     @Override

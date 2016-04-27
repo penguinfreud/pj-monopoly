@@ -11,11 +11,15 @@ public final class GameCalendar implements Serializable {
     public static final Parasite<Game, Event0> onMonth = new Parasite<>("GameCalendar.onMonth");
     private static final Parasite<Game, GameCalendar> calendars = new Parasite<>("GameCalendar");
 
-    public static void init(Game g) {
+    public static void enable(Game g) {
         if (calendars.get(g) == null) {
             onMonth.set(g, new Event0());
             calendars.set(g, new GameCalendar(g));
         }
+    }
+
+    public static boolean isEnabled(Game g) {
+        return calendars.get(g) != null;
     }
 
     private final Game game;

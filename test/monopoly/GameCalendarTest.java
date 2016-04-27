@@ -30,8 +30,8 @@ public class GameCalendarTest {
         players.add(new Player("player A", game));
         players.add(new Player("player A", game));
         game.setPlayers(players);
-        GameCalendar.init(game);
-        Properties.init(game);
+        GameCalendar.enable(game);
+        Properties.enable(game);
     }
 
     private String formatDate(Calendar calendar) {

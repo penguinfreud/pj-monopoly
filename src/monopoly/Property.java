@@ -27,7 +27,7 @@ public abstract class Property extends Place {
 
     @Override
     public void init(Game g) {
-        Properties.init(g);
+        Properties.enable(g);
     }
 
     public boolean isFree() {

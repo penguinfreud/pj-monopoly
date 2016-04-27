@@ -19,7 +19,7 @@ public class CouponSite extends Place {
 
     @Override
     public void init(Game g) {
-        Cards.init(g);
+        Cards.enable(g);
     }
 
     @Override

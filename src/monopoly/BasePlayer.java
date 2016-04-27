@@ -252,8 +252,8 @@ public class BasePlayer implements IPlayer {
     @Override
     public final void init() {
         if (game.getState() == Game.State.STARTING) {
-            cash = game.getConfig("init-cash");
-            deposit = game.getConfig("init-deposit");
+            cash = game.getConfig("enable-cash");
+            deposit = game.getConfig("enable-deposit");
             currentPlace = game.getMap().getStartingPoint();
             reversed = false;
             bankrupted = false;

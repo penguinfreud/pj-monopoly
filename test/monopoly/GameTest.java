@@ -40,7 +40,7 @@ public class GameTest {
         players.add(playerA);
         players.add(playerB);
         game.setPlayers(players);
-        Properties.init(game);
+        Properties.enable(game);
     }
 
     @Test
@@ -96,8 +96,8 @@ public class GameTest {
 
     @Test
     public void testStart() throws Exception {
-        game.putConfig("init-cash", 100.0);
-        game.putConfig("init-deposit", 200.0);
+        game.putConfig("enable-cash", 100.0);
+        game.putConfig("enable-deposit", 200.0);
         game.start();
         assertEquals(100, playerA.getCash(), 1e-8);
         assertEquals(100, playerB.getCash(), 1e-8);

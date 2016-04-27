@@ -39,9 +39,9 @@ public class Shareholding implements Serializable {
         Game.putDefaultConfig("stock-max-trade", 10000);
     }
 
-    public static void init(Game g) {
+    public static void enable(Game g) {
         if (onStockHoldingChange.get(g) == null) {
-            GameCalendar.init(g);
+            GameCalendar.enable(g);
             onStockHoldingChange.set(g, new Event3<>());
             BasePlayer.onAddPlayer.get(g).addListener(player -> {
                 Shareholding holding = new Shareholding(player);
@@ -50,6 +50,10 @@ public class Shareholding implements Serializable {
             BasePlayer.onBankrupt.get(g).addListener(player ->
                     parasites.get(player).holdingMap.forEach((stock, holding) -> holding.amount = 0));
         }
+    }
+
+    public static boolean isEnabled(Game g) {
+        return onStockHoldingChange.get(g) != null;
     }
 
     public static Shareholding get(IPlayer player) {

@@ -1,9 +1,7 @@
 package monopoly.card;
 
 import monopoly.*;
-import monopoly.stock.Stock;
 import monopoly.stock.StockMarket;
-import monopoly.util.Consumer0;
 import monopoly.util.Consumer1;
 
 public class RedCard extends Card {
@@ -18,7 +16,7 @@ public class RedCard extends Card {
 
     public static void enable(Game g) {
         Cards.enableCard(g, instance);
-        StockMarket.init(g);
+        StockMarket.enable(g);
     }
 
     @Override

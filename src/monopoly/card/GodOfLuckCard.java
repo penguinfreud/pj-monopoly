@@ -16,7 +16,7 @@ public class GodOfLuckCard extends Card {
 
     public static void enable(Game g) {
         Cards.enableCard(g, instance);
-        Properties.init(g);
+        Properties.enable(g);
     }
 
     @Override

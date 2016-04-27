@@ -9,10 +9,10 @@ public final class BankSystem {
 
     private static final Parasite<Game, Boolean> inited = new Parasite<>("BankSystem");
 
-    public static void init(Game g) {
+    public static void enable(Game g) {
         if (inited.get(g) == null) {
             inited.set(g, true);
-            GameCalendar.init(g);
+            GameCalendar.enable(g);
             GameCalendar.onMonth.get(g).addListener(() -> {
                 synchronized (g.lock) {
                     for (IPlayer player : g.getPlayers()) {
@@ -23,5 +23,9 @@ public final class BankSystem {
                 }
             });
         }
+    }
+
+    public static boolean isEnabled(Game g) {
+        return inited.get(g) != null;
     }
 }

@@ -146,12 +146,12 @@ public class GameSerializationTest {
         players.add(new Player("player D", game));
         game.setPlayers(players);
 
-        Properties.init(game);
-        Cards.init(game);
-        BankSystem.init(game);
-        Lottery.init(game);
-        StockMarket.init(game);
-        Shareholding.init(game);
+        Properties.enable(game);
+        Cards.enable(game);
+        BankSystem.enable(game);
+        Lottery.enable(game);
+        StockMarket.enable(game);
+        Shareholding.enable(game);
 
         StockMarket.addStock(new Stock("baidu"));
         StockMarket.addStock(new Stock("google"));

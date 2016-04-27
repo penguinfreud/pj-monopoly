@@ -17,7 +17,7 @@ public class LotteryCard extends Card {
 
     public static void enable(Game g) {
         Cards.enableCard(g, instance);
-        Lottery.init(g);
+        Lottery.enable(g);
     }
 
     @Override

@@ -88,7 +88,7 @@ public class Cards implements Serializable {
     }
 
     static {
-        Game.putDefaultConfig("init-coupons", 0);
+        Game.putDefaultConfig("enable-coupons", 0);
     }
 
     private static final Parasite<IPlayer, Cards> parasites = new Parasite<>("Cards");
@@ -99,7 +99,7 @@ public class Cards implements Serializable {
         return parasites.get(player);
     }
 
-    public static void init(Game g) {
+    public static void enable(Game g) {
         if (availableCards.get(g) == null) {
             availableCards.set(g, new CopyOnWriteArrayList<>());
             onCouponChange.set(g, new Event2<>());
@@ -112,12 +112,21 @@ public class Cards implements Serializable {
     public static void enableCard(Game g, Card card) {
         List<Card> cards = availableCards.get(g);
         if (cards == null) {
-            init(g);
+            enable(g);
             cards = availableCards.get(g);
         }
         if (!cards.contains(card)) {
             cards.add(card);
         }
+    }
+
+    public static boolean isEnabled(Game g) {
+        return availableCards.get(g) != null;
+    }
+
+    public static boolean isCardEnabled(Game g, Card card) {
+        List<Card> cards = availableCards.get(g);
+        return cards != null && cards.contains(card);
     }
 
     public static Card getRandomCard(Game g, boolean miss) {
@@ -163,7 +172,7 @@ public class Cards implements Serializable {
         }
 
         game.onGameStart.addListener(() ->
-            coupons = game.getConfig("init-coupons"));
+            coupons = game.getConfig("enable-coupons"));
     }
 
     public final int getCoupons() {

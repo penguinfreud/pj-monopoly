@@ -1,6 +1,8 @@
 package monopoly.tui;
 
 import monopoly.*;
+import monopoly.extension.BankSystem;
+import monopoly.extension.Lottery;
 import monopoly.place.GameMap;
 import monopoly.place.Place;
 import monopoly.stock.Stock;
@@ -18,7 +20,8 @@ public class Main {
     }
 
     private static List<IPlayer> players;
-    private static TUIGame game;
+    private static Game game;
+    private static TUI tui;
     private static boolean isAI = false;
 
     public static void main(String[] args) {
@@ -35,8 +38,6 @@ public class Main {
             Class.forName("monopoly.tui.TUIGameMap");
             Class.forName("monopoly.tui.TUIPlace");
             Place.loadAll();
-            Class.forName("monopoly.place.PropertyNews");
-            Class.forName("monopoly.place.CardNews");
             StockMarket.addStock(new Stock("baidu"));
             StockMarket.addStock(new Stock("google"));
             StockMarket.addStock(new Stock("facebook"));
@@ -46,10 +47,21 @@ public class Main {
 
             players = new ArrayList<>();
 
-            game = new TUIGame(System.in, System.out);
+            game = new Game();
             game.setMap(map);
 
             game.onGameOver.addListener(Main::newGame);
+
+            Properties.enable(game);
+            Cards.enable(game);
+            BankSystem.enable(game);
+            Lottery.enable(game);
+            StockMarket.enable(game);
+            Shareholding.enable(game);
+            Card.enableAll(game);
+
+            TUI.enable(game, System.in, System.out);
+            tui = TUI.get(game);
 
             newGame();
         } catch (Exception e) {
@@ -68,7 +80,7 @@ public class Main {
     private static void newGame() {
         players.clear();
         System.out.println(game.getText("ask_player_names"));
-        Scanner scanner = game.getScanner();
+        Scanner scanner = tui.getScanner();
         players.add(createPlayer(scanner.nextLine()));
         players.add(createPlayer(scanner.nextLine()));
         try {
