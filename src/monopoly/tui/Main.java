@@ -49,8 +49,6 @@ public class Main {
             game = new Game();
             game.setMap(map);
 
-            game.onGameOver.addListener(Main::newGame);
-
             Properties.enable(game);
             Cards.enable(game);
             BankSystem.enable(game);
@@ -62,6 +60,8 @@ public class Main {
             if (isAI) {
                 TUI.addOutput(game, System.out);
             }
+
+            game.onGameOver.addListener(() -> new Thread(Main::newGame).start());
 
             newGame();
         } catch (Exception e) {
@@ -78,6 +78,11 @@ public class Main {
     }
 
     private static void newGame() {
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         players.clear();
         System.out.println(game.getText("ask_player_names"));
         Scanner scanner = TUI.getScanner(System.in);
