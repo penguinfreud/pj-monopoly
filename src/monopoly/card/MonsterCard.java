@@ -27,10 +27,10 @@ public class MonsterCard extends Card {
         if (prop != null && prop instanceof Land) {
             Street street = ((Land) prop).getStreet();
             street.getLands().stream().forEach(land -> land.resetLevel(g));
-            cb.run(true);
+            cb.accept(true);
         } else {
             g.triggerException("not_on_a_removable_land");
-            cb.run(false);
+            cb.accept(false);
         }
     }
 }

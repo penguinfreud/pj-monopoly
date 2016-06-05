@@ -1,7 +1,7 @@
 package monopoly.place;
 
-import monopoly.Game;
 import monopoly.Cards;
+import monopoly.Game;
 import monopoly.util.Consumer0;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -27,6 +27,6 @@ public class CouponSite extends Place {
         int min = g.getConfig("coupon-award-min"),
                 max = g.getConfig("coupon-award-max");
         Cards.get(g.getCurrentPlayer()).addCoupons(ThreadLocalRandom.current().nextInt(max - min + 1) + min);
-        cb.run();
+        cb.accept();
     }
 }

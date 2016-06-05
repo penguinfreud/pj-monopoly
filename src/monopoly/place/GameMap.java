@@ -2,23 +2,25 @@ package monopoly.place;
 
 import monopoly.Game;
 
-import java.io.*;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-public class GameMap implements Serializable {
+public class GameMap {
     private Place head = null;
     private String name = null;
     private int _size = 0;
 
-    public GameMap() {}
+    public GameMap() {
+    }
 
     public int size() {
         return _size;
     }
-    
+
     public String getName() {
         return name;
     }

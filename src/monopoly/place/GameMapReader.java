@@ -5,7 +5,9 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class GameMapReader {
-    protected GameMapReader() {}
+    protected GameMapReader() {
+    }
+
     private final Map<String, Street> streetMap = new Hashtable<>();
 
     public GameMap readMap(Scanner sc) throws Exception {

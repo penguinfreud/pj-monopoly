@@ -6,9 +6,7 @@ import monopoly.IPlayer;
 import monopoly.Property;
 import monopoly.util.Consumer0;
 
-import java.io.Serializable;
-
-public abstract class Place implements Serializable, GameObject {
+public abstract class Place implements GameObject {
     private final String name;
     Place prev, next;
     private int roadblocks = 0;
@@ -34,7 +32,8 @@ public abstract class Place implements Serializable, GameObject {
         return next;
     }
 
-    public void init(Game g) {}
+    public void init(Game g) {
+    }
 
     public final boolean hasRoadblock() {
         return roadblocks > 0;
@@ -51,13 +50,13 @@ public abstract class Place implements Serializable, GameObject {
     }
 
     public void arriveAt(Game g, Consumer0 cb) {
-        cb.run();
+        cb.accept();
     }
 
     public void passBy(Game g, Consumer0 cb) {
-        cb.run();
+        cb.accept();
     }
-    
+
     public Property asProperty() {
         return null;
     }
@@ -67,7 +66,7 @@ public abstract class Place implements Serializable, GameObject {
         if (a == b) {
             return 0;
         }
-        for (int i = 0; i<steps; i++) {
+        for (int i = 0; i < steps; i++) {
             a = a.getNext();
             back = back.getPrev();
             if (a == b || back == b) {
@@ -79,8 +78,8 @@ public abstract class Place implements Serializable, GameObject {
 
     public static int withinPlayersReach(IPlayer player, Place place, int steps) {
         Place cur = player.getCurrentPlace();
-        for (int i = 0; i<steps; i++) {
-            cur = player.isReversed()? cur.getPrev(): cur.getNext();
+        for (int i = 0; i < steps; i++) {
+            cur = player.isReversed() ? cur.getPrev() : cur.getNext();
             if (cur == place) {
                 return i + 1;
             }

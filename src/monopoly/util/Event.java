@@ -1,11 +1,10 @@
 package monopoly.util;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-abstract class Event<T> implements Serializable {
-    final SerializableObject lock = new SerializableObject();
+abstract class Event<T> {
+    final Object lock = new Object();
     final List<T> listeners = new CopyOnWriteArrayList<>();
 
     public void addListener(T listener) {

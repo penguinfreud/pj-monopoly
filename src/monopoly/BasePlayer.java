@@ -1,5 +1,12 @@
 package monopoly;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.DoubleBinding;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import monopoly.place.Place;
 import monopoly.util.*;
 
@@ -31,11 +38,13 @@ public class BasePlayer implements IPlayer {
 
     private final Game game;
     private String name;
-    private Place currentPlace;
-    private double cash, deposit;
+    private final SimpleObjectProperty<Place> currentPlace = new SimpleObjectProperty<>();
+    private final DoubleProperty cash = new SimpleDoubleProperty();
+    private final DoubleProperty deposit = new SimpleDoubleProperty();
     private int stepsToAdvance;
     private boolean reversed = false, bankrupted = false;
-    private final List<Supplier<Double>> possessions = new CopyOnWriteArrayList<>();
+    private final DoubleBinding totalPossessions;
+    private final ObservableList<Supplier<Double>> possessions = FXCollections.observableList(new CopyOnWriteArrayList<>());
     private final List<Consumer1<Consumer0>> propertySellers = new CopyOnWriteArrayList<>();
     private final Map<Object, Object> storage = new Hashtable<>();
 
@@ -62,6 +71,13 @@ public class BasePlayer implements IPlayer {
             addPossession(this::getDeposit);
             onInit.trigger(this);
             onAddPlayer.get(g).trigger(this);
+
+            totalPossessions = Bindings.createDoubleBinding(
+                    () -> {
+                        synchronized (game.lock) {
+                            return possessions.stream().map(Supplier::get).reduce(0.0, (a, b) -> a + b);
+                        }
+                    }, possessions);
         }
     }
 
@@ -95,25 +111,23 @@ public class BasePlayer implements IPlayer {
     }
 
     @Override
-    public final double getCash() {
+    public DoubleProperty cashProperty() {
         return cash;
     }
 
     @Override
-    public final double getDeposit() {
+    public DoubleProperty depositProperty() {
         return deposit;
     }
 
     @Override
-    public final Place getCurrentPlace() {
+    public SimpleObjectProperty<Place> currentPlaceProperty() {
         return currentPlace;
     }
 
     @Override
-    public final double getTotalPossessions() {
-        synchronized (game.lock) {
-            return possessions.stream().map(Supplier::run).reduce(0.0, (a, b) -> (a + b));
-        }
+    public DoubleBinding totalPossessions() {
+        return totalPossessions;
     }
 
     @Override
@@ -139,51 +153,11 @@ public class BasePlayer implements IPlayer {
         }
     }
 
-    @Override
-    public void changeCash(double amount, String msg) {
-        synchronized (game.lock) {
-            if (cash + amount >= 0 || cash < 0 && amount >= 0) {
-                cash += amount;
-                onMoneyChange.get(game).trigger(this, amount, msg);
-            } else {
-                game.triggerException("short_of_cash");
-            }
-        }
-    }
-
-    @Override
-    public void changeDeposit(double amount, String msg) {
-        synchronized (game.lock) {
-            if (deposit + amount >= 0) {
-                deposit += amount;
-                onMoneyChange.get(game).trigger(this, amount, msg);
-            } else {
-                game.triggerException("short_of_deposit");
-            }
-        }
-    }
-
-    @Override
-    public void depositOrWithdraw(Consumer0 cb) {
-        askHowMuchToDepositOrWithdraw((amount) -> {
-            double maxTransfer = game.getConfig("bank-max-transfer");
-            if (-maxTransfer <= amount && amount <= maxTransfer) {
-                if (cash - amount >= 0 && deposit + amount >= 0) {
-                    cash -= amount;
-                    deposit += amount;
-                }
-            } else {
-                game.triggerException("exceeded_max_transfer_credits");
-            }
-            cb.run();
-        });
-    }
-
     private void sellProperties(int i, Consumer0 cb) {
         if (i < propertySellers.size()) {
-            propertySellers.get(i).run(() -> sellProperties(i+1, cb));
+            propertySellers.get(i).accept(() -> sellProperties(i + 1, cb));
         } else {
-            cb.run();
+            cb.accept();
         }
     }
 
@@ -191,30 +165,40 @@ public class BasePlayer implements IPlayer {
     public void pay(IPlayer receiver, double amount, String msg, Consumer0 cb) {
         synchronized (game.lock) {
             assert amount >= 0;
-            cash -= amount;
+            cash.set(getCash() - amount);
             onMoneyChange.get(game).trigger(this, -amount, msg);
             if (receiver != null) {
                 receiver.changeCash(Math.min(amount, getTotalPossessions() + amount), "");
             }
-            if (cash < 0) {
-                if (cash + deposit >= 0) {
-                    deposit += cash;
-                    cash = 0;
-                    cb.run();
+            if (getCash() < 0) {
+                if (getCash() + getDeposit() >= 0) {
+                    deposit.set(getDeposit() + getCash());
+                    cash.set(0);
+                    cb.accept();
                 } else {
-                    cash += deposit;
-                    deposit = 0;
+                    cash.set(getCash() + getDeposit());
+                    deposit.set(0);
                     sellProperties(0, () -> {
-                        if (cash <= 0) {
+                        if (getCash() <= 0) {
                             bankrupt();
                         }
-                        cb.run();
+                        cb.accept();
                     });
                 }
             } else if (cb != null) {
-                cb.run();
+                cb.accept();
             }
         }
+    }
+
+    @Override
+    public void triggerOnMoneyChange(double amount, String msg) {
+        onMoneyChange.get(game).trigger(this, amount, msg);
+    }
+
+    @Override
+    public void triggerBankrupt() {
+        onBankrupt.get(game).trigger(this);
     }
 
     protected void startStep() {
@@ -224,17 +208,17 @@ public class BasePlayer implements IPlayer {
     protected final void endStep() {
         synchronized (game.lock) {
             if (game.getState() == Game.State.TURN_WALKING) {
-                currentPlace = reversed? currentPlace.getPrev(): currentPlace.getNext();
+                currentPlace.set(reversed ? getCurrentPlace().getPrev() : getCurrentPlace().getNext());
                 --stepsToAdvance;
-                if (currentPlace.hasRoadblock()) {
+                if (getCurrentPlace().hasRoadblock()) {
                     stepsToAdvance = 0;
-                    currentPlace.clearRoadblocks();
-                    game.triggerException("met_roadblock", currentPlace.toString(game));
+                    getCurrentPlace().clearRoadblocks();
+                    game.triggerException("met_roadblock", getCurrentPlace().toString(game));
                 }
                 if (stepsToAdvance <= 0) {
                     game.endWalking();
                 } else {
-                    currentPlace.passBy(game, () -> {
+                    getCurrentPlace().passBy(game, () -> {
                         if (bankrupted) {
                             game.endWalking();
                         } else {
@@ -252,9 +236,9 @@ public class BasePlayer implements IPlayer {
     @Override
     public final void init() {
         if (game.getState() == Game.State.STARTING) {
-            cash = game.getConfig("init-cash");
-            deposit = game.getConfig("init-deposit");
-            currentPlace = game.getMap().getStartingPoint();
+            cash.set(game.getConfig("init-cash"));
+            deposit.set(game.getConfig("init-deposit"));
+            currentPlace.set(game.getMap().getStartingPoint());
             reversed = false;
             bankrupted = false;
         } else {

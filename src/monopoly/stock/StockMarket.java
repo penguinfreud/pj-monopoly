@@ -50,7 +50,7 @@ public class StockMarket implements Serializable {
 
         private void initPrice() {
             double min = game.getConfig("stock-enable-price-min"),
-            max = game.getConfig("stock-enable-price-max");
+                    max = game.getConfig("stock-enable-price-max");
             double price = ThreadLocalRandom.current().nextDouble(max - min) + min;
             prices.add(price);
         }
@@ -94,7 +94,7 @@ public class StockMarket implements Serializable {
     private final Map<Stock, StockTrend> priceMap = new Hashtable<>();
 
     private StockMarket(Game g) {
-        for (Stock stock: stocks) {
+        for (Stock stock : stocks) {
             priceMap.put(stock, new StockTrend(g));
         }
         g.onGameStart.addListener(() -> priceMap.forEach((k, v) -> v.initPrice()));

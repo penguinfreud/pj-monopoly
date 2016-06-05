@@ -1,7 +1,7 @@
 package monopoly.place;
 
-import monopoly.Game;
 import monopoly.Cards;
+import monopoly.Game;
 import monopoly.util.Consumer0;
 
 public class CardShop extends Place {

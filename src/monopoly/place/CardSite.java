@@ -1,8 +1,8 @@
 package monopoly.place;
 
-import monopoly.Game;
-import monopoly.Cards;
 import monopoly.Card;
+import monopoly.Cards;
+import monopoly.Game;
 import monopoly.util.Consumer0;
 
 public class CardSite extends Place {
@@ -25,6 +25,6 @@ public class CardSite extends Place {
         if (card != null) {
             Cards.get(g.getCurrentPlayer()).addCard(card);
         }
-        cb.run();
+        cb.accept();
     }
 }

@@ -30,21 +30,21 @@ public class News extends Place {
         GameMap.registerPlaceReader("News", (r, sc) -> new News());
 
         newsTypes.add(new NewsType(g -> {
-            for (IPlayer player: g.getPlayers()) {
+            for (IPlayer player : g.getPlayers()) {
                 double amount = player.getDeposit() / 10;
                 String msg = g.format("news_interest", player.getName(), amount);
                 player.changeDeposit(amount, msg);
             }
         }, null));
         newsTypes.add(new NewsType(g -> {
-            for (IPlayer player: g.getPlayers()) {
+            for (IPlayer player : g.getPlayers()) {
                 double amount = player.getDeposit() / 10;
                 String msg = g.format("news_tax", player.getName(), amount);
                 player.changeDeposit(-amount, msg);
             }
         }, null));
         newsTypes.add(new NewsType(g -> {
-            for (IPlayer player: g.getPlayers()) {
+            for (IPlayer player : g.getPlayers()) {
                 Cards.get(player).addCard(Cards.getRandomCard(g, false));
             }
         }, Cards::isEnabled));
@@ -86,8 +86,8 @@ public class News extends Place {
 
     @Override
     public void arriveAt(Game g, Consumer0 cb) {
-        Object[] types = newsTypes.stream().filter(t -> t.requirement == null || t.requirement.run(g)).toArray();
-        ((NewsType) types[ThreadLocalRandom.current().nextInt(types.length)]).fn.run(g);
-        cb.run();
+        Object[] types = newsTypes.stream().filter(t -> t.requirement == null || t.requirement.apply(g)).toArray();
+        ((NewsType) types[ThreadLocalRandom.current().nextInt(types.length)]).fn.accept(g);
+        cb.accept();
     }
 }

@@ -5,6 +5,7 @@ import monopoly.util.Consumer1;
 
 public class BuyLandCard extends Card {
     private static final Card instance = new BuyLandCard();
+
     static {
         Game.putDefaultConfig("buy-land-card-price", 7);
     }
@@ -23,9 +24,9 @@ public class BuyLandCard extends Card {
         IPlayer player = g.getCurrentPlayer();
         Property prop = player.getCurrentPlace().asProperty();
         if (prop != null && prop.getOwner() != player && player.getCash() >= prop.getPurchasePrice()) {
-            Properties.get(player).buyProperty(prop, () -> cb.run(true), true);
+            Properties.get(player).buyProperty(prop, () -> cb.accept(true), true);
         } else {
-            cb.run(false);
+            cb.accept(false);
         }
     }
 }

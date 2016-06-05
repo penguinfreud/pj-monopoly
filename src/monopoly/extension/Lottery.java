@@ -4,14 +4,13 @@ import monopoly.Game;
 import monopoly.IPlayer;
 import monopoly.util.Parasite;
 
-import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Lottery implements Serializable {
+public class Lottery {
     static {
         Game.putDefaultConfig("lottery-number-max", 20);
         Game.putDefaultConfig("lottery-price", 200.0);
@@ -44,12 +43,12 @@ public class Lottery implements Serializable {
 
     private void selectLotteryWinner() {
         int max = game.getConfig("lottery-number-max");
-        int winningNumber = cheatNumber >= 0? cheatNumber: ThreadLocalRandom.current().nextInt(max);
+        int winningNumber = cheatNumber >= 0 ? cheatNumber : ThreadLocalRandom.current().nextInt(max);
         game.triggerException("lottery", winningNumber);
         List<IPlayer> winners = entries.get(winningNumber);
         if (winners != null) {
             double amount = value / winners.size();
-            for (IPlayer player: winners) {
+            for (IPlayer player : winners) {
                 String msg = game.format("win_lottery", player.getName(), amount);
                 player.changeCash(amount, msg);
             }

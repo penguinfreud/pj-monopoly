@@ -18,7 +18,7 @@ class RentFree implements Consumer0 {
     }
 
     @Override
-    public void run() {
+    public void accept() {
         if (game.getCurrentPlayer() == player) {
             if (duration > 0) {
                 Properties.get(player).setRentFree();

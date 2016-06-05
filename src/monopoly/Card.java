@@ -3,9 +3,7 @@ package monopoly;
 import monopoly.card.*;
 import monopoly.util.Consumer1;
 
-import java.io.Serializable;
-
-public abstract class Card implements Serializable, GameObject {
+public abstract class Card implements GameObject {
     private final String name;
 
     protected Card(String name) {
@@ -29,7 +27,7 @@ public abstract class Card implements Serializable, GameObject {
 
     private String uncamelize(String str) {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i<str.length(); i++) {
+        for (int i = 0; i < str.length(); i++) {
             char ch = str.charAt(i);
             if (ch >= 'A' && ch <= 'Z') {
                 if (i > 0) {

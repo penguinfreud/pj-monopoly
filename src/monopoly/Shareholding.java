@@ -6,18 +6,18 @@ import monopoly.stock.StockMarket;
 import monopoly.util.Event3;
 import monopoly.util.Parasite;
 
-import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Shareholding implements Serializable {
-    public static class StockHolding implements Serializable {
+public class Shareholding {
+    public static class StockHolding {
         private double cost = 0.0;
         private int amount = 0;
 
-        private StockHolding() {}
+        private StockHolding() {
+        }
 
         public double getTotalCost() {
             return cost;

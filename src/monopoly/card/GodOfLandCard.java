@@ -28,7 +28,7 @@ public class GodOfLandCard extends Card {
             private final IPlayer player = g.getCurrentPlayer();
 
             @Override
-            public void run() {
+            public void accept() {
                 if (g.getCurrentPlayer() == player) {
                     if (duration > 0) {
                         Properties.get(player).robLand(player.getCurrentPlace().asProperty());
@@ -40,6 +40,6 @@ public class GodOfLandCard extends Card {
                 }
             }
         });
-        cb.run(true);
+        cb.accept(true);
     }
 }

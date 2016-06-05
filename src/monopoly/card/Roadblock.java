@@ -1,14 +1,15 @@
 package monopoly.card;
 
 import monopoly.Card;
-import monopoly.Game;
 import monopoly.Cards;
+import monopoly.Game;
 import monopoly.IPlayer;
 import monopoly.place.Place;
 import monopoly.util.Consumer1;
 
 public class Roadblock extends Card {
     private static final Card instance = new Roadblock();
+
     static {
         Game.putDefaultConfig("roadblock-price", 5);
         Game.putDefaultConfig("roadblock-reach", 8);
@@ -31,9 +32,9 @@ public class Roadblock extends Card {
                 if (place != null &&
                         Place.withinReach(player.getCurrentPlace(), place, reach) >= 0) {
                     place.setRoadblock(g);
-                    cb.run(true);
+                    cb.accept(true);
                 } else {
-                    cb.run(false);
+                    cb.accept(false);
                 }
             }
         });

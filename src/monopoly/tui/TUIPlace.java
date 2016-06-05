@@ -1,6 +1,8 @@
 package monopoly.tui;
 
-import monopoly.*;
+import monopoly.Game;
+import monopoly.IPlayer;
+import monopoly.Property;
 import monopoly.place.*;
 
 import java.io.PrintStream;

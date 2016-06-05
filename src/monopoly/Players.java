@@ -1,12 +1,14 @@
 package monopoly;
 
-import java.io.Serializable;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-class Players implements Serializable {
-    private final List<IPlayer> players = new CopyOnWriteArrayList<>();
+class Players {
+    private final ObservableList<IPlayer> players = FXCollections.observableList(new CopyOnWriteArrayList<>());
     private int currentPlayerIndex = 0;
 
     int count() {
@@ -21,8 +23,8 @@ class Players implements Serializable {
         return currentPlayerIndex == 0;
     }
 
-    List<IPlayer> getPlayers() {
-        return new CopyOnWriteArrayList<>(players);
+    ObservableList<IPlayer> getPlayers() {
+        return players;
     }
 
     void set(List<IPlayer> thePlayers) throws Exception {

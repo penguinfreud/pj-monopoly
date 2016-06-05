@@ -28,7 +28,7 @@ public class Main {
     }
 
     private static void startGame(String[] args) {
-        for (String arg: args) {
+        for (String arg : args) {
             if (arg.equals("--ai")) {
                 isAI = true;
             }
@@ -42,7 +42,7 @@ public class Main {
             StockMarket.addStock(new Stock("facebook"));
             StockMarket.addStock(new Stock("microsoft"));
 
-            GameMap map = GameMap.readMap(Main.class.getResourceAsStream("/maps/default_tui.map"));
+            GameMap map = GameMap.readMap(Main.class.getResourceAsStream("/maps/card_rich.map"));
 
             players = new ArrayList<>();
 

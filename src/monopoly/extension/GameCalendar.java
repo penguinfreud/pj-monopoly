@@ -1,13 +1,13 @@
 package monopoly.extension;
 
 import monopoly.Game;
-import monopoly.util.*;
+import monopoly.util.Event0;
+import monopoly.util.Parasite;
 
-import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.Calendar;
 
-public final class GameCalendar implements Serializable {
+public final class GameCalendar {
     public static final Parasite<Game, Event0> onMonth = new Parasite<>("GameCalendar.onMonth");
     private static final Parasite<Game, GameCalendar> calendars = new Parasite<>("GameCalendar");
 

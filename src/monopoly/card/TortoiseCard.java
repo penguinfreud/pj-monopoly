@@ -9,6 +9,7 @@ import monopoly.util.Consumer1;
 
 public class TortoiseCard extends Card {
     private static final Card instance = new TortoiseCard();
+
     static {
         Game.putDefaultConfig("tortoise-card-price", 3);
         Game.putDefaultConfig("tortoise-card-duration", 3);
@@ -29,7 +30,7 @@ public class TortoiseCard extends Card {
             private final IPlayer player = g.getCurrentPlayer();
 
             @Override
-            public void run() {
+            public void accept() {
                 if (g.getCurrentPlayer() == player) {
                     if (--duration > 0) {
                         g.setDice(1);
@@ -40,6 +41,6 @@ public class TortoiseCard extends Card {
             }
         });
         g.setDice(1);
-        cb.run(true);
+        cb.accept(true);
     }
 }

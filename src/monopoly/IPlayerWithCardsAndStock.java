@@ -11,9 +11,9 @@ public interface IPlayerWithCardsAndStock extends Cards.IPlayerWithCards {
     default void askForTargetStock(Consumer1<Stock> cb) {
         ArrayList<Stock> stocks = new ArrayList<>(StockMarket.getMarket(getGame()).getStocks());
         if (stocks.isEmpty()) {
-            cb.run(null);
+            cb.accept(null);
         } else {
-            cb.run(stocks.get(ThreadLocalRandom.current().nextInt(stocks.size())));
+            cb.accept(stocks.get(ThreadLocalRandom.current().nextInt(stocks.size())));
         }
     }
 }

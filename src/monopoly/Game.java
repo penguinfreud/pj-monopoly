@@ -1,16 +1,20 @@
 package monopoly;
 
+import javafx.collections.ObservableList;
 import monopoly.place.GameMap;
-import monopoly.util.*;
+import monopoly.util.Event0;
+import monopoly.util.Event1;
+import monopoly.util.Host;
+import monopoly.util.InitEvent;
 
-import java.io.*;
+import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Game implements Serializable, Host {
+public class Game implements Host {
     private static final Logger logger = Logger.getLogger(Game.class.getName());
     public static final String WRONG_STATE = "wrong state";
 
@@ -28,7 +32,7 @@ public class Game implements Serializable, Host {
         OVER, STARTING, TURN_STARTING, TURN_WALKING, TURN_LANDED
     }
 
-    public final SerializableObject lock = new SerializableObject();
+    public final Object lock = new Object();
     private State state = State.OVER;
     private final Config config;
     private transient ResourceBundle messages;
@@ -56,15 +60,10 @@ public class Game implements Serializable, Host {
         updateMessages();
         onInit.trigger(this);
     }
-    
+
     private void updateMessages() {
         Locale locale = Locale.forLanguageTag((String) config.get("locale"));
         messages = ResourceBundle.getBundle((String) config.get("bundle-name"), locale);
-    }
-
-    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-        ois.defaultReadObject();
-        updateMessages();
     }
 
     public final State getState() {
@@ -91,13 +90,13 @@ public class Game implements Serializable, Host {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             return "";
-        } catch(MissingResourceException e) {
+        } catch (MissingResourceException e) {
             //logger.log(Level.INFO, "Unknown key: " + key);
             return key;
         }
     }
 
-    public final String format(String key, Object ...args) {
+    public final String format(String key, Object... args) {
         return MessageFormat.format(getText(key), args);
     }
 
@@ -130,7 +129,7 @@ public class Game implements Serializable, Host {
         }
     }
 
-    public final List<IPlayer> getPlayers() {
+    public final ObservableList<IPlayer> getPlayers() {
         return players.getPlayers();
     }
 
@@ -296,28 +295,14 @@ public class Game implements Serializable, Host {
         if (state != State.OVER) {
             players.remove(player);
             hadBankrupt = true;
-            onBankrupt.trigger( player);
+            onBankrupt.trigger(player);
         } else {
             logger.log(Level.WARNING, WRONG_STATE);
             (new Exception()).printStackTrace();
         }
     }
 
-    public final void triggerException(String key, Object ...args) {
+    public final void triggerException(String key, Object... args) {
         onException.trigger(format(key, args));
-    }
-
-    protected static Game readData(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-        Game game = (Game) ois.readObject();
-        onInit.trigger(game);
-        return game;
-    }
-
-    protected final void writeData(ObjectOutputStream oos) throws IOException {
-        synchronized (lock) {
-            if (state != State.OVER) {
-                oos.writeObject(this);
-            }
-        }
     }
 }

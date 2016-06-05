@@ -1,14 +1,15 @@
 package monopoly.card;
 
 import monopoly.Card;
-import monopoly.Game;
 import monopoly.Cards;
+import monopoly.Game;
 import monopoly.IPlayer;
 import monopoly.place.Place;
 import monopoly.util.Consumer1;
 
 public class TaxCard extends Card {
     private static final Card instance = new TaxCard();
+
     static {
         Game.putDefaultConfig("tax-card-price", 7);
         Game.putDefaultConfig("tax-card-reach", 5);
@@ -33,9 +34,9 @@ public class TaxCard extends Card {
                     double amount = player.getDeposit() * 3 / 10;
                     String msg = g.format("pay_tax", player.getName(), amount);
                     player.changeDeposit(-amount, msg);
-                    cb.run(true);
+                    cb.accept(true);
                 } else {
-                    cb.run(false);
+                    cb.accept(false);
                 }
             }
         });

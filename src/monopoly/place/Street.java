@@ -1,12 +1,18 @@
 package monopoly.place;
 
-import java.io.Serializable;
+import javafx.beans.InvalidationListener;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.DoubleBinding;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class Street implements Serializable {
+public class Street {
     private final String name;
-    private final List<Land> lands = new CopyOnWriteArrayList<>();
+    private final ObservableList<Land> lands = FXCollections.observableList(new CopyOnWriteArrayList<>());
 
     public Street(String name) {
         this.name = name;
@@ -24,8 +30,29 @@ public class Street implements Serializable {
         return new CopyOnWriteArrayList<>(lands);
     }
 
-    public double getExtraRent(Land ref) {
-        return lands.stream().filter((land) -> land.getOwner() == ref.getOwner())
-                .map(Land::getPrice).reduce(0.0, (a, b) -> a + b) / 10;
+    public DoubleBinding getExtraRent(Land ref) {
+        DoubleBinding binding = Bindings.createDoubleBinding(
+                () -> lands.stream()
+                        .filter((land) -> land.getOwner() == ref.getOwner())
+                        .map(Land::getPrice)
+                        .reduce(0.0, (a, b) -> a + b) / 10);
+        InvalidationListener listener = e -> binding.invalidate();
+        lands.addListener((ListChangeListener<? super Land>) change -> {
+            while (change.next()) {
+                if (change.wasRemoved()) {
+                    for (Land land : change.getRemoved()) {
+                        land.ownerProperty().removeListener(listener);
+                        land.priceProperty().removeListener(listener);
+                    }
+                }
+                if (change.wasAdded()) {
+                    for (Land land : change.getAddedSubList()) {
+                        land.ownerProperty().addListener(listener);
+                        land.priceProperty().addListener(listener);
+                    }
+                }
+            }
+        });
+        return binding;
     }
 }

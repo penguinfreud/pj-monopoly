@@ -1,6 +1,9 @@
 package monopoly.card;
 
-import monopoly.*;
+import monopoly.Card;
+import monopoly.Cards;
+import monopoly.Game;
+import monopoly.IPlayer;
 import monopoly.extension.Lottery;
 import monopoly.util.Consumer1;
 
@@ -27,9 +30,9 @@ public class LotteryCard extends Card {
             int max = g.getConfig("lottery-number-max");
             if (number >= 0 && number <= max) {
                 Lottery.cheat(g, number);
-                cb.run(true);
+                cb.accept(true);
             } else {
-                cb.run(false);
+                cb.accept(false);
             }
         });
     }

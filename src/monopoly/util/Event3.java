@@ -4,7 +4,7 @@ public class Event3<A, B, C> extends Event<Consumer3<A, B, C>> {
     public final void trigger(A a, B b, C c) {
         synchronized (lock) {
             for (Consumer3<A, B, C> callback : listeners) {
-                callback.run(a, b, c);
+                callback.accept(a, b, c);
             }
         }
     }

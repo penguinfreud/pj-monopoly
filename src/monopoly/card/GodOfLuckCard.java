@@ -5,6 +5,7 @@ import monopoly.util.Consumer1;
 
 public class GodOfLuckCard extends Card {
     private static final Card instance = new GodOfLuckCard();
+
     static {
         Game.putDefaultConfig("god-of-luck-card-price", 13);
         Game.putDefaultConfig("god-of-luck-card-duration", 8);
@@ -24,6 +25,6 @@ public class GodOfLuckCard extends Card {
         IPlayer player = g.getCurrentPlayer();
         Cards.get(player).addCard(Cards.getRandomCard(g, false));
         new RentFree(player, g.getConfig("god-of-luck-card-duration"));
-        cb.run(true);
+        cb.accept(true);
     }
 }

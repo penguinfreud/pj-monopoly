@@ -38,8 +38,8 @@ public class TUIGameMap extends GameMap {
     }
 
     void print(Game g, PrintStream out, boolean raw) {
-        for (List<TUIPlace> row: rows) {
-            for (TUIPlace place: row) {
+        for (List<TUIPlace> row : rows) {
+            for (TUIPlace place : row) {
                 if (place == null) {
                     out.print("  ");
                 } else {

@@ -1,9 +1,9 @@
 package monopoly.card;
 
 import monopoly.Card;
+import monopoly.Cards;
 import monopoly.Game;
 import monopoly.IPlayer;
-import monopoly.Cards;
 import monopoly.place.Place;
 import monopoly.util.Consumer1;
 
@@ -12,6 +12,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class RobCard extends Card {
     private static final Card instance = new RobCard();
+
     static {
         Game.putDefaultConfig("rob-card-price", 7);
         Game.putDefaultConfig("rob-card-reach", 5);
@@ -38,12 +39,12 @@ public class RobCard extends Card {
                         Card card = cards.get(ThreadLocalRandom.current().nextInt(cards.size()));
                         Cards.get(player).removeCard(card);
                         Cards.get(current).addCard(card);
-                        cb.run(true);
+                        cb.accept(true);
                     } else {
-                        cb.run(false);
+                        cb.accept(false);
                     }
                 } else {
-                    cb.run(false);
+                    cb.accept(false);
                 }
             }
         });

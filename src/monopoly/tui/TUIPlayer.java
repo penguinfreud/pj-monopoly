@@ -2,7 +2,6 @@ package monopoly.tui;
 
 import monopoly.*;
 import monopoly.Properties;
-import monopoly.Card;
 import monopoly.extension.GameCalendar;
 import monopoly.extension.Lottery;
 import monopoly.place.Place;
@@ -16,13 +15,12 @@ import monopoly.util.Util;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.*;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithProperties, Cards.IPlayerWithCards, IPlayerWithCardsAndStock {
     private Scanner scanner;
     private PrintStream out;
-    
+
     public TUIPlayer(Game g) {
         this("", g);
     }
@@ -65,7 +63,8 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
                 if (x >= min && x <= max) {
                     return x;
                 }
-            } catch (NumberFormatException e) {}
+            } catch (NumberFormatException e) {
+            }
             out.println(g.getText("input_error"));
         }
     }
@@ -83,7 +82,8 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
                 if (x >= min && x <= max) {
                     return x;
                 }
-            } catch (NumberFormatException e) {}
+            } catch (NumberFormatException e) {
+            }
             out.println(g.getText("input_error"));
         }
     }
@@ -93,9 +93,9 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
         while (true) {
             out.println(question);
             int l = options.size();
-            for (int i = 0; i<l; i++) {
+            for (int i = 0; i < l; i++) {
                 T item = options.get(i);
-                String option = stringifier.run(item);
+                String option = stringifier.apply(item);
                 out.println("[" + (i + 1) + "] " + option);
             }
             if (nullable) {
@@ -110,12 +110,13 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
                 } else if (nullable && choice == l + 1) {
                     return null;
                 }
-            } catch (NumberFormatException e) {}
+            } catch (NumberFormatException e) {
+            }
             out.println(g.getText("input_error"));
         }
     }
 
-    private <T extends GameObject>T choose(String question, List<T> options, boolean nullable) {
+    private <T extends GameObject> T choose(String question, List<T> options, boolean nullable) {
         return choose(question, options, nullable, (item) -> item.toString(getGame()));
     }
 
@@ -123,7 +124,7 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
         Game g = getGame();
         while (true) {
             int l = options.size();
-            for (int i = 0; i<l; i++) {
+            for (int i = 0; i < l; i++) {
                 out.println("[" + (i + 1) + "] " + options.get(i));
             }
             out.print(g.getText("please_choose"));
@@ -133,7 +134,8 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
                 if (choice >= 1 && choice <= l) {
                     return choice - 1;
                 }
-            } catch (NumberFormatException e) {}
+            } catch (NumberFormatException e) {
+            }
             out.println(g.getText("input_error"));
         }
     }
@@ -157,7 +159,7 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
         Property property = getCurrentPlace().asProperty();
         String question = getGame().format("ask_whether_to_buy_property", property.getName(),
                 property.getPurchasePrice(), getCash());
-        cb.run(yesOrNo(question));
+        cb.accept(yesOrNo(question));
     }
 
     @Override
@@ -165,20 +167,20 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
         Property property = getCurrentPlace().asProperty();
         String question = getGame().format("ask_whether_to_upgrade_property", property.getName(),
                 property.getUpgradePrice(), getCash());
-        cb.run(yesOrNo(question));
+        cb.accept(yesOrNo(question));
     }
 
     @Override
     public void askWhichPropertyToMortgage(Consumer1<Property> cb) {
         String question = getGame().getText("ask_which_property_to_mortgage");
-        cb.run(choose(question, Properties.get(this).getProperties(), false));
+        cb.accept(choose(question, Properties.get(this).getProperties(), false));
     }
 
     @Override
     public void askWhichCardToBuy(Consumer1<Card> cb) {
         Game g = getGame();
         String question = g.format("ask_which_card_to_buy", Cards.get(this).getCoupons());
-        cb.run(choose(question, Cards.getAvailableCards(g), true,
+        cb.accept(choose(question, Cards.getAvailableCards(g), true,
                 card -> g.format("card_and_price", card.toString(g), card.getPrice(g))));
     }
 
@@ -207,7 +209,7 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
         Game g = getGame();
         Place place = getCurrentPlace();
         boolean hasRoadblock = false;
-        for (int i = 0; i<10; i++) {
+        for (int i = 0; i < 10; i++) {
             place = place.getNext();
             if (place.hasRoadblock()) {
                 hasRoadblock = true;
@@ -226,14 +228,14 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
             if (steps == -11) {
                 break;
             }
-            ((TUIPlace)nthPlace(steps)).printDetail(g, out);
+            ((TUIPlace) nthPlace(steps)).printDetail(g, out);
         }
     }
 
     private void viewPlayerInfo() {
         Game g = getGame();
         out.println(g.getText("player_info_table_head"));
-        for (IPlayer player: g.getPlayers()) {
+        for (IPlayer player : g.getPlayers()) {
             Cards cards = Cards.get(player);
             out.println(g.format("player_info_table_row",
                     player.getName(),
@@ -249,14 +251,14 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     private void menuViewStock() {
         Game g = getGame();
         Set<Map.Entry<Stock, StockMarket.StockTrend>> stocks = StockMarket.getMarket(g).getStockEntries();
-        for (int i = 1; i<=5; i++) {
+        for (int i = 1; i <= 5; i++) {
             out.print(i + "\t\t");
         }
-        for (IPlayer player: g.getPlayers()) {
+        for (IPlayer player : g.getPlayers()) {
             out.print(g.format("player_holding_head", player.getName()));
         }
         out.println();
-        for (Map.Entry<Stock, StockMarket.StockTrend>entry: stocks) {
+        for (Map.Entry<Stock, StockMarket.StockTrend> entry : stocks) {
             Stock stock = entry.getKey();
             StockMarket.StockTrend trend = entry.getValue();
             out.print(g.format("stock_table_row", stock.toString(g),
@@ -266,7 +268,7 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
                     Util.formatNumber(trend.getPrice(1)),
                     Util.formatNumber(trend.getPrice(0))));
 
-            for (IPlayer player: g.getPlayers()) {
+            for (IPlayer player : g.getPlayers()) {
                 out.print(g.format("player_holding_row",
                         Shareholding.get(player).getAmount(stock)));
             }
@@ -320,7 +322,8 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     }
 
     private void tradeStock() {
-        loop: while (true) {
+        loop:
+        while (true) {
             switch (chooseInt(stockMenuItems)) {
                 case 0:
                     menuViewStock();
@@ -376,10 +379,11 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     public void startTurn(Consumer0 cb) {
         Game g = getGame();
         viewMap(false);
-        String direction = g.getText(isReversed()? "anticlockwise": "clockwise");
+        String direction = g.getText(isReversed() ? "anticlockwise" : "clockwise");
         out.println(g.format("game_info", GameCalendar.getDate(g), getName(), direction));
 
-        loop: while (true) {
+        loop:
+        while (true) {
             switch (chooseInt(gameMenuItems)) {
                 case 0:
                     viewMap(false);
@@ -404,11 +408,11 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
                     viewPlayerInfo();
                     break;
                 case 6:
-                    cb.run();
+                    cb.accept();
                     break loop;
                 case 7:
                     giveUp();
-                    cb.run();
+                    cb.accept();
                     break loop;
                 case 8:
                     if (Shareholding.isEnabled(g)) {
@@ -428,7 +432,7 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     public void askHowMuchToDepositOrWithdraw(Consumer1<Double> cb) {
         Game g = getGame();
         String question = g.format("ask_how_much_to_deposit_or_withdraw", getCash(), getDeposit());
-        cb.run(getDouble(question, -getDeposit(), getCash(), 0));
+        cb.accept(getDouble(question, -getDeposit(), getCash(), 0));
     }
 
     @Override
@@ -444,7 +448,7 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
         }
         List<IPlayer> players = g.getPlayers();
         IPlayer player = choose(question, players, true);
-        cb.run(player);
+        cb.accept(player);
     }
 
     @Override
@@ -453,20 +457,20 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
         if (reason.equals("ControlledDice")) {
             int steps = getInt(g.format("ask_where_to_go", getCurrentPlace().getName()), 1, 6, 0);
             if (steps == 0) {
-                cb.run(null);
+                cb.accept(null);
             } else {
                 Place place = nthPlace(steps);
-                cb.run(place);
+                cb.accept(place);
             }
         } else if (reason.equals("Roadblock")) {
             int steps = getInt(g.format("ask_where_to_set_roadblock", getCurrentPlace().getName()), -8, 8, -9);
             if (steps == -9) {
-                cb.run(null);
+                cb.accept(null);
             } else {
-                cb.run(nthPlace(steps));
+                cb.accept(nthPlace(steps));
             }
         } else {
-            cb.run(null);
+            cb.accept(null);
         }
     }
 
@@ -475,9 +479,9 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
         if (reason.equals("LotteryCard")) {
             Game g = getGame();
             int max = g.getConfig("lottery-number-max");
-            cb.run(getInt(g.getText("ask_for_lottery_number"), 0, max, -1));
+            cb.accept(getInt(g.getText("ask_for_lottery_number"), 0, max, -1));
         } else {
-            cb.run(0);
+            cb.accept(0);
         }
     }
 
@@ -488,9 +492,9 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
         List<Map.Entry<Stock, StockMarket.StockTrend>> stocks = new ArrayList<>(market.getStockEntries());
         Map.Entry<Stock, StockMarket.StockTrend> entry = choose(g.format("ask_for_target_stock"), stocks, true, this::formatStockItem);
         if (entry == null) {
-            cb.run(null);
+            cb.accept(null);
         } else {
-            cb.run(entry.getKey());
+            cb.accept(entry.getKey());
         }
     }
 }

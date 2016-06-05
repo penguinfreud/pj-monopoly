@@ -1,9 +1,12 @@
 package monopoly;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import monopoly.place.Place;
 import monopoly.util.*;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -11,47 +14,47 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Cards implements Serializable {
+public class Cards {
     public interface IPlayerWithCards extends IPlayer {
         default void askWhichCardToBuy(Consumer1<Card> cb) {
             int coupons = Cards.get(this).getCoupons();
             if (coupons == 0) {
-                cb.run(null);
+                cb.accept(null);
             } else {
                 Object[] buyableCards = availableCards.get(getGame()).stream()
                         .filter((card) -> card.getPrice(getGame()) <= coupons).toArray();
                 if (buyableCards.length == 0) {
-                    cb.run(null);
+                    cb.accept(null);
                 } else {
-                    cb.run((Card) buyableCards[ThreadLocalRandom.current().nextInt(buyableCards.length)]);
+                    cb.accept((Card) buyableCards[ThreadLocalRandom.current().nextInt(buyableCards.length)]);
                 }
             }
         }
 
         default void askForTargetPlayer(String reason, Consumer1<IPlayer> cb) {
             if (reason.equals("ReverseCard")) {
-                cb.run(this);
+                cb.accept(this);
             } else {
                 List<IPlayer> players = getGame().getPlayers();
                 IPlayer first = players.get(0);
-                cb.run(first == this? players.get(1): first);
+                cb.accept(first == this ? players.get(1) : first);
             }
         }
 
         default void askForTargetPlace(String reason, Consumer1<Place> cb) {
             Place cur = getCurrentPlace();
             if (reason.equals("Roadblock")) {
-                cb.run(cur);
+                cb.accept(cur);
             } else {
-                cb.run(isReversed() ? cur.getPrev() : cur.getNext());
+                cb.accept(isReversed() ? cur.getPrev() : cur.getNext());
             }
         }
 
         default void askForInt(String reason, Consumer1<Integer> cb) {
             if (reason.equals("LotteryCard")) {
-                cb.run(0);
+                cb.accept(0);
             } else {
-                cb.run(0);
+                cb.accept(0);
             }
         }
 
@@ -60,23 +63,23 @@ public class Cards implements Serializable {
             Cards cardsInterface = Cards.get(this);
             List<Card> cards = cardsInterface.cards;
             if (cards.isEmpty()) {
-                cb.run();
+                cb.accept();
             } else {
                 int l = cards.size();
                 cardsInterface.useCard(cards.get(l - 1), new Consumer0() {
                     private int count = l,
-                    i = l - 1;
+                            i = l - 1;
                     private Card card = cards.get(0);
 
                     @Override
-                    public void run() {
+                    public void accept() {
                         if (cards.size() == count && cards.get(count - 1) == card) {
                             i--;
                         } else {
                             count = cards.size();
                         }
                         if (i < 0 || i >= count) {
-                            cb.run();
+                            cb.accept();
                         } else {
                             card = cards.get(i);
                             cardsInterface.useCard(card, this);
@@ -95,6 +98,7 @@ public class Cards implements Serializable {
     private static final Parasite<Game, List<Card>> availableCards = new Parasite<>("Cards.availableCards");
     public static final Parasite<Game, Event2<IPlayer, Integer>> onCouponChange = new Parasite<>("Cards.onCouponChange");
     public static final Parasite<Game, Event3<IPlayer, Boolean, Card>> onCardChange = new Parasite<>("Cards.onCardChange");
+
     public static Cards get(IPlayer player) {
         return parasites.get(player);
     }
@@ -134,7 +138,7 @@ public class Cards implements Serializable {
         int l = cards.size();
         int[] prob = new int[l + 1];
         int sum = 0;
-        for (int i = 0; i<l; i++) {
+        for (int i = 0; i < l; i++) {
             sum += 128 / cards.get(i).getPrice(g);
             prob[i] = sum;
         }
@@ -160,8 +164,8 @@ public class Cards implements Serializable {
 
     private final Game game;
     private final IPlayer player;
-    private int coupons;
-    private final List<Card> cards = new CopyOnWriteArrayList<>();
+    private final IntegerProperty coupons = new SimpleIntegerProperty(0);
+    private final ObservableList<Card> cards = FXCollections.observableList(new CopyOnWriteArrayList<>());
 
     private Cards(IPlayer player) {
         game = player.getGame();
@@ -172,15 +176,19 @@ public class Cards implements Serializable {
         }
 
         game.onGameStart.addListener(() ->
-            coupons = game.getConfig("enable-coupons"));
+                coupons.set(game.getConfig("enable-coupons")));
     }
 
-    public final int getCoupons() {
+    public IntegerProperty couponsProperty() {
         return coupons;
     }
 
-    public final List<Card> getCards() {
-        return new CopyOnWriteArrayList<>(cards);
+    public final int getCoupons() {
+        return coupons.get();
+    }
+
+    public final ObservableList<Card> getCards() {
+        return cards;
     }
 
     public final int getCardsCount() {
@@ -197,11 +205,11 @@ public class Cards implements Serializable {
                         if (!ok) {
                             cards.add(card);
                         }
-                        cb.run();
+                        cb.accept();
                     });
                 } else {
                     game.triggerException("you_do_not_have_this_card");
-                    cb.run();
+                    cb.accept();
                 }
             } else {
                 Logger.getAnonymousLogger().log(Level.WARNING, Game.WRONG_STATE);
@@ -212,15 +220,15 @@ public class Cards implements Serializable {
     private void _buyCards(Consumer0 cb) {
         ((IPlayerWithCards) player).askWhichCardToBuy(new Consumer1<Card>() {
             @Override
-            public void run(Card card) {
+            public void accept(Card card) {
                 synchronized (game.lock) {
                     if (card == null) {
-                        cb.run();
+                        cb.accept();
                     } else {
                         int price = card.getPrice(game);
-                        if (coupons >= price) {
+                        if (coupons.get() >= price) {
                             cards.add(card);
-                            coupons -= price;
+                            coupons.set(coupons.get() - price);
                         }
                         ((IPlayerWithCards) player).askWhichCardToBuy(this);
                     }
@@ -231,7 +239,7 @@ public class Cards implements Serializable {
 
     public final void addCoupons(int amount) {
         synchronized (game) {
-            coupons += amount;
+            coupons.set(coupons.get() + amount);
             onCouponChange.get(game).trigger(player, amount);
         }
     }

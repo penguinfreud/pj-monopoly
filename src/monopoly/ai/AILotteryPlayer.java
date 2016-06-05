@@ -1,8 +1,8 @@
 package monopoly.ai;
 
 import monopoly.Game;
-import monopoly.extension.GameCalendar;
 import monopoly.IPlayer;
+import monopoly.extension.GameCalendar;
 import monopoly.extension.Lottery;
 import monopoly.util.Consumer0;
 
@@ -24,6 +24,6 @@ public interface AILotteryPlayer extends IPlayer {
                 buyLottery(ThreadLocalRandom.current().nextInt(max + 1));
             }
         }
-        cb.run();
+        cb.accept();
     }
 }

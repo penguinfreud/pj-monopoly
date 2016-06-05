@@ -1,11 +1,15 @@
 package monopoly.card;
 
-import monopoly.*;
+import monopoly.Card;
+import monopoly.Cards;
+import monopoly.Game;
+import monopoly.IPlayerWithCardsAndStock;
 import monopoly.stock.StockMarket;
 import monopoly.util.Consumer1;
 
 public class RedCard extends Card {
     private static final Card instance = new RedCard();
+
     static {
         Game.putDefaultConfig("red-card-price", 5);
     }
@@ -26,12 +30,12 @@ public class RedCard extends Card {
                 StockMarket market = StockMarket.getMarket(g);
                 if (market.hasStock(stock)) {
                     StockMarket.getMarket(g).setRed(stock);
-                    cb.run(true);
+                    cb.accept(true);
                 } else {
-                    cb.run(false);
+                    cb.accept(false);
                 }
             } else {
-                cb.run(false);
+                cb.accept(false);
             }
         });
     }

@@ -1,5 +1,6 @@
 package monopoly.place;
 
+import javafx.beans.binding.DoubleBinding;
 import monopoly.Property;
 
 public class Land extends Property {
@@ -8,11 +9,16 @@ public class Land extends Property {
     }
 
     private final Street street;
+    private DoubleBinding _purchasePrice, _upgradePrice, _rent, _mortgagePrice;
 
     protected Land(String name, int price, Street street) {
         super(name, price);
         this.street = street;
         street.addLand(this);
+        _purchasePrice = priceProperty().multiply(levelProperty());
+        _upgradePrice = priceProperty().multiply(0.5);
+        _rent = priceProperty().multiply(0.2).add(street.getExtraRent(this));
+        _mortgagePrice = priceProperty().multiply(levelProperty());
     }
 
     public Street getStreet() {
@@ -20,22 +26,22 @@ public class Land extends Property {
     }
 
     @Override
-    public double getPurchasePrice() {
-        return getPrice() * getLevel();
+    public DoubleBinding purchasePrice() {
+        return _purchasePrice;
     }
 
     @Override
-    public double getUpgradePrice() {
-        return getPrice() / 2;
+    public DoubleBinding upgradePrice() {
+        return _upgradePrice;
     }
 
     @Override
-    public double getRent() {
-        return getPrice() * 2 / 10 + street.getExtraRent(this);
+    public DoubleBinding rent() {
+        return _rent;
     }
 
     @Override
-    public double getMortgagePrice() {
-        return getPrice() * getLevel();
+    public DoubleBinding mortgagePrice() {
+        return _mortgagePrice;
     }
 }

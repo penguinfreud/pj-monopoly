@@ -30,12 +30,12 @@ public class BlackCard extends Card {
                 StockMarket market = StockMarket.getMarket(g);
                 if (market.hasStock(stock)) {
                     market.setBlack(stock);
-                    cb.run(true);
+                    cb.accept(true);
                 } else {
-                    cb.run(false);
+                    cb.accept(false);
                 }
             } else {
-                cb.run(false);
+                cb.accept(false);
             }
         });
     }

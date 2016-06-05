@@ -1,5 +1,8 @@
 package monopoly;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.DoubleBinding;
+import javafx.beans.property.*;
 import monopoly.place.Place;
 import monopoly.util.Consumer0;
 
@@ -11,13 +14,13 @@ public abstract class Property extends Place {
         Game.putDefaultConfig("property-max-level", 6);
     }
 
-    private IPlayer owner;
-    private double price = 0;
-    private int level = 1;
+    private final ObjectProperty<IPlayer> owner = new SimpleObjectProperty<>(null);
+    private final DoubleProperty price = new SimpleDoubleProperty(0);
+    private final IntegerProperty level = new SimpleIntegerProperty(1);
 
     protected Property(String name, double price) {
         super(name);
-        this.price = price;
+        this.price.set(price);
     }
 
     @Override
@@ -30,57 +33,85 @@ public abstract class Property extends Place {
         Properties.enable(g);
     }
 
-    public boolean isFree() {
+    public final boolean isFree() {
         return owner == null;
     }
 
-    public double getPrice() {
+    public DoubleProperty priceProperty() {
         return price;
     }
 
-    public double getPurchasePrice() {
-        return 0;
+    public final double getPrice() {
+        return price.get();
     }
 
-    public double getUpgradePrice() {
-        return 0;
+    private DoubleBinding createZeroBinding() {
+        return Bindings.createDoubleBinding(() -> 0.0);
     }
 
-    public double getRent() {
-        return 0;
+    public DoubleBinding purchasePrice() {
+        return createZeroBinding();
     }
 
-    public double getMortgagePrice() {
-        return 0;
+    public final double getPurchasePrice() {
+        return purchasePrice().get();
     }
 
-    public IPlayer getOwner() {
+    public DoubleBinding upgradePrice() {
+        return createZeroBinding();
+    }
+
+    public final double getUpgradePrice() {
+        return upgradePrice().get();
+    }
+
+    public DoubleBinding rent() {
+        return createZeroBinding();
+    }
+
+    public final double getRent() {
+        return rent().get();
+    }
+
+    public DoubleBinding mortgagePrice() {
+        return createZeroBinding();
+    }
+
+    public final double getMortgagePrice() {
+        return mortgagePrice().get();
+    }
+
+    public ObjectProperty<IPlayer> ownerProperty() {
         return owner;
     }
 
-    public int getLevel() {
+    public final IPlayer getOwner() {
+        return owner.get();
+    }
+
+    public IntegerProperty levelProperty() {
         return level;
     }
 
-    void changeOwner(IPlayer owner) {
-        this.owner = owner;
+    public final int getLevel() {
+        return level.get();
     }
 
     void upgrade(Game g) {
-        if (level < (Integer) g.getConfig("property-max-level")) {
-            level++;
+        if (level.get() < (Integer) g.getConfig("property-max-level")) {
+            level.set(level.get() + 1);
         }
     }
 
     public void resetLevel(Game g) {
         synchronized (g.lock) {
-            level = 1;
+            level.set(1);
         }
     }
 
     public void resetOwner(Game g) {
         synchronized (g.lock) {
-            owner = null;
+            owner.set(null);
         }
     }
 
@@ -91,10 +122,10 @@ public abstract class Property extends Place {
             if (owner == null) {
                 Properties.get(player).buyProperty(this, cb);
             } else if (owner == player) {
-                if (level < (Integer) g.getConfig("property-max-level")) {
+                if (level.get() < (Integer) g.getConfig("property-max-level")) {
                     Properties.get(player).upgradeProperty(this, cb);
                 } else {
-                    cb.run();
+                    cb.accept();
                 }
             } else {
                 Properties.get(player).payRent(this, cb);
@@ -103,7 +134,7 @@ public abstract class Property extends Place {
             Logger.getAnonymousLogger().log(Level.WARNING, Game.WRONG_STATE);
         }
     }
-    
+
     @Override
     public Property asProperty() {
         return this;

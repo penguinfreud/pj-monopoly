@@ -1,25 +1,28 @@
 package monopoly;
 
-import monopoly.util.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import monopoly.util.Consumer0;
+import monopoly.util.Consumer1;
+import monopoly.util.Event3;
+import monopoly.util.Parasite;
 
-import java.io.Serializable;
-import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Properties implements Serializable {
+public class Properties {
     public interface IPlayerWithProperties extends IPlayer {
         default void askWhetherToBuyProperty(Consumer1<Boolean> cb) {
-            cb.run(true);
+            cb.accept(true);
         }
 
         default void askWhetherToUpgradeProperty(Consumer1<Boolean> cb) {
-            cb.run(true);
+            cb.accept(true);
         }
 
         default void askWhichPropertyToMortgage(Consumer1<Property> cb) {
-            cb.run(get(this).getProperties().get(0));
+            cb.accept(get(this).getProperties().get(0));
         }
     }
 
@@ -36,7 +39,7 @@ public class Properties implements Serializable {
                 player.addPropertySeller(properties::sellProperties);
             });
             BasePlayer.onBankrupt.get(g).addListener(player ->
-                parasites.get(player).properties.forEach(property -> property.resetOwner(g)));
+                    parasites.get(player).properties.forEach(property -> property.resetOwner(g)));
         }
     }
 
@@ -50,7 +53,7 @@ public class Properties implements Serializable {
 
     private final IPlayer player;
     private final Game game;
-    private final List<Property> properties = new CopyOnWriteArrayList<>();
+    private final ObservableList<Property> properties = FXCollections.observableList(new CopyOnWriteArrayList<>());
     private boolean rentFree = false;
 
     private Properties(IPlayer player) {
@@ -81,8 +84,8 @@ public class Properties implements Serializable {
         }
     }
 
-    public final List<Property> getProperties() {
-        return new CopyOnWriteArrayList<>(properties);
+    public final ObservableList<Property> getProperties() {
+        return properties;
     }
 
     public final int getPropertiesCount() {
@@ -90,7 +93,7 @@ public class Properties implements Serializable {
     }
 
     private void sellProperties(Consumer0 cb) {
-        sellProperties((Property)null, cb);
+        sellProperties((Property) null, cb);
     }
 
     private void sellProperties(Property property, Consumer0 cb) {
@@ -112,13 +115,13 @@ public class Properties implements Serializable {
                     ((IPlayerWithProperties) player)
                             .askWhichPropertyToMortgage(nextProp -> sellProperties(nextProp, cb));
                 } else {
-                    cb.run();
+                    cb.accept();
                 }
             } else {
-                cb.run();
+                cb.accept();
             }
         } else {
-            cb.run();
+            cb.accept();
         }
     }
 
@@ -152,7 +155,7 @@ public class Properties implements Serializable {
             if (owner != null) {
                 get(owner).properties.remove(property);
             }
-            property.changeOwner(player);
+            property.ownerProperty().set(player);
             onPropertyChange.get(game).trigger(player, true, property);
         }
     }
@@ -180,7 +183,7 @@ public class Properties implements Serializable {
         if (game.getState() == Game.State.TURN_LANDED) {
             if (rentFree) {
                 rentFree = false;
-                cb.run();
+                cb.accept();
             } else {
                 IPlayer owner = property.getOwner();
                 double rent = property.getRent();
@@ -196,7 +199,7 @@ public class Properties implements Serializable {
         synchronized (game.lock) {
             if (force) {
                 _buyProperty(property, true);
-                cb.run();
+                cb.accept();
             } else {
                 double price = property.getPurchasePrice();
                 if (property.isFree() && player.getCash() >= price) {
@@ -205,11 +208,11 @@ public class Properties implements Serializable {
                             if (ok) {
                                 _buyProperty(property, false);
                             }
-                            cb.run();
+                            cb.accept();
                         }
                     });
                 } else {
-                    cb.run();
+                    cb.accept();
                 }
             }
         }
@@ -230,11 +233,11 @@ public class Properties implements Serializable {
                         if (ok) {
                             _upgradeProperty(property);
                         }
-                        cb.run();
+                        cb.accept();
                     }
                 });
             } else {
-                cb.run();
+                cb.accept();
             }
         } else {
             Logger.getAnonymousLogger().log(Level.WARNING, Game.WRONG_STATE);
@@ -246,7 +249,7 @@ public class Properties implements Serializable {
             if (property != null) {
                 IPlayer owner = property.getOwner();
                 if (owner != player) {
-                    property.changeOwner(player);
+                    property.ownerProperty().set(player);
                     properties.add(property);
                     if (owner != null) {
                         get(owner).properties.remove(property);

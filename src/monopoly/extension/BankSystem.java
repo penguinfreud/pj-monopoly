@@ -5,7 +5,8 @@ import monopoly.IPlayer;
 import monopoly.util.Parasite;
 
 public final class BankSystem {
-    private BankSystem() {}
+    private BankSystem() {
+    }
 
     private static final Parasite<Game, Boolean> inited = new Parasite<>("BankSystem");
 

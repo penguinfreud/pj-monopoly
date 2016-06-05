@@ -1,10 +1,8 @@
 package monopoly.tui;
 
-import monopoly.*;
-import monopoly.extension.BankSystem;
-import monopoly.extension.Lottery;
-import monopoly.stock.StockMarket;
-import monopoly.util.Parasite;
+import monopoly.BasePlayer;
+import monopoly.Cards;
+import monopoly.Game;
 
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -15,10 +13,11 @@ import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class TUI {
-    private TUI() {}
+    private TUI() {
+    }
 
     private static final Object scannerLock = new Object(),
-                                outputLock = new Object();
+            outputLock = new Object();
     private static final Map<InputStream, Scanner> scanners = new Hashtable<>();
     private static final Map<PrintStream, List<Game>> outputAssociations = new Hashtable<>();
 

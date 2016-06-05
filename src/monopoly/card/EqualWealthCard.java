@@ -4,13 +4,13 @@ import monopoly.Card;
 import monopoly.Cards;
 import monopoly.Game;
 import monopoly.IPlayer;
-import monopoly.util.Consumer0;
 import monopoly.util.Consumer1;
 
 import java.util.List;
 
 public class EqualWealthCard extends Card {
     private static final Card instance = new EqualWealthCard();
+
     static {
         Game.putDefaultConfig("equal-wealth-card-price", 11);
     }
@@ -27,7 +27,7 @@ public class EqualWealthCard extends Card {
     public void use(Game g, Consumer1<Boolean> cb) {
         List<IPlayer> players = g.getPlayers();
         double average = players.stream().map(IPlayer::getCash).reduce(0.0, (a, b) -> a + b) / players.size();
-        for (IPlayer player: players) {
+        for (IPlayer player : players) {
             double amount = average - player.getCash();
             String msg;
             if (amount >= 0) {
@@ -37,6 +37,6 @@ public class EqualWealthCard extends Card {
             }
             player.changeCash(amount, msg);
         }
-        cb.run(true);
+        cb.accept(true);
     }
 }
