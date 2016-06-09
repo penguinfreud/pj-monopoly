@@ -9,10 +9,10 @@ import javafx.scene.layout.VBox;
 
 public class WelcomePane extends VBox implements IPane {
     public WelcomePane(MainController controller) {
-        Button newGameBtn = controller.createButton("New Game", e -> controller.newGame());
+        Button newGameBtn = controller.createButton("new_game", e -> controller.newGame());
         newGameBtn.setMaxWidth(Double.MAX_VALUE);
 
-        Button exitBtn = controller.createButton("Exit", e -> Platform.exit());
+        Button exitBtn = controller.createButton("exit", e -> Platform.exit());
         exitBtn.setMaxWidth(Double.MAX_VALUE);
 
         getChildren().addAll(newGameBtn, exitBtn);

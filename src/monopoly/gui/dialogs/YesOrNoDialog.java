@@ -11,6 +11,7 @@ import monopoly.gui.MainController;
 
 public class YesOrNoDialog extends Dialog<Boolean> {
     public YesOrNoDialog(MainController controller, String prompt) {
+        setTitle(controller.getText("monopoly"));
         setOnCloseRequest(e -> close());
         DialogPane dialogPane = getDialogPane();
         Text text = controller.createText(prompt);
@@ -18,7 +19,8 @@ public class YesOrNoDialog extends Dialog<Boolean> {
         pane.getChildren().add(text);
         pane.setPadding(new Insets(20));
         dialogPane.setContent(pane);
-        dialogPane.getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
+        LocalButtonTypes buttonTypes = controller.getButtonTypes();
+        dialogPane.getButtonTypes().addAll(buttonTypes.YES, buttonTypes.NO);
         setResultConverter(type -> type == ButtonType.YES);
     }
 }

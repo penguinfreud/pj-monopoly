@@ -8,9 +8,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceDialog;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -18,15 +16,13 @@ import javafx.stage.Stage;
 import monopoly.Config;
 import monopoly.Game;
 import monopoly.IPlayer;
-import monopoly.gui.dialogs.YesOrNoDialog;
+import monopoly.gui.dialogs.LocalButtonTypes;
 import monopoly.place.GameMap;
-import monopoly.place.GameMapReader;
 import monopoly.util.Host;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
 import java.util.*;
 
@@ -34,10 +30,7 @@ public class MainController implements Host {
     private static Config defaultConfig = new Config();
 
     static {
-        ObservableList<String> defaultMaps = FXCollections.observableArrayList();
-        defaultMaps.add("From file");
-        defaultMaps.add("gui_1.map");
-        defaultConfig.put("default-maps", defaultMaps);
+        defaultConfig.put("default-maps", new String[]{ "from_file", "gui_1.map" });
         defaultConfig.put("icons-count", 12);
         defaultConfig.put("font", new Font(16));
     }
@@ -57,21 +50,24 @@ public class MainController implements Host {
 
     private ImageManager imageManager = new ImageManager();
     private GUIGameMap.GUIGameMapReader mapReader = new GUIGameMap.GUIGameMapReader(this);
+    private LocalButtonTypes buttonTypes;
 
     private IPane currentPane;
     private BorderPane rootPane = new BorderPane();
     private IPane welcomePane, gameEditorPane, playerEditorPane, gamePane;
 
     MainController() {
+        Locale locale = Locale.forLanguageTag(game.getConfig("locale"));
+        messages = ResourceBundle.getBundle("messages/ui_messages", locale);
+
+        buttonTypes = new LocalButtonTypes(this);
+
         welcomePane = new WelcomePane(this);
         gameEditorPane = new GameEditorPane(this);
         playerEditorPane = new PlayerEditorPane(this);
         gamePane = new GamePane(this);
 
         GUIPlayerInfo.enable(game, this);
-
-        Locale locale = Locale.forLanguageTag(game.getConfig("locale"));
-        messages = ResourceBundle.getBundle("messages/ui_messages", locale);
     }
 
     @Override
@@ -90,7 +86,7 @@ public class MainController implements Host {
         Scene scene = new Scene(rootPane, 800, 600);
         stage = primaryStage;
         primaryStage.setScene(scene);
-        primaryStage.setTitle("Monopoly");
+        primaryStage.setTitle(getText("monopoly"));
 
         primaryStage.show();
     }
@@ -133,8 +129,8 @@ public class MainController implements Host {
             if (mapIndex == 0) {
                 is = new FileInputStream((String) config.get("map-file"));
             } else {
-                ObservableList<String> defaultMaps = config.get("default-maps");
-                is = MainController.class.getResourceAsStream("/maps/" + defaultMaps.get(mapIndex));
+                String[] defaultMaps = config.get("default-maps");
+                is = MainController.class.getResourceAsStream("/maps/" + defaultMaps[mapIndex]);
             }
             GameMap map = GameMap.readMap(is, mapReader);
             game.setMap(map);
@@ -174,13 +170,13 @@ public class MainController implements Host {
     }
 
     public Text createText(String strText) {
-        Text text = new Text(strText);
+        Text text = new Text(getText(strText));
         text.setFont(config.get("font"));
         return text;
     }
 
     public Button createButton(String text, EventHandler<ActionEvent> handler) {
-        Button button = new Button(text);
+        Button button = new Button(getText(text));
         button.setOnAction(handler);
 
         button.setFont(config.get("font"));
@@ -199,5 +195,9 @@ public class MainController implements Host {
 
     public String format(String key, Object ... args) {
         return MessageFormat.format(getText(key), args);
+    }
+
+    public LocalButtonTypes getButtonTypes() {
+        return buttonTypes;
     }
 }

@@ -29,18 +29,20 @@ public class GUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     @Override
     public void askWhetherToBuyProperty(Consumer1<Boolean> cb) {
         Property property = getCurrentPlace().asProperty();
-        new YesOrNoDialog(controller,
+        boolean result = new YesOrNoDialog(controller,
                 controller.format("ask_whether_to_buy_property",
                         property.getName(), property.getPurchasePrice(), getCash()))
-                .showAndWait().ifPresent(cb::accept);
+                .showAndWait().orElse(false);
+        cb.accept(result);
     }
 
     @Override
     public void askWhetherToUpgradeProperty(Consumer1<Boolean> cb) {
         Property property = getCurrentPlace().asProperty();
-        new YesOrNoDialog(controller,
+        boolean result = new YesOrNoDialog(controller,
                 controller.format("ask_whether_to_upgrade_property",
                         property.getName(), property.getUpgradePrice(), getCash()))
-                .showAndWait().ifPresent(cb::accept);
+                .showAndWait().orElse(false);
+        cb.accept(result);
     }
 }

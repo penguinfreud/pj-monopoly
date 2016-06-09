@@ -1,7 +1,6 @@
 package monopoly.gui;
 
 import javafx.beans.property.StringProperty;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -79,7 +78,7 @@ public class GameEditorPane extends VBox implements IPane {
         listView.setPrefHeight(200);
         listView.setStyle(controller.getCSSFont());
 
-        Button addBtn = controller.createButton("Add a human player",
+        Button addBtn = controller.createButton("add_a_human_player",
                 e -> {
                     IPlayer player = new GUIPlayer(g, controller);
                     player.setName("wsy");
@@ -87,10 +86,10 @@ public class GameEditorPane extends VBox implements IPane {
                     controller.editPlayer(player);
                 });
 
-        Button editBtn = controller.createButton("Edit",
+        Button editBtn = controller.createButton("edit",
                 e -> Util.getListSelection(listView).ifPresent(controller::editPlayer));
 
-        Button removeBtn = controller.createButton("Remove",
+        Button removeBtn = controller.createButton("remove",
                 e -> Util.getListSelection(listView).ifPresent(g::removePlayer));
 
         buttons.getChildren().addAll(addBtn, editBtn, removeBtn);
@@ -108,9 +107,12 @@ public class GameEditorPane extends VBox implements IPane {
 
         ComboBox<String> comboBox = new ComboBox<>();
         Config config = controller.getConfig();
-        ObservableList<String> defaultMaps = config.get("default-maps");
+        String[] defaultMaps = config.get("default-maps");
 
-        comboBox.setItems(defaultMaps);
+        comboBox.getItems().add(controller.getText(defaultMaps[0]));
+        for (int i = 1; i<defaultMaps.length; i++) {
+            comboBox.getItems().add(defaultMaps[i]);
+        }
 
         SelectionModel<String> selectionModel = comboBox.getSelectionModel();
         String key = "selected-default-map-index";
@@ -121,7 +123,7 @@ public class GameEditorPane extends VBox implements IPane {
         Text chosenFile = new Text();
         chosenFile.textProperty().bind(config.stringValueAt("map-file"));
 
-        Button chooseBtn = controller.createButton("choose",
+        Button chooseBtn = controller.createButton("choose_file",
                 e -> {
                     FileChooser fileChooser = new FileChooser();
                     File selectedFile = fileChooser.showOpenDialog(controller.getStage());
@@ -142,7 +144,7 @@ public class GameEditorPane extends VBox implements IPane {
                     }
                 });
 
-        vBox.getChildren().addAll(controller.createText("Map: "), comboBox, fromFilePane);
+        vBox.getChildren().addAll(controller.createText("map_colon"), comboBox, fromFilePane);
         vBox.setPadding(new Insets(10));
         vBox.setSpacing(10);
 
@@ -150,8 +152,8 @@ public class GameEditorPane extends VBox implements IPane {
     }
 
     private void createBottom() {
-        Button startBtn = controller.createButton("Start Game", e -> controller.startGame());
-        Button backBtn = controller.createButton("Back", e -> controller.welcome());
+        Button startBtn = controller.createButton("start_game", e -> controller.startGame());
+        Button backBtn = controller.createButton("back", e -> controller.welcome());
 
         bottomPane.getChildren().addAll(startBtn, backBtn);
         bottomPane.setAlignment(Pos.BOTTOM_RIGHT);

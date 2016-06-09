@@ -36,7 +36,7 @@ public class PlayerEditorPane extends VBox implements IPane {
             nameField.textProperty().bindBidirectional(nv.nameProperty());
         });
         nameField.setFont(controller.getConfig().get("font"));
-        hBox.getChildren().addAll(controller.createText("Name: "), nameField);
+        hBox.getChildren().addAll(controller.createText("name_colon"), nameField);
         hBox.setAlignment(Pos.TOP_CENTER);
         hBox.setPadding(new Insets(10));
         return hBox;
