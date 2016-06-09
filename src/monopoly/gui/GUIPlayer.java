@@ -1,12 +1,12 @@
 package monopoly.gui;
 
-import monopoly.BasePlayer;
-import monopoly.Game;
-import monopoly.IPlayer;
+import javafx.event.EventHandler;
+import javafx.scene.input.MouseEvent;
+import monopoly.*;
 import monopoly.util.Consumer0;
 import monopoly.util.Parasite;
 
-public class GUIPlayer extends BasePlayer {
+public class GUIPlayer extends BasePlayer implements Properties.IPlayerWithProperties, IPlayerWithCardsAndStock {
     private MainController controller;
 
     public GUIPlayer(Game g, MainController controller) {
@@ -16,6 +16,11 @@ public class GUIPlayer extends BasePlayer {
 
     @Override
     public void startTurn(Consumer0 cb) {
-
+        DiceView diceView = DiceView.get(controller);
+        EventHandler<MouseEvent> listener = e -> {
+            diceView.setOnMouseClicked(null);
+            cb.accept();
+        };
+        diceView.setOnMouseClicked(listener);
     }
 }

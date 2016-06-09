@@ -147,6 +147,8 @@ public class Cards {
             prob[l] = sum;
         }
 
+        if (sum <= 0)
+            return null;
         int index = Arrays.binarySearch(prob, ThreadLocalRandom.current().nextInt(sum));
         if (index < 0) {
             index = -index - 1;

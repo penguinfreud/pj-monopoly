@@ -1,5 +1,7 @@
 package monopoly;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.ObservableList;
 import monopoly.place.GameMap;
 import monopoly.util.Event0;
@@ -38,6 +40,7 @@ public class Game implements Host {
     private transient ResourceBundle messages;
     private GameMap map;
     private final Players players = new Players();
+    private final IntegerProperty dice = new SimpleIntegerProperty(1);
     private boolean hadBankrupt = false;
     private final Map<Object, Object> storage = new Hashtable<>();
 
@@ -69,6 +72,7 @@ public class Game implements Host {
     public final void reset() {
         if (state == State.OVER) {
             players.reset();
+            dice.set(1);
             hadBankrupt = false;
         }
     }
@@ -145,6 +149,14 @@ public class Game implements Host {
         return players.getCurrentPlayer();
     }
 
+    public IntegerProperty diceProperty() {
+        return dice;
+    }
+
+    public int getDice() {
+        return dice.get();
+    }
+
     public final void start() {
         synchronized (lock) {
             if (state == State.OVER) {
@@ -174,7 +186,7 @@ public class Game implements Host {
             if (state == State.STARTING || notFirst) {
                 state = State.TURN_STARTING;
                 hadBankrupt = false;
-                dice = -1;
+                nextDice = -1;
                 if (players.isNewCycle() && notFirst) {
                     onCycle.trigger();
                 }
@@ -213,13 +225,13 @@ public class Game implements Host {
         }
     }
 
-    private int dice = -1;
+    private int nextDice = -1;
 
     public void setDice(int dice) {
         synchronized (lock) {
             if (state == State.TURN_STARTING) {
                 if (dice >= 1 && dice < (Integer) config.get("dice-sides")) {
-                    this.dice = dice;
+                    nextDice = dice;
                 } else {
                     triggerException("invalid_dice_number");
                 }
@@ -232,8 +244,8 @@ public class Game implements Host {
 
     public void startWalking() {
         synchronized (lock) {
-            if (dice != -1) {
-                startWalking(dice);
+            if (nextDice != -1) {
+                startWalking(nextDice);
             } else {
                 int dice = ThreadLocalRandom.current().nextInt(getConfig("dice-sides")) + 1;
                 startWalking(dice);
@@ -251,6 +263,7 @@ public class Game implements Host {
                     if (steps == 0) {
                         endWalking();
                     } else {
+                        dice.set(steps);
                         players.getCurrentPlayer().startWalking(steps);
                     }
                 }

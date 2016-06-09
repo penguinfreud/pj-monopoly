@@ -49,15 +49,13 @@ public class News extends Place {
             }
         }, Cards::isEnabled));
         newsTypes.add(new NewsType(g -> {
-            List<IPlayer> players = getSortedPlayers(g);
-            IPlayer player = players.get(0);
+            IPlayer player = getPoorestPlayers(g);
             double award = News.getRandomAward(g);
             String msg = g.format("news_poorest_player", player.getName(), award);
             player.changeCash(award, msg);
         }, Properties::isEnabled));
         newsTypes.add(new NewsType(g -> {
-            List<IPlayer> players = getSortedPlayers(g);
-            IPlayer player = players.get(players.size() - 1);
+            IPlayer player = getRichestPlayers(g);
             double award = News.getRandomAward(g);
             String msg = g.format("news_biggest_landlord", player.getName(), award);
             player.changeCash(award, msg);
@@ -73,11 +71,12 @@ public class News extends Place {
         return ThreadLocalRandom.current().nextDouble(awardMin, awardMax);
     }
 
-    private static List<IPlayer> getSortedPlayers(Game g) {
-        List<IPlayer> players = g.getPlayers();
-        Collections.sort(players, (a, b) ->
-                Properties.get(a).getPropertiesCount() - Properties.get(b).getPropertiesCount());
-        return players;
+    private static IPlayer getRichestPlayers(Game g) {
+        return g.getPlayers().stream().reduce((a, b) -> Properties.get(a).getPropertiesCount() < Properties.get(b).getPropertiesCount()? b: a).get();
+    }
+
+    private static IPlayer getPoorestPlayers(Game g) {
+        return g.getPlayers().stream().reduce((a, b) -> Properties.get(a).getPropertiesCount() < Properties.get(b).getPropertiesCount()? a: b).get();
     }
 
     private News() {

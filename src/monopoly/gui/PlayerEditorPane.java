@@ -1,5 +1,6 @@
 package monopoly.gui;
 
+import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -7,9 +8,13 @@ import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PlayerEditorPane extends VBox implements IPane {
     private MainController controller;
     private HBox bottomPane = new HBox();
+    private List<RadioButton> iconButtons = new ArrayList<>();
 
     public PlayerEditorPane(MainController controller) {
         this.controller = controller;
@@ -47,11 +52,22 @@ public class PlayerEditorPane extends VBox implements IPane {
             RadioButton radioButton = new RadioButton();
             radioButton.setToggleGroup(toggleGroup);
             radioButton.setGraphic(imageView);
-            if (i == 1)
-                radioButton.setSelected(true);
+            radioButton.selectedProperty().addListener(changeIcon(i - 1));
             gridPane.getChildren().add(radioButton);
+            iconButtons.add(radioButton);
         }
+        controller.editingPlayerProperty().addListener((v, ov, nv) -> {
+            iconButtons.get(GUIPlayerInfo.get(nv).getIconIndex()).setSelected(true);
+        });
         return gridPane;
+    }
+
+    private ChangeListener<Boolean> changeIcon(int index) {
+        return (v, ov, nv) -> {
+            if (nv) {
+                GUIPlayerInfo.get(controller.editingPlayerProperty().get()).setIconIndex(index);
+            }
+        };
     }
 
     private void createBottomPane() {

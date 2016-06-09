@@ -18,6 +18,13 @@ import monopoly.IPlayer;
 import monopoly.util.Parasite;
 
 public class GUIPlayerInfo {
+    static {
+        MainController.putDefaultConfig("player-colors", new Color[]{
+                Color.BLUE, Color.YELLOW, Color.GREEN, Color.RED,
+                Color.BROWN, Color.AZURE, Color.CHOCOLATE, Color.FIREBRICK,
+                Color.PAPAYAWHIP, Color.BISQUE, Color.VIOLET, Color.TAN
+        });
+    }
     private static final Parasite<Game, Boolean> enabled = new Parasite<>();
     private static final Parasite<IPlayer, GUIPlayerInfo> parasites = new Parasite<>();
 
@@ -29,18 +36,52 @@ public class GUIPlayerInfo {
         if (enabled.get(game) == null) {
             enabled.set(game, true);
             BasePlayer.onAddPlayer.get(game).addListener(player -> {
-                parasites.set(player, new GUIPlayerInfo(controller));
+                parasites.set(player, new GUIPlayerInfo(player, controller));
+            });
+            game.onGameStart.addListener(() -> {
+                Color[] colors = controller.getConfig().get("player-colors");
+                int i = 0;
+                for (IPlayer player: game.getPlayers()) {
+                    get(player).setColor(colors[i]);
+                    i++;
+                }
             });
         }
     }
 
     private MainController controller;
+    private IPlayer player;
     private IntegerProperty iconIndex = new SimpleIntegerProperty();
     private ObjectProperty<Color> color = new SimpleObjectProperty<>();
     private Node token = null;
 
-    public GUIPlayerInfo(MainController controller) {
+    public GUIPlayerInfo(IPlayer player, MainController controller) {
+        this.player = player;
         this.controller = controller;
+    }
+
+    public IntegerProperty iconIndexProperty() {
+        return iconIndex;
+    }
+
+    public ObjectProperty<Color> colorProperty() {
+        return color;
+    }
+
+    public int getIconIndex() {
+        return iconIndex.get();
+    }
+
+    public void setIconIndex(int iconIndex) {
+        this.iconIndex.set(iconIndex);
+    }
+
+    public Color getColor() {
+        return color.get();
+    }
+
+    public void setColor(Color color) {
+        this.color.set(color);
     }
 
     public ObjectBinding<Image> icon(int size) {
@@ -60,6 +101,12 @@ public class GUIPlayerInfo {
             circle.setStroke(color.get());
             circle.setStrokeType(StrokeType.OUTSIDE);
             circle.setStrokeWidth(3);
+            circle.translateXProperty().bind(Bindings.createObjectBinding(
+                    () -> ((GUIPlace) player.getCurrentPlace()).getX() + 36,
+                    player.currentPlaceProperty()));
+            circle.translateYProperty().bind(Bindings.createObjectBinding(
+                    () -> ((GUIPlace) player.getCurrentPlace()).getY() + 36,
+                    player.currentPlaceProperty()));
             token = circle;
         }
         return token;

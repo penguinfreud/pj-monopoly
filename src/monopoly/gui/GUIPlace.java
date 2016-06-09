@@ -47,6 +47,22 @@ public class GUIPlace extends DelegatePlace {
         icon.set(placeIconMap.get(place.getClass()));
     }
 
+    public DoubleProperty xProperty() {
+        return x;
+    }
+
+    public double getX() {
+        return x.get();
+    }
+
+    public DoubleProperty yProperty() {
+        return y;
+    }
+
+    public double getY() {
+        return y.get();
+    }
+
     public Shape getToken() {
         if (token == null) {
             token = new Rectangle(64, 64);

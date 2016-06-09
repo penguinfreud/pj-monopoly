@@ -18,12 +18,15 @@ import monopoly.Game;
 import monopoly.IPlayer;
 import monopoly.place.GameMap;
 import monopoly.place.GameMapReader;
+import monopoly.util.Host;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Hashtable;
+import java.util.Map;
 
-public class MainController {
+public class MainController implements Host {
     private static Config defaultConfig = new Config();
 
     static {
@@ -43,6 +46,8 @@ public class MainController {
     private Config config = new Config(defaultConfig);
     private ObjectProperty<IPlayer> editingPlayer = new SimpleObjectProperty<>();
 
+    private Map<Object, Object> storage = new Hashtable<>();
+
     private Stage stage;
 
     private ImageManager imageManager = new ImageManager();
@@ -61,9 +66,20 @@ public class MainController {
         GUIPlayerInfo.enable(game, this);
     }
 
+    @Override
+    public <T> void setParasite(Object key, T obj) {
+        storage.put(key, obj);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T getParasite(Object key) {
+        return (T) storage.get(key);
+    }
+
     void initStage(Stage primaryStage) {
         welcome();
-        Scene scene = new Scene(rootPane, 600, 600);
+        Scene scene = new Scene(rootPane, 800, 600);
         stage = primaryStage;
         primaryStage.setScene(scene);
         primaryStage.setTitle("Monopoly");
@@ -162,5 +178,10 @@ public class MainController {
         button.setFont(config.get("font"));
         button.setPadding(new Insets(8, 10, 8, 10));
         return button;
+    }
+
+    public String getCSSFont() {
+        Font font = config.get("font");
+        return "-fx-font: " + font.getSize() + " " + font.getFamily();
     }
 }

@@ -77,6 +77,7 @@ public class GameEditorPane extends VBox implements IPane {
         listView.setItems(g.getPlayers());
         listView.setPrefWidth(200);
         listView.setPrefHeight(200);
+        listView.setStyle(controller.getCSSFont());
 
         Button addBtn = controller.createButton("Add a human player",
                 e -> {
