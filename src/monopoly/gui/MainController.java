@@ -8,7 +8,9 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -16,6 +18,7 @@ import javafx.stage.Stage;
 import monopoly.Config;
 import monopoly.Game;
 import monopoly.IPlayer;
+import monopoly.gui.dialogs.YesOrNoDialog;
 import monopoly.place.GameMap;
 import monopoly.place.GameMapReader;
 import monopoly.util.Host;
@@ -23,8 +26,9 @@ import monopoly.util.Host;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.Hashtable;
-import java.util.Map;
+import java.io.UnsupportedEncodingException;
+import java.text.MessageFormat;
+import java.util.*;
 
 public class MainController implements Host {
     private static Config defaultConfig = new Config();
@@ -47,6 +51,7 @@ public class MainController implements Host {
     private ObjectProperty<IPlayer> editingPlayer = new SimpleObjectProperty<>();
 
     private Map<Object, Object> storage = new Hashtable<>();
+    private ResourceBundle messages;
 
     private Stage stage;
 
@@ -64,6 +69,9 @@ public class MainController implements Host {
         gamePane = new GamePane(this);
 
         GUIPlayerInfo.enable(game, this);
+
+        Locale locale = Locale.forLanguageTag(game.getConfig("locale"));
+        messages = ResourceBundle.getBundle("messages/ui_messages", locale);
     }
 
     @Override
@@ -183,5 +191,13 @@ public class MainController implements Host {
     public String getCSSFont() {
         Font font = config.get("font");
         return "-fx-font: " + font.getSize() + " " + font.getFamily();
+    }
+
+    public String getText(String key) {
+        return monopoly.util.Util.getText(messages, key);
+    }
+
+    public String format(String key, Object ... args) {
+        return MessageFormat.format(getText(key), args);
     }
 }

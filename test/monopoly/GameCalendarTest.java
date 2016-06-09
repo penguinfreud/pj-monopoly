@@ -35,7 +35,7 @@ public class GameCalendarTest {
     }
 
     private String formatDate(Calendar calendar) {
-        return MessageFormat.format(game.getText("date_format"),
+        return game.format("date_format",
                 String.format("%d", calendar.get(Calendar.YEAR)),
                 calendar.get(Calendar.MONTH) + 1,
                 calendar.get(Calendar.DATE));

@@ -4,10 +4,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.ObservableList;
 import monopoly.place.GameMap;
-import monopoly.util.Event0;
-import monopoly.util.Event1;
-import monopoly.util.Host;
-import monopoly.util.InitEvent;
+import monopoly.util.*;
 
 import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
@@ -95,15 +92,7 @@ public class Game implements Host {
     }
 
     public final String getText(String key) {
-        try {
-            return new String(messages.getString(key).getBytes("ISO-8859-1"), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return "";
-        } catch (MissingResourceException e) {
-            //logger.log(Level.INFO, "Unknown key: " + key);
-            return key;
-        }
+        return Util.getText(messages, key);
     }
 
     public final String format(String key, Object... args) {
