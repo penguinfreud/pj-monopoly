@@ -3,7 +3,6 @@ package monopoly.stock;
 import monopoly.Game;
 import monopoly.util.Parasite;
 
-import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -11,14 +10,14 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class StockMarket implements Serializable {
+public class StockMarket {
     private static final List<Stock> stocks = new CopyOnWriteArrayList<>();
 
     public static void addStock(Stock stock) {
         stocks.add(stock);
     }
 
-    private static final Parasite<Game, StockMarket> markets = new Parasite<>("StockMarket");
+    private static final Parasite<Game, StockMarket> markets = new Parasite<>();
 
     public static StockMarket getMarket(Game g) {
         return markets.get(g);

@@ -3,18 +3,25 @@ package monopoly;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.StringProperty;
 import monopoly.place.Place;
 import monopoly.util.Consumer0;
 import monopoly.util.Consumer1;
 import monopoly.util.Host;
 import monopoly.util.Supplier;
 
-import java.io.Serializable;
-
-public interface IPlayer extends Serializable, Host, GameObject {
+public interface IPlayer extends Host, GameObject {
     Game getGame();
 
-    String getName();
+    StringProperty nameProperty();
+
+    default String getName() {
+        return nameProperty().get();
+    }
+
+    default void setName(String name) {
+        nameProperty().set(name);
+    }
 
     ObjectProperty<Place> currentPlaceProperty();
 

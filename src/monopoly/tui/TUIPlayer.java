@@ -30,7 +30,8 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     }
 
     public TUIPlayer(String name, Game g, InputStream in, PrintStream out) {
-        super(name, g);
+        super(g);
+        setName(name);
         scanner = TUI.getScanner(in);
         TUI.addOutput(g, out);
         this.out = out;

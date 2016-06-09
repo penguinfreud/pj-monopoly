@@ -32,8 +32,8 @@ public class Shareholding {
         }
     }
 
-    private static final Parasite<IPlayer, Shareholding> parasites = new Parasite<>("Shareholding");
-    public static final Parasite<Game, Event3<IPlayer, Stock, Integer>> onStockHoldingChange = new Parasite<>("Shareholding.onStockHoldingChange");
+    private static final Parasite<IPlayer, Shareholding> parasites = new Parasite<>();
+    public static final Parasite<Game, Event3<IPlayer, Stock, Integer>> onStockHoldingChange = new Parasite<>();
 
     static {
         Game.putDefaultConfig("stock-max-trade", 10000);

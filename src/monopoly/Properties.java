@@ -26,8 +26,8 @@ public class Properties {
         }
     }
 
-    private static final Parasite<IPlayer, Properties> parasites = new Parasite<>("Properties");
-    public static final Parasite<Game, Event3<IPlayer, Boolean, Property>> onPropertyChange = new Parasite<>("Properties.onPropertyChange");
+    private static final Parasite<IPlayer, Properties> parasites = new Parasite<>();
+    public static final Parasite<Game, Event3<IPlayer, Boolean, Property>> onPropertyChange = new Parasite<>();
 
     public static void enable(Game g) {
         if (onPropertyChange.get(g) == null) {

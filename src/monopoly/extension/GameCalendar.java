@@ -8,8 +8,8 @@ import java.text.MessageFormat;
 import java.util.Calendar;
 
 public final class GameCalendar {
-    public static final Parasite<Game, Event0> onMonth = new Parasite<>("GameCalendar.onMonth");
-    private static final Parasite<Game, GameCalendar> calendars = new Parasite<>("GameCalendar");
+    public static final Parasite<Game, Event0> onMonth = new Parasite<>();
+    private static final Parasite<Game, GameCalendar> calendars = new Parasite<>();
 
     public static void enable(Game g) {
         if (calendars.get(g) == null) {

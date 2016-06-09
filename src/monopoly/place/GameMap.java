@@ -55,12 +55,11 @@ public class GameMap {
         }
     }
 
-    public static GameMap readMap(InputStream is) throws Exception {
+    public static GameMap readMap(InputStream is, GameMapReader reader) throws Exception {
         InputStreamReader isr = new InputStreamReader(is, "UTF-8");
         Scanner sc = new Scanner(isr);
         sc.useDelimiter(Pattern.compile("\\s*(,|[\r\n]+)\\s*"));
         String mapType = sc.next();
-        GameMapReader reader = mapReaders.get(mapType);
         GameMap map;
 
         if (reader != null) {
@@ -86,11 +85,5 @@ public class GameMap {
 
     public static PlaceReader getPlaceReader(String id) {
         return placeReaders.get(id);
-    }
-
-    private static final Map<String, GameMapReader> mapReaders = new Hashtable<>();
-
-    public static void registerMapReader(String id, GameMapReader reader) {
-        mapReaders.put(id, reader);
     }
 }

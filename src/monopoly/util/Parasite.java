@@ -1,13 +1,7 @@
 package monopoly.util;
 
-import java.io.Serializable;
-
 public class Parasite<H extends Host, T> {
-    private final Serializable key;
-
-    public Parasite(Serializable key) {
-        this.key = key;
-    }
+    private final Object key = new Object();
 
     public T get(H host) {
         return host.getParasite(key);

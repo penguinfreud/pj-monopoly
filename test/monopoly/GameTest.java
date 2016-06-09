@@ -1,6 +1,7 @@
 package monopoly;
 
 import monopoly.place.GameMap;
+import monopoly.place.GameMapReader;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,12 +14,12 @@ import static org.hamcrest.CoreMatchers.*;
 public class GameTest {
     private static class Player extends BasePlayer implements Properties.IPlayerWithProperties {
         Player(String name, Game g) {
-            super(name, g);
+            super(g);
+            setName(name);
         }
     }
 
     private GameMap map;
-    private List<IPlayer> players = new ArrayList<>();
     private IPlayer playerA, playerB, playerC;
 
     private MyGame game;
@@ -27,7 +28,7 @@ public class GameTest {
         Class.forName("monopoly.place.GameMapReader");
         Class.forName("monopoly.place.Land");
         Class.forName("monopoly.place.Trap");
-        map = GameMap.readMap(GameTest.class.getResourceAsStream("/test.map"));
+        map = GameMap.readMap(GameTest.class.getResourceAsStream("/test.map"), new GameMapReader());
     }
 
     @Before
@@ -37,9 +38,8 @@ public class GameTest {
         playerA = new Player("player A", game);
         playerB = new Player("player B", game);
         playerC = new Player("player C", game);
-        players.add(playerA);
-        players.add(playerB);
-        game.setPlayers(players);
+        game.addPlayer(playerA);
+        game.addPlayer(playerB);
         Properties.enable(game);
     }
 
@@ -62,7 +62,7 @@ public class GameTest {
         game.onGameStart.addListener(() -> assertEquals(Game.State.STARTING, game.getState()));
         game.onTurn.addListener(() -> assertEquals(Game.State.TURN_STARTING, game.getState()));
         game.onCycle.addListener(() -> assertEquals(Game.State.TURN_STARTING, game.getState()));
-        game.onGameOver.addListener(() -> assertEquals(Game.State.OVER, game.getState()));
+        game.onGameOver.addListener(winner -> assertEquals(Game.State.OVER, game.getState()));
         game.onLanded.addListener(() -> assertEquals(Game.State.TURN_LANDED, game.getState()));
         game.start();
     }
@@ -73,13 +73,8 @@ public class GameTest {
     }
 
     @Test
-    public void testPlayers() throws Exception {
-        assertEquals(2, game.getPlayers().size());
-        players.add(playerC);
-        assertEquals(2, game.getPlayers().size());
-        assertThat(game.getCurrentPlayer(), anyOf(equalTo(playerA), equalTo(playerB)));
-
-        game.setPlayers(players);
+    public void testPlayers() {
+        game.addPlayer(playerC);
         game.start();
 
         List<IPlayer> _players = new ArrayList<>();
@@ -108,7 +103,6 @@ public class GameTest {
     @Test
     public void testWalking() throws Exception {
         game.putConfig("shuffle-players", false);
-        game.setPlayers(players);
         game.start();
         assertEquals("a", playerA.getCurrentPlace().getName());
         assertEquals("a", playerB.getCurrentPlace().getName());
@@ -125,14 +119,11 @@ public class GameTest {
 
     @Test
     public void testTriggerBankrupt() throws Exception {
-        players.add(playerC);
-        game.setPlayers(players);
+        game.addPlayer(playerC);
         List<IPlayer> bankrupted = new ArrayList<>();
         game.onBankrupt.addListener(bankrupted::add);
         game.forwardUntil = -1;
         game.start();
         assertEquals(2, bankrupted.size());
-        assertEquals(1, game.getPlayers().size());
-        assertThat(bankrupted, not(hasItem(game.getCurrentPlayer())));
     }
 }

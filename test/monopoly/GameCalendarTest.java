@@ -2,6 +2,7 @@ package monopoly;
 
 import monopoly.extension.GameCalendar;
 import monopoly.place.GameMap;
+import monopoly.place.GameMapReader;
 import org.junit.Test;
 
 import java.text.MessageFormat;
@@ -14,7 +15,8 @@ import static org.junit.Assert.*;
 public class GameCalendarTest {
     private static class Player extends BasePlayer implements Properties.IPlayerWithProperties {
         Player(String name, Game g) {
-            super(name, g);
+            super(g);
+            setName(name);
         }
     }
 
@@ -24,12 +26,10 @@ public class GameCalendarTest {
         Class.forName("monopoly.place.GameMapReader");
         Class.forName("monopoly.place.Land");
         Class.forName("monopoly.place.Trap");
-        GameMap map = GameMap.readMap(GameTest.class.getResourceAsStream("/test.map"));
+        GameMap map = GameMap.readMap(GameTest.class.getResourceAsStream("/test.map"), new GameMapReader());
         game.setMap(map);
-        List<IPlayer> players = new ArrayList<>();
-        players.add(new Player("player A", game));
-        players.add(new Player("player A", game));
-        game.setPlayers(players);
+        game.addPlayer(new Player("player A", game));
+        game.addPlayer(new Player("player A", game));
         GameCalendar.enable(game);
         Properties.enable(game);
     }

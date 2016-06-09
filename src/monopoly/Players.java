@@ -27,12 +27,13 @@ class Players {
         return players;
     }
 
-    void set(List<IPlayer> thePlayers) throws Exception {
-        if (thePlayers.size() < 2)
-            throw new Exception("Too few players.");
+    void reset() {
         players.clear();
-        players.addAll(thePlayers);
         currentPlayerIndex = 0;
+    }
+
+    void add(IPlayer player) {
+        players.add(player);
     }
 
     void shuffle() {

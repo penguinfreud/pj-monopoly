@@ -42,7 +42,7 @@ public class TUI {
 
             if (!games.contains(g)) {
                 games.add(g);
-                g.onGameOver.addListener(() ->
+                g.onGameOver.addListener(winner ->
                         out.println(g.format("game_over", g.getCurrentPlayer().getName())));
                 g.onLanded.addListener(() ->
                         out.println(g.format("you_have_arrived",

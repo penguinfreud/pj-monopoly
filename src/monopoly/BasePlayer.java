@@ -2,9 +2,7 @@ package monopoly;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import monopoly.place.Place;
@@ -20,9 +18,9 @@ import java.util.logging.Logger;
 public class BasePlayer implements IPlayer {
     private static final Logger logger = Logger.getLogger(BasePlayer.class.getName());
 
-    public static final Parasite<Game, InitEvent<IPlayer>> onAddPlayer = new Parasite<>("BasePlayer.onAddPlayer");
-    public static final Parasite<Game, Event3<IPlayer, Double, String>> onMoneyChange = new Parasite<>("BasePlayer.onMoneyChange");
-    public static final Parasite<Game, Event1<IPlayer>> onBankrupt = new Parasite<>("BasePlayer.onBankrupt");
+    public static final Parasite<Game, InitEvent<IPlayer>> onAddPlayer = new Parasite<>();
+    public static final Parasite<Game, Event3<IPlayer, Double, String>> onMoneyChange = new Parasite<>();
+    public static final Parasite<Game, Event1<IPlayer>> onBankrupt = new Parasite<>();
     public static final InitEvent<IPlayer> onInit = new InitEvent<>();
 
     static {
@@ -37,7 +35,7 @@ public class BasePlayer implements IPlayer {
     }
 
     private final Game game;
-    private String name;
+    private final StringProperty name = new SimpleStringProperty();
     private final SimpleObjectProperty<Place> currentPlace = new SimpleObjectProperty<>();
     private final DoubleProperty cash = new SimpleDoubleProperty();
     private final DoubleProperty deposit = new SimpleDoubleProperty();
@@ -60,13 +58,8 @@ public class BasePlayer implements IPlayer {
     }
 
     public BasePlayer(Game g) {
-        this("", g);
-    }
-
-    public BasePlayer(String name, Game g) {
         synchronized (g.lock) {
             game = g;
-            this.name = name;
             addPossession(this::getCash);
             addPossession(this::getDeposit);
             onInit.trigger(this);
@@ -87,17 +80,13 @@ public class BasePlayer implements IPlayer {
     }
 
     @Override
-    public final String getName() {
+    public StringProperty nameProperty() {
         return name;
     }
 
     @Override
     public final String toString(Game game) {
-        return name;
-    }
-
-    protected final void setName(String name) {
-        this.name = name;
+        return getName();
     }
 
     @Override

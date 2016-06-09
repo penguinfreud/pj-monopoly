@@ -5,9 +5,6 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class GameMapReader {
-    protected GameMapReader() {
-    }
-
     private final Map<String, Street> streetMap = new Hashtable<>();
 
     public GameMap readMap(Scanner sc) throws Exception {
@@ -45,9 +42,5 @@ public class GameMapReader {
             streetMap.put(name, street);
         }
         return street;
-    }
-
-    static {
-        GameMap.registerMapReader("GameMap", new GameMapReader());
     }
 }

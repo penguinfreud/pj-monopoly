@@ -1,6 +1,7 @@
 package monopoly;
 
 import monopoly.place.GameMap;
+import monopoly.place.GameMapReader;
 import monopoly.place.Land;
 import monopoly.place.Place;
 import org.junit.After;
@@ -27,7 +28,7 @@ public class GameMapTest {
 
     @Test
     public void testMapFromFile() throws Exception {
-        GameMap map = GameMap.readMap(new FileInputStream(tempFile));
+        GameMap map = GameMap.readMap(new FileInputStream(tempFile), new GameMapReader());
         assertEquals(1, map.size());
         Place p = map.getStartingPoint();
         assertThat(p, instanceOf(Land.class));

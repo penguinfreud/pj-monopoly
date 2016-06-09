@@ -1,7 +1,5 @@
 package monopoly.util;
 
-import java.io.Serializable;
-
-public interface Supplier<T> extends Serializable {
+public interface Supplier<T> {
     T get();
 }

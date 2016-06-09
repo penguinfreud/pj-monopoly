@@ -8,7 +8,7 @@ public final class BankSystem {
     private BankSystem() {
     }
 
-    private static final Parasite<Game, Boolean> inited = new Parasite<>("BankSystem");
+    private static final Parasite<Game, Boolean> inited = new Parasite<>();
 
     public static void enable(Game g) {
         if (inited.get(g) == null) {

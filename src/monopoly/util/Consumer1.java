@@ -1,7 +1,5 @@
 package monopoly.util;
 
-import java.io.Serializable;
-
-public interface Consumer1<A> extends Serializable {
+public interface Consumer1<A> {
     void accept(A a);
 }

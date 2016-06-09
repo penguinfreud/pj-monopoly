@@ -94,10 +94,10 @@ public class Cards {
         Game.putDefaultConfig("enable-coupons", 0);
     }
 
-    private static final Parasite<IPlayer, Cards> parasites = new Parasite<>("Cards");
-    private static final Parasite<Game, List<Card>> availableCards = new Parasite<>("Cards.availableCards");
-    public static final Parasite<Game, Event2<IPlayer, Integer>> onCouponChange = new Parasite<>("Cards.onCouponChange");
-    public static final Parasite<Game, Event3<IPlayer, Boolean, Card>> onCardChange = new Parasite<>("Cards.onCardChange");
+    private static final Parasite<IPlayer, Cards> parasites = new Parasite<>();
+    private static final Parasite<Game, List<Card>> availableCards = new Parasite<>();
+    public static final Parasite<Game, Event2<IPlayer, Integer>> onCouponChange = new Parasite<>();
+    public static final Parasite<Game, Event3<IPlayer, Boolean, Card>> onCardChange = new Parasite<>();
 
     public static Cards get(IPlayer player) {
         return parasites.get(player);

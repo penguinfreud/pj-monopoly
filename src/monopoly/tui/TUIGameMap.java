@@ -10,15 +10,6 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class TUIGameMap extends GameMap {
-    static {
-        GameMap.registerMapReader("TUIGameMap", new GameMapReader() {
-            @Override
-            protected GameMap createMap() {
-                return new TUIGameMap();
-            }
-        });
-    }
-
     private final List<List<TUIPlace>> rows = new CopyOnWriteArrayList<>();
 
     @Override

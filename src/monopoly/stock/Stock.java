@@ -3,9 +3,7 @@ package monopoly.stock;
 import monopoly.Game;
 import monopoly.GameObject;
 
-import java.io.Serializable;
-
-public class Stock implements GameObject, Serializable {
+public class Stock implements GameObject {
     private final String name;
 
     public Stock(String name) {

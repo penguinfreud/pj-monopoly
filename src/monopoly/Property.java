@@ -14,7 +14,7 @@ public abstract class Property extends Place {
         Game.putDefaultConfig("property-max-level", 6);
     }
 
-    private final ObjectProperty<IPlayer> owner = new SimpleObjectProperty<>(null);
+    private final ObjectProperty<IPlayer> owner = new SimpleObjectProperty<>();
     private final DoubleProperty price = new SimpleDoubleProperty(0);
     private final IntegerProperty level = new SimpleIntegerProperty(1);
 
@@ -34,7 +34,7 @@ public abstract class Property extends Place {
     }
 
     public final boolean isFree() {
-        return owner == null;
+        return owner.get() == null;
     }
 
     public DoubleProperty priceProperty() {
@@ -119,9 +119,9 @@ public abstract class Property extends Place {
     public void arriveAt(Game g, Consumer0 cb) {
         if (g.getState() == Game.State.TURN_LANDED) {
             IPlayer player = g.getCurrentPlayer();
-            if (owner == null) {
+            if (owner.get() == null) {
                 Properties.get(player).buyProperty(this, cb);
-            } else if (owner == player) {
+            } else if (owner.get() == player) {
                 if (level.get() < (Integer) g.getConfig("property-max-level")) {
                     Properties.get(player).upgradeProperty(this, cb);
                 } else {

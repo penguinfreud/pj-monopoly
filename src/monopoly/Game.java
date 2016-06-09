@@ -22,7 +22,7 @@ public class Game implements Host {
     private static final Config defaultConfig = new Config();
 
     static {
-        defaultConfig.put("bundle-name", "messages");
+        defaultConfig.put("bundle-name", "messages/messages");
         defaultConfig.put("locale", "zh-CN");
         defaultConfig.put("dice-sides", 6);
         defaultConfig.put("shuffle-players", false);
@@ -62,18 +62,24 @@ public class Game implements Host {
     }
 
     private void updateMessages() {
-        Locale locale = Locale.forLanguageTag((String) config.get("locale"));
-        messages = ResourceBundle.getBundle((String) config.get("bundle-name"), locale);
+        Locale locale = Locale.forLanguageTag(config.get("locale"));
+        messages = ResourceBundle.getBundle(config.get("bundle-name"), locale);
+    }
+
+    public final void reset() {
+        if (state == State.OVER) {
+            players.reset();
+            hadBankrupt = false;
+        }
     }
 
     public final State getState() {
         return state;
     }
 
-    @SuppressWarnings("unchecked")
     public final <T> T getConfig(String key) {
         synchronized (lock) {
-            return (T) config.get(key);
+            return config.get(key);
         }
     }
 
@@ -115,16 +121,18 @@ public class Game implements Host {
         }
     }
 
-    public final void setPlayers(List<IPlayer> playersList) throws Exception {
+    public final void addPlayer(IPlayer player) {
         synchronized (lock) {
             if (state == State.OVER) {
-                players.set(playersList);
-                if ((boolean) config.get("shuffle-players")) {
-                    players.shuffle();
-                }
-            } else {
-                logger.log(Level.WARNING, WRONG_STATE);
-                (new Exception()).printStackTrace();
+                players.add(player);
+            }
+        }
+    }
+
+    public final void removePlayer(IPlayer player) {
+        synchronized (lock) {
+            if (state == State.OVER) {
+                players.remove(player);
             }
         }
     }
@@ -140,7 +148,13 @@ public class Game implements Host {
     public final void start() {
         synchronized (lock) {
             if (state == State.OVER) {
+                if (players.count() < 2) {
+                    throw new RuntimeException("Too few players");
+                }
                 state = State.STARTING;
+                if (config.get("shuffle-players")) {
+                    players.shuffle();
+                }
                 map.init(this);
                 players.init();
                 onGameStart.trigger();
@@ -265,7 +279,8 @@ public class Game implements Host {
     private void endGame() {
         if (state != State.OVER) {
             state = State.OVER;
-            onGameOver.trigger();
+            onGameOver.trigger(getCurrentPlayer());
+            reset();
         } else {
             logger.log(Level.WARNING, WRONG_STATE);
             (new Exception()).printStackTrace();
@@ -284,12 +299,12 @@ public class Game implements Host {
     }
 
     public final Event0 onGameStart = new Event0(),
-            onGameOver = new Event0(),
             onTurn = new Event0(),
             onLanded = new Event0(),
             onCycle = new Event0();
     public final Event1<String> onException = new Event1<>();
-    public final Event1<IPlayer> onBankrupt = new Event1<>();
+    public final Event1<IPlayer> onBankrupt = new Event1<>(),
+            onGameOver = new Event1<>();
 
     final void triggerBankrupt(IPlayer player) {
         if (state != State.OVER) {

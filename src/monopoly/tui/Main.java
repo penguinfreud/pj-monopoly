@@ -4,6 +4,7 @@ import monopoly.*;
 import monopoly.extension.BankSystem;
 import monopoly.extension.Lottery;
 import monopoly.place.GameMap;
+import monopoly.place.GameMapReader;
 import monopoly.place.Place;
 import monopoly.stock.Stock;
 import monopoly.stock.StockMarket;
@@ -15,11 +16,11 @@ import java.util.Scanner;
 public class Main {
     private static class Player extends BasePlayer implements IPlayerWithCardsAndStock, Properties.IPlayerWithProperties {
         Player(String name, Game g) {
-            super(name, g);
+            super(g);
+            setName(name);
         }
     }
 
-    private static List<IPlayer> players;
     private static Game game;
     private static boolean isAI = false;
 
@@ -42,9 +43,13 @@ public class Main {
             StockMarket.addStock(new Stock("facebook"));
             StockMarket.addStock(new Stock("microsoft"));
 
-            GameMap map = GameMap.readMap(Main.class.getResourceAsStream("/maps/card_rich.map"));
-
-            players = new ArrayList<>();
+            GameMap map = GameMap.readMap(Main.class.getResourceAsStream("/maps/card_rich.map"),
+                    new GameMapReader() {
+                        @Override
+                        protected GameMap createMap() {
+                            return new TUIGameMap();
+                        }
+                    });
 
             game = new Game();
             game.setMap(map);
@@ -61,7 +66,7 @@ public class Main {
                 TUI.addOutput(game, System.out);
             }
 
-            game.onGameOver.addListener(() -> new Thread(Main::newGame).start());
+            game.onGameOver.addListener(winner -> new Thread(Main::newGame).start());
 
             newGame();
         } catch (Exception e) {
@@ -83,16 +88,10 @@ public class Main {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        players.clear();
         System.out.println(game.getText("ask_player_names"));
         Scanner scanner = TUI.getScanner(System.in);
-        players.add(createPlayer(scanner.nextLine()));
-        players.add(createPlayer(scanner.nextLine()));
-        try {
-            game.setPlayers(players);
-            game.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        game.addPlayer(createPlayer(scanner.nextLine()));
+        game.addPlayer(createPlayer(scanner.nextLine()));
+        game.start();
     }
 }

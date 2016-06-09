@@ -17,7 +17,7 @@ public class Lottery {
         Game.putDefaultConfig("lottery-pool", 2000.0);
     }
 
-    private static final Parasite<Game, Lottery> parasites = new Parasite<>("Lottery");
+    private static final Parasite<Game, Lottery> parasites = new Parasite<>();
 
     public static void enable(Game g) {
         if (parasites.get(g) == null) {
