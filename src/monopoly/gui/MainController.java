@@ -61,6 +61,7 @@ public class MainController {
         StockMarket.enable(game);
         Shareholding.enable(game);
         GUIPlayerInfo.enable(game, this);
+        Card.enableAll(game);
 
         buttonTypes = new LocalButtonTypes(this);
 

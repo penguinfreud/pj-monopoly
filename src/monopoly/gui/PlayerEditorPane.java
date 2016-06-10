@@ -73,7 +73,7 @@ public class PlayerEditorPane extends VBox implements IPane {
     }
 
     private void createBottomPane() {
-        Button okBtn = controller.createButton("OK", e -> controller.completeEditingPlayer());
+        Button okBtn = controller.createButton("ok", e -> controller.completeEditingPlayer());
 
         bottomPane.getChildren().addAll(okBtn);
         bottomPane.setAlignment(Pos.BOTTOM_RIGHT);
