@@ -2,8 +2,6 @@ package monopoly.gui;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -13,24 +11,23 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import monopoly.Config;
-import monopoly.Game;
-import monopoly.IPlayer;
+import monopoly.*;
 import monopoly.gui.dialogs.LocalButtonTypes;
 import monopoly.place.GameMap;
-import monopoly.util.Host;
+import monopoly.stock.StockMarket;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
-public class MainController implements Host {
+public class MainController {
     private static Config defaultConfig = new Config();
 
     static {
-        defaultConfig.put("default-maps", new String[]{ "from_file", "gui_1.map" });
+        defaultConfig.put("default-maps", new String[]{"from_file", "gui_1.map"});
         defaultConfig.put("icons-count", 12);
         defaultConfig.put("font", new Font(16));
     }
@@ -43,7 +40,6 @@ public class MainController implements Host {
     private Config config = new Config(defaultConfig);
     private ObjectProperty<IPlayer> editingPlayer = new SimpleObjectProperty<>();
 
-    private Map<Object, Object> storage = new Hashtable<>();
     private ResourceBundle messages;
 
     private Stage stage;
@@ -60,6 +56,12 @@ public class MainController implements Host {
         Locale locale = Locale.forLanguageTag(game.getConfig("locale"));
         messages = ResourceBundle.getBundle("messages/ui_messages", locale);
 
+        Properties.enable(game);
+        Cards.enable(game);
+        StockMarket.enable(game);
+        Shareholding.enable(game);
+        GUIPlayerInfo.enable(game, this);
+
         buttonTypes = new LocalButtonTypes(this);
 
         welcomePane = new WelcomePane(this);
@@ -67,18 +69,6 @@ public class MainController implements Host {
         playerEditorPane = new PlayerEditorPane(this);
         gamePane = new GamePane(this);
 
-        GUIPlayerInfo.enable(game, this);
-    }
-
-    @Override
-    public <T> void setParasite(Object key, T obj) {
-        storage.put(key, obj);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T getParasite(Object key) {
-        return (T) storage.get(key);
     }
 
     void initStage(Stage primaryStage) {
@@ -193,7 +183,7 @@ public class MainController implements Host {
         return monopoly.util.Util.getText(messages, key);
     }
 
-    public String format(String key, Object ... args) {
+    public String format(String key, Object... args) {
         return MessageFormat.format(getText(key), args);
     }
 

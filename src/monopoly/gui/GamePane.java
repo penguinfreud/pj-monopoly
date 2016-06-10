@@ -31,13 +31,14 @@ public class GamePane implements IPane {
     @Override
     public void onShow() {
         mapView.getChildren().addAll(controller.getMap().createMapView());
-        for (IPlayer player: controller.getGame().getPlayers()) {
+        for (IPlayer player : controller.getGame().getPlayers()) {
             mapView.getChildren().add(GUIPlayerInfo.get(player).getToken());
         }
     }
 
     private void createRightPane() {
-        rightPane.getChildren().addAll(DiceView.get(controller));
+        rightPane.getChildren().addAll(CurrentPlayerInfoPane.get(controller),
+                DiceView.get(controller));
         rightPane.setBorder(new Border(new BorderStroke(Color.BLACK,
                 BorderStrokeStyle.SOLID,
                 CornerRadii.EMPTY,

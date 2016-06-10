@@ -9,7 +9,6 @@ import monopoly.util.Consumer1;
 import monopoly.util.Function1;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -72,11 +71,11 @@ public class News extends Place {
     }
 
     private static IPlayer getRichestPlayers(Game g) {
-        return g.getPlayers().stream().reduce((a, b) -> Properties.get(a).getPropertiesCount() < Properties.get(b).getPropertiesCount()? b: a).get();
+        return g.getPlayers().stream().reduce((a, b) -> Properties.get(a).getPropertiesCount() < Properties.get(b).getPropertiesCount() ? b : a).get();
     }
 
     private static IPlayer getPoorestPlayers(Game g) {
-        return g.getPlayers().stream().reduce((a, b) -> Properties.get(a).getPropertiesCount() < Properties.get(b).getPropertiesCount()? a: b).get();
+        return g.getPlayers().stream().reduce((a, b) -> Properties.get(a).getPropertiesCount() < Properties.get(b).getPropertiesCount() ? a : b).get();
     }
 
     private News() {

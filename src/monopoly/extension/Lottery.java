@@ -2,7 +2,6 @@ package monopoly.extension;
 
 import monopoly.Game;
 import monopoly.IPlayer;
-import monopoly.util.Parasite;
 
 import java.util.Hashtable;
 import java.util.List;
@@ -17,12 +16,12 @@ public class Lottery {
         Game.putDefaultConfig("lottery-pool", 2000.0);
     }
 
-    private static final Parasite<Game, Lottery> parasites = new Parasite<>();
+    private static final Map<Game, Lottery> parasites = new Hashtable<>();
 
     public static void enable(Game g) {
         if (parasites.get(g) == null) {
             GameCalendar.enable(g);
-            parasites.set(g, new Lottery(g));
+            parasites.put(g, new Lottery(g));
         }
     }
 

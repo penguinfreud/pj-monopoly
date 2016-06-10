@@ -4,16 +4,18 @@ import javafx.beans.binding.Bindings;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import monopoly.Game;
-import monopoly.util.Parasite;
+
+import java.util.Hashtable;
+import java.util.Map;
 
 public class DiceView extends ImageView {
-    private static final Parasite<MainController, DiceView> parasites = new Parasite<>();
+    private static final Map<MainController, DiceView> parasites = new Hashtable<>();
 
     public static DiceView get(MainController controller) {
         DiceView view = parasites.get(controller);
         if (view == null) {
             view = new DiceView(controller);
-            parasites.set(controller, view);
+            parasites.put(controller, view);
         }
         return view;
     }

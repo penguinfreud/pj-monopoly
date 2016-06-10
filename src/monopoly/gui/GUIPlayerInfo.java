@@ -15,7 +15,9 @@ import javafx.scene.shape.StrokeType;
 import monopoly.BasePlayer;
 import monopoly.Game;
 import monopoly.IPlayer;
-import monopoly.util.Parasite;
+
+import java.util.Hashtable;
+import java.util.Map;
 
 public class GUIPlayerInfo {
     static {
@@ -25,8 +27,9 @@ public class GUIPlayerInfo {
                 Color.PAPAYAWHIP, Color.BISQUE, Color.VIOLET, Color.TAN
         });
     }
-    private static final Parasite<Game, Boolean> enabled = new Parasite<>();
-    private static final Parasite<IPlayer, GUIPlayerInfo> parasites = new Parasite<>();
+
+    private static final Map<Game, Boolean> enabled = new Hashtable<>();
+    private static final Map<IPlayer, GUIPlayerInfo> parasites = new Hashtable<>();
 
     public static GUIPlayerInfo get(IPlayer player) {
         return parasites.get(player);
@@ -34,14 +37,14 @@ public class GUIPlayerInfo {
 
     public static void enable(Game game, MainController controller) {
         if (enabled.get(game) == null) {
-            enabled.set(game, true);
+            enabled.put(game, true);
             BasePlayer.onAddPlayer.get(game).addListener(player -> {
-                parasites.set(player, new GUIPlayerInfo(player, controller));
+                parasites.put(player, new GUIPlayerInfo(player, controller));
             });
             game.onGameStart.addListener(() -> {
                 Color[] colors = controller.getConfig().get("player-colors");
                 int i = 0;
-                for (IPlayer player: game.getPlayers()) {
+                for (IPlayer player : game.getPlayers()) {
                     get(player).setColor(colors[i]);
                     i++;
                 }
@@ -87,7 +90,7 @@ public class GUIPlayerInfo {
     public ObjectBinding<Image> icon(int size) {
         return Bindings.createObjectBinding(
                 () -> controller.getImageManager().getImage("/icons/characters/" +
-                    size + "x" + size + "/" + (iconIndex.get()+ 1) + ".png"), iconIndex);
+                        size + "x" + size + "/" + (iconIndex.get() + 1) + ".png"), iconIndex);
     }
 
     public Image getIcon(int size) {

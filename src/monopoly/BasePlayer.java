@@ -12,15 +12,16 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class BasePlayer implements IPlayer {
     private static final Logger logger = Logger.getLogger(BasePlayer.class.getName());
 
-    public static final Parasite<Game, InitEvent<IPlayer>> onAddPlayer = new Parasite<>();
-    public static final Parasite<Game, Event3<IPlayer, Double, String>> onMoneyChange = new Parasite<>();
-    public static final Parasite<Game, Event1<IPlayer>> onBankrupt = new Parasite<>();
+    public static final Map<Game, InitEvent<IPlayer>> onAddPlayer = new Hashtable<>();
+    public static final Map<Game, Event3<IPlayer, Double, String>> onMoneyChange = new Hashtable<>();
+    public static final Map<Game, Event1<IPlayer>> onBankrupt = new Hashtable<>();
     public static final InitEvent<IPlayer> onInit = new InitEvent<>();
 
     static {
@@ -28,9 +29,9 @@ public class BasePlayer implements IPlayer {
         Game.putDefaultConfig("init-deposit", 2000.0);
         Game.putDefaultConfig("bank-max-transfer", 100000.0);
         Game.onInit.addListener(game -> {
-            onAddPlayer.set(game, new InitEvent<>());
-            onMoneyChange.set(game, new Event3<>());
-            onBankrupt.set(game, new Event1<>());
+            onAddPlayer.put(game, new InitEvent<>());
+            onMoneyChange.put(game, new Event3<>());
+            onBankrupt.put(game, new Event1<>());
         });
     }
 
@@ -44,18 +45,6 @@ public class BasePlayer implements IPlayer {
     private final DoubleBinding totalPossessions;
     private final ObservableList<Supplier<Double>> possessions = FXCollections.observableList(new CopyOnWriteArrayList<>());
     private final List<Consumer1<Consumer0>> propertySellers = new CopyOnWriteArrayList<>();
-    private final Map<Object, Object> storage = new Hashtable<>();
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public final <T> T getParasite(Object key) {
-        return (T) storage.get(key);
-    }
-
-    @Override
-    public final void setParasite(Object key, Object value) {
-        storage.put(key, value);
-    }
 
     public BasePlayer(Game g) {
         synchronized (g.lock) {

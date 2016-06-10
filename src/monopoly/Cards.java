@@ -5,10 +5,15 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import monopoly.place.Place;
-import monopoly.util.*;
+import monopoly.util.Consumer0;
+import monopoly.util.Consumer1;
+import monopoly.util.Event2;
+import monopoly.util.Event3;
 
 import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
@@ -94,10 +99,10 @@ public class Cards {
         Game.putDefaultConfig("enable-coupons", 0);
     }
 
-    private static final Parasite<IPlayer, Cards> parasites = new Parasite<>();
-    private static final Parasite<Game, List<Card>> availableCards = new Parasite<>();
-    public static final Parasite<Game, Event2<IPlayer, Integer>> onCouponChange = new Parasite<>();
-    public static final Parasite<Game, Event3<IPlayer, Boolean, Card>> onCardChange = new Parasite<>();
+    private static final Map<IPlayer, Cards> parasites = new Hashtable<>();
+    private static final Map<Game, List<Card>> availableCards = new Hashtable<>();
+    public static final Map<Game, Event2<IPlayer, Integer>> onCouponChange = new Hashtable<>();
+    public static final Map<Game, Event3<IPlayer, Boolean, Card>> onCardChange = new Hashtable<>();
 
     public static Cards get(IPlayer player) {
         return parasites.get(player);
@@ -105,11 +110,11 @@ public class Cards {
 
     public static void enable(Game g) {
         if (availableCards.get(g) == null) {
-            availableCards.set(g, new CopyOnWriteArrayList<>());
-            onCouponChange.set(g, new Event2<>());
-            onCardChange.set(g, new Event3<>());
+            availableCards.put(g, new CopyOnWriteArrayList<>());
+            onCouponChange.put(g, new Event2<>());
+            onCardChange.put(g, new Event3<>());
             BasePlayer.onAddPlayer.get(g).addListener(player ->
-                    parasites.set(player, new Cards(player)));
+                    parasites.put(player, new Cards(player)));
         }
     }
 

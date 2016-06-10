@@ -9,8 +9,6 @@ import monopoly.place.Place;
 import monopoly.stock.Stock;
 import monopoly.stock.StockMarket;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 public class Main {

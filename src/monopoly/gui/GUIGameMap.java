@@ -1,7 +1,6 @@
 package monopoly.gui;
 
 import javafx.scene.Group;
-import javafx.scene.layout.Pane;
 import monopoly.place.GameMap;
 import monopoly.place.GameMapReader;
 

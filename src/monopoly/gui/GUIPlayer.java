@@ -7,7 +7,6 @@ import monopoly.gui.dialogs.BankDialog;
 import monopoly.gui.dialogs.YesOrNoDialog;
 import monopoly.util.Consumer0;
 import monopoly.util.Consumer1;
-import monopoly.util.Parasite;
 
 public class GUIPlayer extends BasePlayer implements Properties.IPlayerWithProperties, IPlayerWithCardsAndStock {
     private MainController controller;

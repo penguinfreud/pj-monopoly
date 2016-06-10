@@ -29,7 +29,7 @@ public class BankDialog extends Dialog<Double> {
                 return 0.0;
             try {
                 double amount = Double.parseDouble(amountField.getText());
-                return type == buttonTypes.DEPOSIT? amount: -amount;
+                return type == buttonTypes.DEPOSIT ? amount : -amount;
             } catch (NumberFormatException e) {
                 return 0.0;
             }

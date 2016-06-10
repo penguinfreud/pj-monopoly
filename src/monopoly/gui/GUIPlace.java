@@ -35,7 +35,7 @@ public class GUIPlace extends DelegatePlace {
 
     private MainController controller;
     private DoubleProperty x = new SimpleDoubleProperty(),
-    y = new SimpleDoubleProperty();
+            y = new SimpleDoubleProperty();
     private ObjectProperty<String> icon = new SimpleObjectProperty<>();
     private Shape token;
 
@@ -67,7 +67,7 @@ public class GUIPlace extends DelegatePlace {
         if (token == null) {
             token = new Rectangle(64, 64);
             token.fillProperty().bind(Bindings.createObjectBinding(() ->
-                    icon.get() == null? null:
+                    icon.get() == null ? null :
                             new ImagePattern(controller.getImageManager().getImage("/icons/places/" + icon.get())), icon));
             token.translateXProperty().bind(x);
             token.translateYProperty().bind(y);

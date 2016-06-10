@@ -2,7 +2,6 @@ package monopoly.tui;
 
 import monopoly.Game;
 import monopoly.place.GameMap;
-import monopoly.place.GameMapReader;
 import monopoly.place.Place;
 
 import java.io.PrintStream;

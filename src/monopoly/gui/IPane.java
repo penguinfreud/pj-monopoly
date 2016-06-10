@@ -21,7 +21,9 @@ public interface IPane {
 
     Node center();
 
-    default void onShow() {}
+    default void onShow() {
+    }
 
-    default void onHide() {}
+    default void onHide() {
+    }
 }

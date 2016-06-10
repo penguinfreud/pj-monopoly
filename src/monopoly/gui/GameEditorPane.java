@@ -110,7 +110,7 @@ public class GameEditorPane extends VBox implements IPane {
         String[] defaultMaps = config.get("default-maps");
 
         comboBox.getItems().add(controller.getText(defaultMaps[0]));
-        for (int i = 1; i<defaultMaps.length; i++) {
+        for (int i = 1; i < defaultMaps.length; i++) {
             comboBox.getItems().add(defaultMaps[i]);
         }
 
@@ -128,16 +128,16 @@ public class GameEditorPane extends VBox implements IPane {
                     FileChooser fileChooser = new FileChooser();
                     File selectedFile = fileChooser.showOpenDialog(controller.getStage());
                     controller.getConfig().put("map-file",
-                            selectedFile == null? "": selectedFile.getAbsolutePath());
+                            selectedFile == null ? "" : selectedFile.getAbsolutePath());
                 });
 
         fromFilePane.getChildren().addAll(chosenFile, chooseBtn);
         fromFilePane.setVisible((Integer) config.get(key) == 0);
 
         selectionModel.selectedIndexProperty().addListener(
-                (v, ov, nv) -> {
-                    config.put(key, nv.intValue());
-                    if (nv.intValue() == 0) {
+                (observable, oldValue, newValue) -> {
+                    config.put(key, newValue.intValue());
+                    if (newValue.intValue() == 0) {
                         fromFilePane.setVisible(true);
                     } else {
                         fromFilePane.setVisible(false);

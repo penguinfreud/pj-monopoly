@@ -5,8 +5,9 @@ import javafx.collections.ObservableList;
 import monopoly.util.Consumer0;
 import monopoly.util.Consumer1;
 import monopoly.util.Event3;
-import monopoly.util.Parasite;
 
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,15 +27,15 @@ public class Properties {
         }
     }
 
-    private static final Parasite<IPlayer, Properties> parasites = new Parasite<>();
-    public static final Parasite<Game, Event3<IPlayer, Boolean, Property>> onPropertyChange = new Parasite<>();
+    private static final Map<IPlayer, Properties> parasites = new Hashtable<>();
+    public static final Map<Game, Event3<IPlayer, Boolean, Property>> onPropertyChange = new Hashtable<>();
 
     public static void enable(Game g) {
         if (onPropertyChange.get(g) == null) {
-            onPropertyChange.set(g, new Event3<>());
+            onPropertyChange.put(g, new Event3<>());
             BasePlayer.onAddPlayer.get(g).addListener(player -> {
                 Properties properties = new Properties(player);
-                parasites.set(player, properties);
+                parasites.put(player, properties);
                 player.addPossession(properties::getValue);
                 player.addPropertySeller(properties::sellProperties);
             });

@@ -4,7 +4,6 @@ import monopoly.extension.GameCalendar;
 import monopoly.stock.Stock;
 import monopoly.stock.StockMarket;
 import monopoly.util.Event3;
-import monopoly.util.Parasite;
 
 import java.util.Hashtable;
 import java.util.Map;
@@ -32,8 +31,8 @@ public class Shareholding {
         }
     }
 
-    private static final Parasite<IPlayer, Shareholding> parasites = new Parasite<>();
-    public static final Parasite<Game, Event3<IPlayer, Stock, Integer>> onStockHoldingChange = new Parasite<>();
+    private static final Map<IPlayer, Shareholding> parasites = new Hashtable<>();
+    public static final Map<Game, Event3<IPlayer, Stock, Integer>> onStockHoldingChange = new Hashtable<>();
 
     static {
         Game.putDefaultConfig("stock-max-trade", 10000);
@@ -42,10 +41,10 @@ public class Shareholding {
     public static void enable(Game g) {
         if (onStockHoldingChange.get(g) == null) {
             GameCalendar.enable(g);
-            onStockHoldingChange.set(g, new Event3<>());
+            onStockHoldingChange.put(g, new Event3<>());
             BasePlayer.onAddPlayer.get(g).addListener(player -> {
                 Shareholding holding = new Shareholding(player);
-                parasites.set(player, holding);
+                parasites.put(player, holding);
             });
             BasePlayer.onBankrupt.get(g).addListener(player ->
                     parasites.get(player).holdingMap.forEach((stock, holding) -> holding.amount = 0));

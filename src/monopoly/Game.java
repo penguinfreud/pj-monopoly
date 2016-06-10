@@ -1,23 +1,27 @@
 package monopoly;
 
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.ObservableList;
 import monopoly.place.GameMap;
-import monopoly.util.*;
+import monopoly.util.Event0;
+import monopoly.util.Event1;
+import monopoly.util.InitEvent;
+import monopoly.util.Util;
 
-import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Game implements Host {
+public class Game {
     private static final Logger logger = Logger.getLogger(Game.class.getName());
-    public static final String WRONG_STATE = "wrong state";
+    static final String WRONG_STATE = "wrong state";
 
-    public static final InitEvent<Game> onInit = new InitEvent<>();
+    static final InitEvent<Game> onInit = new InitEvent<>();
     private static final Config defaultConfig = new Config();
 
     static {
@@ -39,7 +43,6 @@ public class Game implements Host {
     private final Players players = new Players();
     private final IntegerProperty dice = new SimpleIntegerProperty(1);
     private boolean hadBankrupt = false;
-    private final Map<Object, Object> storage = new Hashtable<>();
 
     public static void putDefaultConfig(String key, Object value) {
         defaultConfig.put(key, value);
@@ -74,7 +77,7 @@ public class Game implements Host {
         }
     }
 
-    public final State getState() {
+    final State getState() {
         return state;
     }
 
@@ -134,8 +137,12 @@ public class Game implements Host {
         return players.getPlayers();
     }
 
+    public final ObjectBinding<IPlayer> currentPlayer() {
+        return players.currentPlayer();
+    }
+
     public final IPlayer getCurrentPlayer() {
-        return players.getCurrentPlayer();
+        return players.currentPlayer().get();
     }
 
     public IntegerProperty diceProperty() {
@@ -180,7 +187,7 @@ public class Game implements Host {
                     onCycle.trigger();
                 }
                 onTurn.trigger();
-                players.getCurrentPlayer().startTurn(this::startWalking);
+                getCurrentPlayer().startTurn(this::startWalking);
             } else {
                 logger.log(Level.WARNING, WRONG_STATE);
                 (new Exception()).printStackTrace();
@@ -253,7 +260,7 @@ public class Game implements Host {
                         endWalking();
                     } else {
                         dice.set(steps);
-                        players.getCurrentPlayer().startWalking(steps);
+                        getCurrentPlayer().startWalking(steps);
                     }
                 }
             } else {
@@ -270,7 +277,7 @@ public class Game implements Host {
                 endTurn();
             } else {
                 onLanded.trigger();
-                players.getCurrentPlayer().getCurrentPlace().arriveAt(this, this::endTurn);
+                getCurrentPlayer().getCurrentPlace().arriveAt(this, this::endTurn);
             }
         } else {
             logger.log(Level.WARNING, WRONG_STATE);
@@ -287,17 +294,6 @@ public class Game implements Host {
             logger.log(Level.WARNING, WRONG_STATE);
             (new Exception()).printStackTrace();
         }
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public final <T> T getParasite(Object key) {
-        return (T) storage.get(key);
-    }
-
-    @Override
-    public final void setParasite(Object key, Object value) {
-        storage.put(key, value);
     }
 
     public final Event0 onGameStart = new Event0(),

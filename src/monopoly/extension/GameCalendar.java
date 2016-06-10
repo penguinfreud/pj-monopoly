@@ -2,19 +2,20 @@ package monopoly.extension;
 
 import monopoly.Game;
 import monopoly.util.Event0;
-import monopoly.util.Parasite;
 
 import java.text.MessageFormat;
 import java.util.Calendar;
+import java.util.Hashtable;
+import java.util.Map;
 
 public final class GameCalendar {
-    public static final Parasite<Game, Event0> onMonth = new Parasite<>();
-    private static final Parasite<Game, GameCalendar> calendars = new Parasite<>();
+    public static final Map<Game, Event0> onMonth = new Hashtable<>();
+    private static final Map<Game, GameCalendar> calendars = new Hashtable<>();
 
     public static void enable(Game g) {
         if (calendars.get(g) == null) {
-            onMonth.set(g, new Event0());
-            calendars.set(g, new GameCalendar(g));
+            onMonth.put(g, new Event0());
+            calendars.put(g, new GameCalendar(g));
         }
     }
 

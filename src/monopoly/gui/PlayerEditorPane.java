@@ -4,9 +4,16 @@ import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import monopoly.IPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,12 +36,7 @@ public class PlayerEditorPane extends VBox implements IPane {
     private HBox createNameField() {
         HBox hBox = new HBox();
         TextField nameField = new TextField();
-        controller.editingPlayerProperty().addListener((v, ov, nv) -> {
-            if (ov != null) {
-                nameField.textProperty().unbindBidirectional(ov.nameProperty());
-            }
-            nameField.textProperty().bindBidirectional(nv.nameProperty());
-        });
+        Util.bindBidirectional(nameField.textProperty(), controller.editingPlayerProperty(), IPlayer::nameProperty);
         nameField.setFont(controller.getConfig().get("font"));
         hBox.getChildren().addAll(controller.createText("name_colon"), nameField);
         hBox.setAlignment(Pos.TOP_CENTER);
@@ -47,7 +49,7 @@ public class PlayerEditorPane extends VBox implements IPane {
         gridPane.setVgap(10);
         gridPane.setHgap(10);
         ToggleGroup toggleGroup = new ToggleGroup();
-        for (int i = 1; i<=(Integer) controller.getConfig().get("icons-count"); i++) {
+        for (int i = 1; i <= (Integer) controller.getConfig().get("icons-count"); i++) {
             ImageView imageView = new ImageView(controller.getImageManager().getImage("/icons/characters/96x96/" + i + ".png"));
             RadioButton radioButton = new RadioButton();
             radioButton.setToggleGroup(toggleGroup);
@@ -56,15 +58,15 @@ public class PlayerEditorPane extends VBox implements IPane {
             gridPane.getChildren().add(radioButton);
             iconButtons.add(radioButton);
         }
-        controller.editingPlayerProperty().addListener((v, ov, nv) -> {
-            iconButtons.get(GUIPlayerInfo.get(nv).getIconIndex()).setSelected(true);
+        controller.editingPlayerProperty().addListener((observable, oldValue, newValue) -> {
+            iconButtons.get(GUIPlayerInfo.get(newValue).getIconIndex()).setSelected(true);
         });
         return gridPane;
     }
 
     private ChangeListener<Boolean> changeIcon(int index) {
-        return (v, ov, nv) -> {
-            if (nv) {
+        return (observable, oldValue, newValue) -> {
+            if (newValue) {
                 GUIPlayerInfo.get(controller.editingPlayerProperty().get()).setIconIndex(index);
             }
         };

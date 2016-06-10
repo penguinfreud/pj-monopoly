@@ -1,7 +1,6 @@
 package monopoly.stock;
 
 import monopoly.Game;
-import monopoly.util.Parasite;
 
 import java.util.Hashtable;
 import java.util.List;
@@ -17,7 +16,7 @@ public class StockMarket {
         stocks.add(stock);
     }
 
-    private static final Parasite<Game, StockMarket> markets = new Parasite<>();
+    private static final Map<Game, StockMarket> markets = new Hashtable<>();
 
     public static StockMarket getMarket(Game g) {
         return markets.get(g);
@@ -82,7 +81,7 @@ public class StockMarket {
 
     public static void enable(Game g) {
         if (markets.get(g) == null) {
-            markets.set(g, new StockMarket(g));
+            markets.put(g, new StockMarket(g));
         }
     }
 

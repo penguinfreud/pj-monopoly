@@ -7,10 +7,10 @@ import javafx.beans.property.StringProperty;
 import monopoly.place.Place;
 import monopoly.util.Consumer0;
 import monopoly.util.Consumer1;
-import monopoly.util.Host;
-import monopoly.util.Supplier;
 
-public interface IPlayer extends Host, GameObject {
+import java.util.function.Supplier;
+
+public interface IPlayer extends GameObject {
     Game getGame();
 
     StringProperty nameProperty();
