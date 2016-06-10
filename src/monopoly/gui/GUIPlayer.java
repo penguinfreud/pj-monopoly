@@ -3,6 +3,7 @@ package monopoly.gui;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 import monopoly.*;
+import monopoly.gui.dialogs.BankDialog;
 import monopoly.gui.dialogs.YesOrNoDialog;
 import monopoly.util.Consumer0;
 import monopoly.util.Consumer1;
@@ -44,5 +45,12 @@ public class GUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
                         property.getName(), property.getUpgradePrice(), getCash()))
                 .showAndWait().orElse(false);
         cb.accept(result);
+    }
+
+    @Override
+    public void askHowMuchToDepositOrWithdraw(Consumer1<Double> cb) {
+        cb.accept(new BankDialog(controller,
+                controller.format("ask_how_much_to_deposit_or_withdraw", getCash(), getDeposit()))
+                .showAndWait().orElse(0.0));
     }
 }

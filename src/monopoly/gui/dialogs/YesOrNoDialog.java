@@ -1,7 +1,6 @@
 package monopoly.gui.dialogs;
 
 import javafx.geometry.Insets;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.layout.Pane;
@@ -21,6 +20,6 @@ public class YesOrNoDialog extends Dialog<Boolean> {
         dialogPane.setContent(pane);
         LocalButtonTypes buttonTypes = controller.getButtonTypes();
         dialogPane.getButtonTypes().addAll(buttonTypes.YES, buttonTypes.NO);
-        setResultConverter(type -> type == ButtonType.YES);
+        setResultConverter(type -> type == buttonTypes.YES);
     }
 }
