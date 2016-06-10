@@ -245,6 +245,15 @@ public class Properties {
         }
     }
 
+    public final void removeLand(Property property) {
+        synchronized (game.lock) {
+            if (property != null) {
+                properties.remove(property);
+                onPropertyChange.get(game).trigger(player, false, property);
+            }
+        }
+    }
+
     public final void robLand(Property property) {
         synchronized (game.lock) {
             if (property != null) {

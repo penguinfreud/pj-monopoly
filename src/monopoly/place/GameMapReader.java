@@ -6,9 +6,10 @@ import java.util.Scanner;
 
 public class GameMapReader {
     private final Map<String, Street> streetMap = new Hashtable<>();
+    private GameMap map;
 
     public GameMap readMap(Scanner sc) throws Exception {
-        GameMap map = createMap();
+        map = createMap();
         initStreetMap();
         map.setName(sc.next());
         while (sc.hasNext()) {
@@ -19,6 +20,10 @@ public class GameMapReader {
 
     protected GameMap createMap() {
         return new GameMap();
+    }
+
+    public GameMap getMap() {
+        return map;
     }
 
     protected void initStreetMap() {

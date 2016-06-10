@@ -12,6 +12,7 @@ import monopoly.card.TaxCard;
 import monopoly.gui.dialogs.BankDialog;
 import monopoly.gui.dialogs.ChoiceDialog;
 import monopoly.gui.dialogs.YesOrNoDialog;
+import monopoly.place.Place;
 import monopoly.util.Consumer0;
 
 import java.util.function.Consumer;
@@ -125,5 +126,10 @@ public class GUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
                 Cards.get(this).useCard(card, this::useCard);
             }
         }
+    }
+
+    @Override
+    public void askForTargetPlace(Card card, Consumer<Place> cb) {
+        ((GUIGameMap) getGame().getMap()).setOnSelectPlace(cb);
     }
 }

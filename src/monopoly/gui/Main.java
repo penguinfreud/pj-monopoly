@@ -7,14 +7,15 @@ import monopoly.place.Place;
 public final class Main extends Application {
     private final MainController controller = new MainController();
 
+    public Main() throws ClassNotFoundException {
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         controller.initStage(primaryStage);
     }
 
-    public static void main(String[] args) throws ClassNotFoundException {
-        Class.forName("monopoly.gui.GUIGameMap");
-        Place.loadAll();
+    public static void main(String[] args) {
         launch(args);
     }
 }

@@ -12,8 +12,11 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import monopoly.*;
+import monopoly.card.RobCard;
+import monopoly.card.TeardownCard;
 import monopoly.gui.dialogs.LocalButtonTypes;
 import monopoly.place.GameMap;
+import monopoly.place.Place;
 import monopoly.stock.StockMarket;
 
 import java.io.FileInputStream;
@@ -22,6 +25,7 @@ import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.stream.Collector;
 
 public class MainController {
     private static Config defaultConfig = new Config();
@@ -52,7 +56,7 @@ public class MainController {
     private BorderPane rootPane = new BorderPane();
     private IPane welcomePane, gameEditorPane, playerEditorPane, gamePane;
 
-    MainController() {
+    MainController() throws ClassNotFoundException {
         Locale locale = Locale.forLanguageTag(game.getConfig("locale"));
         messages = ResourceBundle.getBundle("messages/ui_messages", locale);
 
@@ -62,6 +66,11 @@ public class MainController {
         Shareholding.enable(game);
         GUIPlayerInfo.enable(game, this);
         Card.enableAll(game);
+
+        Place.loadAll();
+        Class.forName("monopoly.gui.GUIGameMap");
+        Class.forName("monopoly.gui.GUIPlace");
+        Class.forName("monopoly.gui.GUIProperty");
 
         buttonTypes = new LocalButtonTypes(this);
 
@@ -126,6 +135,9 @@ public class MainController {
             GameMap map = GameMap.readMap(is, mapReader);
             game.setMap(map);
             game.start();
+            Cards.get(game.getPlayers().get(0)).addCard(Cards.getAvailableCards(game).stream().filter(c -> c instanceof RobCard).findFirst().get());
+            Cards.get(game.getPlayers().get(1)).addCard(Cards.getAvailableCards(game).stream().filter(c -> c instanceof TeardownCard).findFirst().get());
+
             switchToPane(gamePane);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
