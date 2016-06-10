@@ -12,6 +12,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,7 +45,7 @@ public class BasePlayer implements IPlayer {
     private boolean reversed = false, bankrupted = false;
     private final DoubleBinding totalPossessions;
     private final ObservableList<Supplier<Double>> possessions = FXCollections.observableList(new CopyOnWriteArrayList<>());
-    private final List<Consumer1<Consumer0>> propertySellers = new CopyOnWriteArrayList<>();
+    private final List<Consumer<Consumer0>> propertySellers = new CopyOnWriteArrayList<>();
 
     public BasePlayer(Game g) {
         synchronized (g.lock) {
@@ -84,7 +85,7 @@ public class BasePlayer implements IPlayer {
     }
 
     @Override
-    public final void addPropertySeller(Consumer1<Consumer0> fn) {
+    public final void addPropertySeller(Consumer<Consumer0> fn) {
         propertySellers.add(fn);
     }
 

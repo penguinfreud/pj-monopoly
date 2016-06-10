@@ -1,5 +1,6 @@
 package monopoly.util;
 
-public interface Function1<A, R> {
-    R apply(A a);
+import java.util.function.Function;
+
+public interface Function1<A, R> extends Function<A, R> {
 }

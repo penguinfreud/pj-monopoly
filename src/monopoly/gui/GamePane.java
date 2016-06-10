@@ -2,6 +2,7 @@ package monopoly.gui;
 
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import monopoly.IPlayer;
@@ -37,7 +38,11 @@ public class GamePane implements IPane {
     }
 
     private void createRightPane() {
-        rightPane.getChildren().addAll(CurrentPlayerInfoPane.get(controller),
+        Button useCardBtn = controller.createButton("use_card",
+                e -> ((GUIPlayer) controller.getGame().getCurrentPlayer()).useCard());
+        rightPane.getChildren().addAll(
+                new HBox(useCardBtn),
+                CurrentPlayerInfoPane.get(controller),
                 DiceView.get(controller));
         rightPane.setBorder(new Border(new BorderStroke(Color.BLACK,
                 BorderStrokeStyle.SOLID,

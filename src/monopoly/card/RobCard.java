@@ -29,7 +29,7 @@ public class RobCard extends Card {
     @Override
     public void use(Game g, Consumer1<Boolean> cb) {
         IPlayer current = g.getCurrentPlayer();
-        ((Cards.IPlayerWithCards) current).askForTargetPlayer(getName(), player -> {
+        ((Cards.IPlayerWithCards) current).askForTargetPlayer(this, player -> {
             synchronized (g.lock) {
                 int reach = g.getConfig("rob-card-reach");
                 if (player != null &&

@@ -1,5 +1,6 @@
 package monopoly.gui.dialogs;
 
+import javafx.scene.Node;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBox;
@@ -15,7 +16,7 @@ public class ChoiceDialog<T> extends PromptDialog<T> {
                         String title,
                         String prompt,
                         List<T> items,
-                        Function<T, String> toString,
+                        Function<T, Node> toGraphic,
                         boolean nullable) {
         super(controller, title, prompt);
 
@@ -24,7 +25,8 @@ public class ChoiceDialog<T> extends PromptDialog<T> {
 
         boolean first = true;
         for (T t : items) {
-            RadioButton radioButton = new RadioButton(toString.apply(t));
+            RadioButton radioButton = new RadioButton();
+            radioButton.setGraphic(toGraphic.apply(t));
             radioButton.setToggleGroup(toggleGroup);
             itemsPane.getChildren().add(radioButton);
             radioButton.selectedProperty().addListener((observable, oldValue, newValue) -> {

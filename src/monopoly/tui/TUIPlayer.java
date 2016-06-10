@@ -2,20 +2,21 @@ package monopoly.tui;
 
 import monopoly.*;
 import monopoly.Properties;
+import monopoly.card.*;
 import monopoly.extension.GameCalendar;
 import monopoly.extension.Lottery;
 import monopoly.place.Place;
 import monopoly.stock.Stock;
 import monopoly.stock.StockMarket;
 import monopoly.util.Consumer0;
-import monopoly.util.Consumer1;
-import monopoly.util.Function1;
 import monopoly.util.Util;
 
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithProperties, Cards.IPlayerWithCards, IPlayerWithCardsAndStock {
     private Scanner scanner;
@@ -89,7 +90,7 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
         }
     }
 
-    private <T> T choose(String question, List<T> options, boolean nullable, Function1<T, String> stringifier) {
+    private <T> T choose(String question, List<T> options, boolean nullable, Function<T, String> stringifier) {
         Game g = getGame();
         while (true) {
             out.println(question);
@@ -156,7 +157,7 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     }
 
     @Override
-    public void askWhetherToBuyProperty(Consumer1<Boolean> cb) {
+    public void askWhetherToBuyProperty(Consumer<Boolean> cb) {
         Property property = getCurrentPlace().asProperty();
         String question = getGame().format("ask_whether_to_buy_property", property.getName(),
                 property.getPurchasePrice(), getCash());
@@ -164,7 +165,7 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     }
 
     @Override
-    public void askWhetherToUpgradeProperty(Consumer1<Boolean> cb) {
+    public void askWhetherToUpgradeProperty(Consumer<Boolean> cb) {
         Property property = getCurrentPlace().asProperty();
         String question = getGame().format("ask_whether_to_upgrade_property", property.getName(),
                 property.getUpgradePrice(), getCash());
@@ -172,13 +173,13 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     }
 
     @Override
-    public void askWhichPropertyToMortgage(Consumer1<Property> cb) {
+    public void askWhichPropertyToMortgage(Consumer<Property> cb) {
         String question = getGame().getText("ask_which_property_to_mortgage");
         cb.accept(choose(question, Properties.get(this).getProperties(), false));
     }
 
     @Override
-    public void askWhichCardToBuy(Consumer1<Card> cb) {
+    public void askWhichCardToBuy(Consumer<Card> cb) {
         Game g = getGame();
         String question = g.format("ask_which_card_to_buy", Cards.get(this).getCoupons());
         cb.accept(choose(question, Cards.getAvailableCards(g), true,
@@ -430,19 +431,19 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     }
 
     @Override
-    public void askHowMuchToDepositOrWithdraw(Consumer1<Double> cb) {
+    public void askHowMuchToDepositOrWithdraw(Consumer<Double> cb) {
         Game g = getGame();
         String question = g.format("ask_how_much_to_deposit_or_withdraw", getCash(), getDeposit());
         cb.accept(getDouble(question, -getDeposit(), getCash(), 0));
     }
 
     @Override
-    public void askForTargetPlayer(String reason, Consumer1<IPlayer> cb) {
+    public void askForTargetPlayer(Card card, Consumer<IPlayer> cb) {
         Game g = getGame();
         String question;
-        if (reason.equals("ReverseCard")) {
+        if (card instanceof ReverseCard) {
             question = g.getText("ask_whom_to_reverse");
-        } else if (reason.equals("TaxCard")) {
+        } else if (card instanceof TaxCard) {
             question = g.getText("ask_whom_to_tax");
         } else {
             question = "";
@@ -453,9 +454,9 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     }
 
     @Override
-    public void askForTargetPlace(String reason, Consumer1<Place> cb) {
+    public void askForTargetPlace(Card card, Consumer<Place> cb) {
         Game g = getGame();
-        if (reason.equals("ControlledDice")) {
+        if (card instanceof ControlledDice) {
             int steps = getInt(g.format("ask_where_to_go", getCurrentPlace().getName()), 1, 6, 0);
             if (steps == 0) {
                 cb.accept(null);
@@ -463,7 +464,7 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
                 Place place = nthPlace(steps);
                 cb.accept(place);
             }
-        } else if (reason.equals("Roadblock")) {
+        } else if (card instanceof Roadblock) {
             int steps = getInt(g.format("ask_where_to_set_roadblock", getCurrentPlace().getName()), -8, 8, -9);
             if (steps == -9) {
                 cb.accept(null);
@@ -476,8 +477,8 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     }
 
     @Override
-    public void askForInt(String reason, Consumer1<Integer> cb) {
-        if (reason.equals("LotteryCard")) {
+    public void askForInt(Card card, Consumer<Integer> cb) {
+        if (card instanceof LotteryCard) {
             Game g = getGame();
             int max = g.getConfig("lottery-number-max");
             cb.accept(getInt(g.getText("ask_for_lottery_number"), 0, max, -1));
@@ -487,7 +488,7 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     }
 
     @Override
-    public void askForTargetStock(Consumer1<Stock> cb) {
+    public void askForTargetStock(Consumer<Stock> cb) {
         Game g = getGame();
         StockMarket market = StockMarket.getMarket(g);
         List<Map.Entry<Stock, StockMarket.StockTrend>> stocks = new ArrayList<>(market.getStockEntries());

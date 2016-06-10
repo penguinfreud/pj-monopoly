@@ -25,7 +25,7 @@ public abstract class Card implements GameObject {
 
     protected abstract void use(Game g, Consumer1<Boolean> cb);
 
-    private String uncamelize(String str) {
+    public static String uncamelize(String str) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < str.length(); i++) {
             char ch = str.charAt(i);

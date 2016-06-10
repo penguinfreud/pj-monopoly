@@ -6,8 +6,8 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
 import monopoly.place.Place;
 import monopoly.util.Consumer0;
-import monopoly.util.Consumer1;
 
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public interface IPlayer extends GameObject {
@@ -53,7 +53,7 @@ public interface IPlayer extends GameObject {
 
     void addPossession(Supplier<Double> possession);
 
-    void addPropertySeller(Consumer1<Consumer0> cb);
+    void addPropertySeller(Consumer<Consumer0> cb);
 
     void init();
 
@@ -108,7 +108,7 @@ public interface IPlayer extends GameObject {
         cb.accept();
     }
 
-    default void askHowMuchToDepositOrWithdraw(Consumer1<Double> cb) {
+    default void askHowMuchToDepositOrWithdraw(Consumer<Double> cb) {
         cb.accept(0.0);
     }
 }

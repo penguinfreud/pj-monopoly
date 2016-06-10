@@ -26,7 +26,7 @@ public class LotteryCard extends Card {
     @Override
     protected void use(Game g, Consumer1<Boolean> cb) {
         IPlayer player = g.getCurrentPlayer();
-        ((Cards.IPlayerWithCards) player).askForInt(getName(), number -> {
+        ((Cards.IPlayerWithCards) player).askForInt(this, number -> {
             int max = g.getConfig("lottery-number-max");
             if (number >= 0 && number <= max) {
                 Lottery.cheat(g, number);

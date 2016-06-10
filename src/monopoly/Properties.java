@@ -3,26 +3,26 @@ package monopoly;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import monopoly.util.Consumer0;
-import monopoly.util.Consumer1;
 import monopoly.util.Event3;
 
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Properties {
     public interface IPlayerWithProperties extends IPlayer {
-        default void askWhetherToBuyProperty(Consumer1<Boolean> cb) {
+        default void askWhetherToBuyProperty(Consumer<Boolean> cb) {
             cb.accept(true);
         }
 
-        default void askWhetherToUpgradeProperty(Consumer1<Boolean> cb) {
+        default void askWhetherToUpgradeProperty(Consumer<Boolean> cb) {
             cb.accept(true);
         }
 
-        default void askWhichPropertyToMortgage(Consumer1<Property> cb) {
+        default void askWhichPropertyToMortgage(Consumer<Property> cb) {
             cb.accept(get(this).getProperties().get(0));
         }
     }

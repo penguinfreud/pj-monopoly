@@ -4,9 +4,11 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import monopoly.card.LotteryCard;
+import monopoly.card.ReverseCard;
+import monopoly.card.Roadblock;
 import monopoly.place.Place;
 import monopoly.util.Consumer0;
-import monopoly.util.Consumer1;
 import monopoly.util.Event2;
 import monopoly.util.Event3;
 
@@ -16,12 +18,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Cards {
     public interface IPlayerWithCards extends IPlayer {
-        default void askWhichCardToBuy(Consumer1<Card> cb) {
+        default void askWhichCardToBuy(Consumer<Card> cb) {
             int coupons = Cards.get(this).getCoupons();
             if (coupons == 0) {
                 cb.accept(null);
@@ -36,8 +39,8 @@ public class Cards {
             }
         }
 
-        default void askForTargetPlayer(String reason, Consumer1<IPlayer> cb) {
-            if (reason.equals("ReverseCard")) {
+        default void askForTargetPlayer(Card card, Consumer<IPlayer> cb) {
+            if (card instanceof ReverseCard) {
                 cb.accept(this);
             } else {
                 List<IPlayer> players = getGame().getPlayers();
@@ -46,17 +49,17 @@ public class Cards {
             }
         }
 
-        default void askForTargetPlace(String reason, Consumer1<Place> cb) {
+        default void askForTargetPlace(Card card, Consumer<Place> cb) {
             Place cur = getCurrentPlace();
-            if (reason.equals("Roadblock")) {
+            if (card instanceof Roadblock) {
                 cb.accept(cur);
             } else {
                 cb.accept(isReversed() ? cur.getPrev() : cur.getNext());
             }
         }
 
-        default void askForInt(String reason, Consumer1<Integer> cb) {
-            if (reason.equals("LotteryCard")) {
+        default void askForInt(Card card, Consumer<Integer> cb) {
+            if (card instanceof LotteryCard) {
                 cb.accept(0);
             } else {
                 cb.accept(0);
@@ -225,7 +228,7 @@ public class Cards {
     }
 
     private void _buyCards(Consumer0 cb) {
-        ((IPlayerWithCards) player).askWhichCardToBuy(new Consumer1<Card>() {
+        ((IPlayerWithCards) player).askWhichCardToBuy(new Consumer<Card>() {
             @Override
             public void accept(Card card) {
                 synchronized (game.lock) {

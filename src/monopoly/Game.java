@@ -31,7 +31,7 @@ public class Game {
         defaultConfig.put("shuffle-players", false);
     }
 
-    enum State {
+    public enum State {
         OVER, STARTING, TURN_STARTING, TURN_WALKING, TURN_LANDED
     }
 
@@ -77,7 +77,7 @@ public class Game {
         }
     }
 
-    final State getState() {
+    public final State getState() {
         return state;
     }
 

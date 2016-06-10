@@ -5,19 +5,19 @@ import monopoly.Game;
 import monopoly.IPlayer;
 import monopoly.Properties;
 import monopoly.util.Consumer0;
-import monopoly.util.Consumer1;
-import monopoly.util.Function1;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class News extends Place {
     private static class NewsType {
-        Consumer1<Game> fn;
-        Function1<Game, Boolean> requirement;
+        Consumer<Game> fn;
+        Function<Game, Boolean> requirement;
 
-        NewsType(Consumer1<Game> fn, Function1<Game, Boolean> requirement) {
+        NewsType(Consumer<Game> fn, Function<Game, Boolean> requirement) {
             this.fn = fn;
             this.requirement = requirement;
         }
