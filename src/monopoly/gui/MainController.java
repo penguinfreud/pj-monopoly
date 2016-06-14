@@ -11,13 +11,16 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import monopoly.*;
 import monopoly.card.RobCard;
 import monopoly.card.TeardownCard;
 import monopoly.gui.dialogs.LocalButtonTypes;
 import monopoly.gui.popups.PlayerInfoWindow;
+import monopoly.gui.popups.StockWindow;
 import monopoly.place.GameMap;
 import monopoly.place.Place;
+import monopoly.stock.Stock;
 import monopoly.stock.StockMarket;
 
 import java.io.FileInputStream;
@@ -58,6 +61,7 @@ public class MainController {
     private IPane welcomePane, gameEditorPane, playerEditorPane, gamePane;
 
     private PlayerInfoWindow playerInfoWindow;
+    private StockWindow stockWindow;
 
     MainController() throws ClassNotFoundException {
         Locale locale = Locale.forLanguageTag(game.getConfig("locale"));
@@ -65,10 +69,19 @@ public class MainController {
 
         Properties.enable(game);
         Cards.enable(game);
-        StockMarket.enable(game);
         Shareholding.enable(game);
         GUIPlayerInfo.enable(game, this);
         Card.enableAll(game);
+
+        StockMarket market = StockMarket.getMarket(game);
+        market.addStock(new Stock("Microsoft"));
+        market.addStock(new Stock("Facebook"));
+        market.addStock(new Stock("Google"));
+        market.addStock(new Stock("Intel"));
+        market.addStock(new Stock("Amazon"));
+        market.addStock(new Stock("IBM"));
+
+        StockMarket.enable(game);
 
         Place.loadAll();
         Class.forName("monopoly.gui.GUIGameMap");
@@ -84,6 +97,8 @@ public class MainController {
 
         playerInfoWindow = new PlayerInfoWindow(this);
         playerInfoWindow.initOwner(stage);
+        stockWindow = new StockWindow(this);
+        stockWindow.initOwner(stage);
     }
 
     void initStage(Stage primaryStage) {
@@ -151,12 +166,20 @@ public class MainController {
         }
     }
 
-    public void togglePlayerInfoWindow() {
-        if (playerInfoWindow.isShowing()) {
-            playerInfoWindow.hide();
+    private void toggleWindow(Stage window) {
+        if (window.isShowing()) {
+            window.hide();
         } else {
-            playerInfoWindow.show();
+            window.show();
         }
+    }
+
+    public void togglePlayerInfoWindow() {
+        toggleWindow(playerInfoWindow);
+    }
+
+    public void toggleStockWindow() {
+        toggleWindow(stockWindow);
     }
 
     public ImageManager getImageManager() {

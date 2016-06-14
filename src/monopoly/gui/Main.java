@@ -2,7 +2,6 @@ package monopoly.gui;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import monopoly.place.Place;
 
 public final class Main extends Application {
     private final MainController controller = new MainController();

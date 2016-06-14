@@ -101,7 +101,7 @@ public class Shareholding {
                 } else {
                     StockMarket market = StockMarket.getMarket(game);
                     if (market.hasStock(stock)) {
-                        double price = market.getPrice(stock) * amount;
+                        double price = market.getPrice(stock).get() * amount;
                         if (player.getCash() >= price) {
                             StockHolding holding = holdingMap.get(stock);
                             if (holding == null) {
@@ -143,7 +143,7 @@ public class Shareholding {
                         } else if (amount > holding.amount) {
                             game.triggerException("sell_too_much_stock");
                         } else {
-                            double price = market.getPrice(stock) * amount;
+                            double price = market.getPrice(stock).get() * amount;
                             int oldAmount = holding.amount;
                             holding.amount -= amount;
                             holding.cost = holding.cost * holding.amount / oldAmount;

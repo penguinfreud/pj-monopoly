@@ -264,11 +264,11 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
             Stock stock = entry.getKey();
             StockMarket.StockTrend trend = entry.getValue();
             out.print(g.format("stock_table_row", stock.toString(g),
-                    Util.formatNumber(trend.getPrice(4)),
-                    Util.formatNumber(trend.getPrice(3)),
-                    Util.formatNumber(trend.getPrice(2)),
-                    Util.formatNumber(trend.getPrice(1)),
-                    Util.formatNumber(trend.getPrice(0))));
+                    Util.formatNumber(trend.getPrice(4).get()),
+                    Util.formatNumber(trend.getPrice(3).get()),
+                    Util.formatNumber(trend.getPrice(2).get()),
+                    Util.formatNumber(trend.getPrice(1).get()),
+                    Util.formatNumber(trend.getPrice(0).get())));
 
             for (IPlayer player : g.getPlayers()) {
                 out.print(g.format("player_holding_row",
@@ -280,7 +280,7 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
 
     private String formatStockItem(Map.Entry<Stock, StockMarket.StockTrend> entry) {
         Stock stock = entry.getKey();
-        double price = entry.getValue().getPrice(0);
+        double price = entry.getValue().getPrice(0).get();
         Shareholding holding = Shareholding.get(this);
         return getGame().format("stock_item", stock.toString(getGame()), price,
                 holding.getAmount(stock), Util.formatNumber(holding.getAverageCost(stock)));

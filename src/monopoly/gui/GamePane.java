@@ -83,11 +83,13 @@ public class GamePane implements IPane {
                     }
                     alert.showAndWait();
                 });
+        Button tradeStockBtn = controller.createButton("trade_stock",
+                e -> controller.toggleStockWindow());
         Button giveUpBtn = controller.createButton("give_up",
                 e -> g.getCurrentPlayer().giveUp());
 
         return new VBox(
-                new HBox(useCardBtn, playerInfoBtn, checkAlertBtn, giveUpBtn),
+                new HBox(useCardBtn, playerInfoBtn, checkAlertBtn, tradeStockBtn, giveUpBtn),
                 text);
     }
 

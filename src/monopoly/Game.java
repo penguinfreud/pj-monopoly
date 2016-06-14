@@ -41,7 +41,8 @@ public class Game {
     private transient ResourceBundle messages;
     private GameMap map;
     private final Players players = new Players();
-    private final IntegerProperty dice = new SimpleIntegerProperty(1);
+    private final IntegerProperty dice = new SimpleIntegerProperty(1),
+    daysPassed = new SimpleIntegerProperty(0);
     private boolean hadBankrupt = false;
 
     public static void putDefaultConfig(String key, Object value) {
@@ -73,6 +74,7 @@ public class Game {
         if (state == State.OVER) {
             players.reset();
             dice.set(1);
+            daysPassed.set(0);
             hadBankrupt = false;
         }
     }
@@ -153,6 +155,14 @@ public class Game {
         return dice.get();
     }
 
+    public IntegerProperty daysPassedProperty() {
+        return daysPassed;
+    }
+
+    public int getDaysPassed() {
+        return daysPassed.get();
+    }
+
     public final void start() {
         synchronized (lock) {
             if (state == State.OVER) {
@@ -210,6 +220,7 @@ public class Game {
                         if (!hadBankrupt) {
                             players.next();
                         }
+                        daysPassed.set(daysPassed.get() + 1);
                         startTurn();
                     } while (tailRecursion);
                     inEndTurn = false;

@@ -36,10 +36,11 @@ public class Main {
             Class.forName("monopoly.tui.TUIGameMap");
             Class.forName("monopoly.tui.TUIPlace");
             Place.loadAll();
-            StockMarket.addStock(new Stock("baidu"));
-            StockMarket.addStock(new Stock("google"));
-            StockMarket.addStock(new Stock("facebook"));
-            StockMarket.addStock(new Stock("microsoft"));
+            StockMarket market = StockMarket.getMarket(game);
+            market.addStock(new Stock("baidu"));
+            market.addStock(new Stock("google"));
+            market.addStock(new Stock("facebook"));
+            market.addStock(new Stock("microsoft"));
 
             GameMap map = GameMap.readMap(Main.class.getResourceAsStream("/maps/card_rich.map"),
                     new GameMapReader() {
