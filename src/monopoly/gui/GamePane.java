@@ -3,6 +3,7 @@ package monopoly.gui;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -11,6 +12,7 @@ import monopoly.BasePlayer;
 import monopoly.Cards;
 import monopoly.Game;
 import monopoly.IPlayer;
+import monopoly.place.Place;
 
 public class GamePane implements IPane {
     private MainController controller;
@@ -58,7 +60,35 @@ public class GamePane implements IPane {
             }
         });
 
-        return text;
+        Button useCardBtn = controller.createButton("use_card",
+                e -> ((GUIPlayer) g.getCurrentPlayer()).useCard());
+        Button playerInfoBtn = controller.createButton("view_player_info",
+                e -> controller.togglePlayerInfoWindow());
+        Button checkAlertBtn = controller.createButton("check_alert",
+                e -> {
+                    Place place = g.getCurrentPlayer().getCurrentPlace();
+                    boolean hasRoadblock = false;
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle(controller.getText("check_alert"));
+                    alert.setHeaderText(controller.getText("check_alert"));
+                    for (int i = 0; i < 10; i++) {
+                        place = place.getNext();
+                        if (place.hasRoadblock()) {
+                            hasRoadblock = true;
+                            alert.setContentText(g.format("has_roadblock", i + 1));
+                        }
+                    }
+                    if (!hasRoadblock) {
+                        alert.setContentText(g.getText("has_no_roadblock"));
+                    }
+                    alert.showAndWait();
+                });
+        Button giveUpBtn = controller.createButton("give_up",
+                e -> g.getCurrentPlayer().giveUp());
+
+        return new VBox(
+                new HBox(useCardBtn, playerInfoBtn, checkAlertBtn, giveUpBtn),
+                text);
     }
 
     @Override
@@ -75,10 +105,7 @@ public class GamePane implements IPane {
     }
 
     private void createRightPane() {
-        Button useCardBtn = controller.createButton("use_card",
-                e -> ((GUIPlayer) controller.getGame().getCurrentPlayer()).useCard());
         rightPane.getChildren().addAll(
-                new HBox(useCardBtn),
                 CurrentPlayerInfoPane.get(controller),
                 DiceView.get(controller));
         rightPane.setBorder(new Border(new BorderStroke(Color.BLACK,

@@ -15,6 +15,7 @@ import monopoly.*;
 import monopoly.card.RobCard;
 import monopoly.card.TeardownCard;
 import monopoly.gui.dialogs.LocalButtonTypes;
+import monopoly.gui.popups.PlayerInfoWindow;
 import monopoly.place.GameMap;
 import monopoly.place.Place;
 import monopoly.stock.StockMarket;
@@ -56,6 +57,8 @@ public class MainController {
     private BorderPane rootPane = new BorderPane();
     private IPane welcomePane, gameEditorPane, playerEditorPane, gamePane;
 
+    private PlayerInfoWindow playerInfoWindow;
+
     MainController() throws ClassNotFoundException {
         Locale locale = Locale.forLanguageTag(game.getConfig("locale"));
         messages = ResourceBundle.getBundle("messages/ui_messages", locale);
@@ -79,6 +82,8 @@ public class MainController {
         playerEditorPane = new PlayerEditorPane(this);
         gamePane = new GamePane(this);
 
+        playerInfoWindow = new PlayerInfoWindow(this);
+        playerInfoWindow.initOwner(stage);
     }
 
     void initStage(Stage primaryStage) {
@@ -143,6 +148,14 @@ public class MainController {
         } catch (Exception e) {
             e.printStackTrace();
             Util.alertError("Failed to read map: " + e.getMessage());
+        }
+    }
+
+    public void togglePlayerInfoWindow() {
+        if (playerInfoWindow.isShowing()) {
+            playerInfoWindow.hide();
+        } else {
+            playerInfoWindow.show();
         }
     }
 
