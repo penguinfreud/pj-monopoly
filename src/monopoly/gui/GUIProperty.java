@@ -15,15 +15,14 @@ public class GUIProperty extends GUIPlace {
 
     static {
         GameMap.registerPlaceReader("GUIProperty", (r, sc) -> new GUIProperty(
-                (GUIGameMap) r.getMap(),
                 ((GUIGameMap.GUIGameMapReader) r).getController(),
                 sc.nextDouble(), sc.nextDouble(), r.readPlace(sc).asProperty()));
     }
 
     private Pane token = null;
 
-    public GUIProperty(GUIGameMap map, MainController controller, double x, double y, Property property) {
-        super(map, controller, x, y, property);
+    public GUIProperty(MainController controller, double x, double y, Property property) {
+        super(controller, x, y, property);
         this.property = property;
     }
 

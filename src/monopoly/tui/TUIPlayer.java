@@ -454,7 +454,7 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     }
 
     @Override
-    public void askForTargetPlace(Card card, Consumer<Place> cb) {
+    public void askForTargetPlace(Card card, List<Place> candidates, Consumer<Place> cb) {
         Game g = getGame();
         if (card instanceof ControlledDice) {
             int steps = getInt(g.format("ask_where_to_go", getCurrentPlace().getName()), 1, 6, 0);
@@ -488,7 +488,7 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     }
 
     @Override
-    public void askForTargetStock(Consumer<Stock> cb) {
+    public void askForTargetStock(Card card, Consumer<Stock> cb) {
         Game g = getGame();
         StockMarket market = StockMarket.getMarket(g);
         List<Map.Entry<Stock, StockMarket.StockTrend>> stocks = new ArrayList<>(market.getStockEntries());

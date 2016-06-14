@@ -8,7 +8,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 
 public interface IPlayerWithCardsAndStock extends Cards.IPlayerWithCards {
-    default void askForTargetStock(Consumer<Stock> cb) {
+    default void askForTargetStock(Card card, Consumer<Stock> cb) {
         ArrayList<Stock> stocks = new ArrayList<>(StockMarket.getMarket(getGame()).getStocks());
         if (stocks.isEmpty()) {
             cb.accept(null);

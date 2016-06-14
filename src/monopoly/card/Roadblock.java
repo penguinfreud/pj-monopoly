@@ -26,17 +26,18 @@ public class Roadblock extends Card {
     @Override
     public void use(Game g, Consumer1<Boolean> cb) {
         IPlayer player = g.getCurrentPlayer();
-        ((Cards.IPlayerWithCards) player).askForTargetPlace(this, place -> {
-            synchronized (g.lock) {
-                int reach = g.getConfig("roadblock-reach");
-                if (place != null &&
-                        Place.withinReach(player.getCurrentPlace(), place, reach) >= 0) {
-                    place.setRoadblock(g);
-                    cb.accept(true);
-                } else {
-                    cb.accept(false);
-                }
-            }
-        });
+        int reach = g.getConfig("roadblock-reach");
+        ((Cards.IPlayerWithCards) player).askForTargetPlace(this,
+                Place.getPlacesWithinReach(player.getCurrentPlace(), reach),
+                place -> {
+                    synchronized (g.lock) {
+                        if (place != null) {
+                            place.setRoadblock(g);
+                            cb.accept(true);
+                        } else {
+                            cb.accept(false);
+                        }
+                    }
+                });
     }
 }

@@ -49,13 +49,8 @@ public class Cards {
             }
         }
 
-        default void askForTargetPlace(Card card, Consumer<Place> cb) {
-            Place cur = getCurrentPlace();
-            if (card instanceof Roadblock) {
-                cb.accept(cur);
-            } else {
-                cb.accept(isReversed() ? cur.getPrev() : cur.getNext());
-            }
+        default void askForTargetPlace(Card card, List<Place> candidates, Consumer<Place> cb) {
+            cb.accept(candidates.get(0));
         }
 
         default void askForInt(Card card, Consumer<Integer> cb) {

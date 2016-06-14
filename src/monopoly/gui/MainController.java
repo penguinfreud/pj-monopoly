@@ -135,8 +135,6 @@ public class MainController {
             GameMap map = GameMap.readMap(is, mapReader);
             game.setMap(map);
             game.start();
-            Cards.get(game.getPlayers().get(0)).addCard(Cards.getAvailableCards(game).stream().filter(c -> c instanceof RobCard).findFirst().get());
-            Cards.get(game.getPlayers().get(1)).addCard(Cards.getAvailableCards(game).stream().filter(c -> c instanceof TeardownCard).findFirst().get());
 
             switchToPane(gamePane);
         } catch (FileNotFoundException e) {

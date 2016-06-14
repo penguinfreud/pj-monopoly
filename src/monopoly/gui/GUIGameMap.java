@@ -32,8 +32,6 @@ public class GUIGameMap extends GameMap {
         }
     }
 
-    private Consumer<? super GUIPlace> onSelectPlace;
-
     public Group createMapView() {
         Group group = new Group();
         GUIPlace start = (GUIPlace) getStartingPoint(), place = start;
@@ -42,17 +40,5 @@ public class GUIGameMap extends GameMap {
             place = (GUIPlace) place.getNext();
         } while (place != start);
         return group;
-    }
-
-    void selectPlace(GUIPlace place) {
-        if (onSelectPlace != null) {
-            Consumer<? super GUIPlace> cb = onSelectPlace;
-            onSelectPlace = null;
-            cb.accept(place);
-        }
-    }
-
-    public void setOnSelectPlace(Consumer<? super GUIPlace> onSelectPlace) {
-        this.onSelectPlace = onSelectPlace;
     }
 }

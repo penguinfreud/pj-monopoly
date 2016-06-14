@@ -25,7 +25,7 @@ public class BlackCard extends Card {
 
     @Override
     protected void use(Game g, Consumer1<Boolean> cb) {
-        ((IPlayerWithCardsAndStock) g.getCurrentPlayer()).askForTargetStock(stock -> {
+        ((IPlayerWithCardsAndStock) g.getCurrentPlayer()).askForTargetStock(this, stock -> {
             if (stock != null) {
                 StockMarket market = StockMarket.getMarket(g);
                 if (market.hasStock(stock)) {

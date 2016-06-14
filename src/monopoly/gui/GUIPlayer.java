@@ -7,14 +7,21 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import monopoly.*;
+import monopoly.card.ControlledDice;
 import monopoly.card.ReverseCard;
+import monopoly.card.Roadblock;
 import monopoly.card.TaxCard;
 import monopoly.gui.dialogs.BankDialog;
 import monopoly.gui.dialogs.ChoiceDialog;
 import monopoly.gui.dialogs.YesOrNoDialog;
 import monopoly.place.Place;
+import monopoly.stock.Stock;
+import monopoly.stock.StockMarket;
 import monopoly.util.Consumer0;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -129,7 +136,28 @@ public class GUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     }
 
     @Override
-    public void askForTargetPlace(Card card, Consumer<Place> cb) {
-        ((GUIGameMap) getGame().getMap()).setOnSelectPlace(cb);
+    public void askForTargetPlace(Card card, List<Place> candidates, Consumer<Place> cb) {
+        String prompt = card instanceof ControlledDice?
+                controller.getText("ask_where_to_go"):
+                card instanceof Roadblock?
+                        controller.getText("ask_where_to_set_roadblock"): "";
+        cb.accept(new ChoiceDialog<>(controller,
+                controller.getText("using") + card.toString(getGame()),
+                prompt,
+                candidates,
+                place -> new Text(place.toString(getGame())),
+                true).showAndWait().orElse(null));
+    }
+
+    @Override
+    public void askForTargetStock(Card card, Consumer<Stock> cb) {
+        Game g = getGame();
+        List<Stock> stocks = new ArrayList<>(StockMarket.getMarket(g).getStocks());
+        cb.accept(new ChoiceDialog<>(controller,
+                controller.getText("using") + card.toString(g),
+                controller.getText("ask_for_target_stock"),
+                stocks,
+                stock -> new Text(stock.toString(g)),
+                true).showAndWait().orElse(null));
     }
 }

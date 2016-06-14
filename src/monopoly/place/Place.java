@@ -6,6 +6,10 @@ import monopoly.IPlayer;
 import monopoly.Property;
 import monopoly.util.Consumer0;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 public abstract class Place implements GameObject {
     private final String name;
     Place prev, next;
@@ -76,6 +80,21 @@ public abstract class Place implements GameObject {
         return -1;
     }
 
+    public static List<Place> getPlacesWithinReach(Place a, int steps) {
+        List<Place> result = new ArrayList<>();
+        Place forward = a, backward = a;
+        result.add(a);
+        for (int i = 0; i<steps; i++) {
+            forward = forward.getNext();
+            backward = backward.getPrev();
+            if (result.indexOf(forward) == -1)
+                result.add(forward);
+            if (result.indexOf(backward) == -1)
+                result.add(0, backward);
+        }
+        return result;
+    }
+
     public static int withinPlayersReach(IPlayer player, Place place, int steps) {
         Place cur = player.getCurrentPlace();
         for (int i = 0; i < steps; i++) {
@@ -85,6 +104,18 @@ public abstract class Place implements GameObject {
             }
         }
         return 0;
+    }
+
+    public static List<Place> getPlacesWithinPlayersReach(IPlayer player, int steps) {
+        List<Place> result = new ArrayList<>();
+        Place cur = player.getCurrentPlace();
+        for (int i = 0; i<steps; i++) {
+            cur = player.isReversed()? cur.getPrev(): cur.getNext();
+            if (result.indexOf(cur) >= 0)
+                break;
+            result.add(cur);
+        }
+        return result;
     }
 
     public static void loadAll() throws ClassNotFoundException {
