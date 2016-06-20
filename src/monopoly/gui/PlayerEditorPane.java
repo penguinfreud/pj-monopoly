@@ -36,7 +36,7 @@ public class PlayerEditorPane extends VBox implements IPane {
     private HBox createNameField() {
         HBox hBox = new HBox();
         TextField nameField = new TextField();
-        Util.bindBidirectional(nameField.textProperty(), controller.editingPlayerProperty(), IPlayer::nameProperty);
+        monopoly.util.Util.bindBidirectional(nameField.textProperty(), controller.editingPlayerProperty(), IPlayer::nameProperty);
         nameField.setFont(controller.getConfig().get("font"));
         hBox.getChildren().addAll(controller.createText("name_colon"), nameField);
         hBox.setAlignment(Pos.TOP_CENTER);

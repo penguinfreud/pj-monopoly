@@ -283,7 +283,7 @@ public class TUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
         double price = entry.getValue().getPrice(0).get();
         Shareholding holding = Shareholding.get(this);
         return getGame().format("stock_item", stock.toString(getGame()), price,
-                holding.getAmount(stock), Util.formatNumber(holding.getAverageCost(stock)));
+                holding.getAmount(stock), Util.formatNumber(holding.getAverageCost(stock).get()));
     }
 
     private void menuBuyStock() {

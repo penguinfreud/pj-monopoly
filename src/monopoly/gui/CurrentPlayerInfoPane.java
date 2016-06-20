@@ -32,6 +32,7 @@ public class CurrentPlayerInfoPane extends VBox {
         Text couponsText = new Text();
         Text cardsText = new Text();
         Text propertiesText = new Text();
+        Text totalPossessionsText = new Text();
         ImageView iconView = new ImageView();
         getChildren().addAll(
                 iconView,
@@ -40,21 +41,24 @@ public class CurrentPlayerInfoPane extends VBox {
                 new HBox(new Text(controller.getText("deposit_colon")), depositText),
                 new HBox(new Text(controller.getText("coupons_colon")), couponsText),
                 new HBox(new Text(controller.getText("cards_colon")), cardsText),
-                new HBox(new Text(controller.getText("properties_colon")), propertiesText));
+                new HBox(new Text(controller.getText("properties_colon")), propertiesText),
+                new HBox(new Text(controller.getText("total_possessions_colon")), totalPossessionsText));
         ObjectBinding<IPlayer> currentPlayer = controller.getGame().currentPlayer();
-        Util.bind(nameText.textProperty(), currentPlayer, IPlayer::nameProperty);
-        Util.bind(cashText.textProperty(), currentPlayer,
+        monopoly.util.Util.bind(nameText.textProperty(), currentPlayer, IPlayer::nameProperty);
+        monopoly.util.Util.bind(cashText.textProperty(), currentPlayer,
                 player -> player.cashProperty().asString("%.2f"));
-        Util.bind(depositText.textProperty(), currentPlayer,
+        monopoly.util.Util.bind(depositText.textProperty(), currentPlayer,
                 player -> player.depositProperty().asString("%.2f"));
-        Util.bind(couponsText.textProperty(), currentPlayer,
+        monopoly.util.Util.bind(couponsText.textProperty(), currentPlayer,
                 player -> Cards.get(player).couponsProperty().asString());
-        Util.bind(cardsText.textProperty(), currentPlayer,
+        monopoly.util.Util.bind(cardsText.textProperty(), currentPlayer,
                 player -> Bindings.size(Cards.get(player).getCards()).asString());
-        Util.bind(propertiesText.textProperty(), currentPlayer,
+        monopoly.util.Util.bind(propertiesText.textProperty(), currentPlayer,
                 player -> Bindings.size(Properties.get(player).getProperties()).asString());
-        Util.bind(iconView.imageProperty(), currentPlayer,
+        monopoly.util.Util.bind(iconView.imageProperty(), currentPlayer,
                 player -> GUIPlayerInfo.get(player).icon(144));
+        monopoly.util.Util.bind(totalPossessionsText.textProperty(), currentPlayer,
+                player -> player.totalPossessions().asString("%.2f"));
     }
 
 

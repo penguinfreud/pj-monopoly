@@ -44,23 +44,18 @@ public class BasePlayer implements IPlayer {
     private int stepsToAdvance;
     private boolean reversed = false, bankrupted = false;
     private final DoubleBinding totalPossessions;
-    private final ObservableList<Supplier<Double>> possessions = FXCollections.observableList(new CopyOnWriteArrayList<>());
+    private final ObservableList<DoubleBinding> possessions = FXCollections.observableList(new CopyOnWriteArrayList<>());
     private final List<Consumer<Consumer0>> propertySellers = new CopyOnWriteArrayList<>();
 
     public BasePlayer(Game g) {
         synchronized (g.lock) {
             game = g;
-            addPossession(this::getCash);
-            addPossession(this::getDeposit);
+            addPossession(Bindings.createDoubleBinding(cash::get, cash));
+            addPossession(Bindings.createDoubleBinding(deposit::get, deposit));
             onInit.trigger(this);
             onAddPlayer.get(g).trigger(this);
 
-            totalPossessions = Bindings.createDoubleBinding(
-                    () -> {
-                        synchronized (game.lock) {
-                            return possessions.stream().map(Supplier::get).reduce(0.0, (a, b) -> a + b);
-                        }
-                    }, possessions);
+            totalPossessions = Util.sum(possessions, e -> e);
         }
     }
 
@@ -80,7 +75,7 @@ public class BasePlayer implements IPlayer {
     }
 
     @Override
-    public final void addPossession(Supplier<Double> possession) {
+    public final void addPossession(DoubleBinding possession) {
         possessions.add(possession);
     }
 

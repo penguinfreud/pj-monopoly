@@ -15,6 +15,7 @@ import javafx.stage.Window;
 import monopoly.*;
 import monopoly.card.RobCard;
 import monopoly.card.TeardownCard;
+import monopoly.extension.Lottery;
 import monopoly.gui.dialogs.LocalButtonTypes;
 import monopoly.gui.popups.PlayerInfoWindow;
 import monopoly.gui.popups.StockWindow;
@@ -72,6 +73,7 @@ public class MainController {
         Shareholding.enable(game);
         GUIPlayerInfo.enable(game, this);
         Card.enableAll(game);
+        Lottery.enable(game);
 
         StockMarket market = StockMarket.getMarket(game);
         market.addStock(new Stock("Microsoft"));
@@ -179,6 +181,7 @@ public class MainController {
     }
 
     public void toggleStockWindow() {
+        stockWindow.init();
         toggleWindow(stockWindow);
     }
 

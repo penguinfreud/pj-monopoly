@@ -51,7 +51,7 @@ public interface IPlayer extends GameObject {
         return totalPossessions().get();
     }
 
-    void addPossession(Supplier<Double> possession);
+    void addPossession(DoubleBinding possession);
 
     void addPropertySeller(Consumer<Consumer0> cb);
 

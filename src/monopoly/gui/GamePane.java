@@ -85,6 +85,10 @@ public class GamePane implements IPane {
                 });
         Button tradeStockBtn = controller.createButton("trade_stock",
                 e -> controller.toggleStockWindow());
+        Button buyLotteryBtn = controller.createButton("buy_lottery",
+                e -> {
+
+                });
         Button giveUpBtn = controller.createButton("give_up",
                 e -> g.getCurrentPlayer().giveUp());
 

@@ -36,7 +36,11 @@ public class StockMarket {
         }
 
         public DoubleBinding getPrice(int daysAgo) {
-            return Bindings.doubleValueAt(prices, daysAgo);
+            return Bindings.createDoubleBinding(() -> {
+                if (daysAgo < prices.size())
+                    return prices.get(daysAgo);
+                return 0.0;
+            }, prices);
         }
 
         private void initPrice() {

@@ -4,6 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import monopoly.util.Consumer0;
 import monopoly.util.Event3;
+import monopoly.util.Util;
 
 import java.util.Hashtable;
 import java.util.Map;
@@ -36,7 +37,7 @@ public class Properties {
             BasePlayer.onAddPlayer.get(g).addListener(player -> {
                 Properties properties = new Properties(player);
                 parasites.put(player, properties);
-                player.addPossession(properties::getValue);
+                player.addPossession(Util.sum(properties.properties, Property::mortgagePrice));
                 player.addPropertySeller(properties::sellProperties);
             });
             BasePlayer.onBankrupt.get(g).addListener(player ->
@@ -77,12 +78,6 @@ public class Properties {
 
     public final IPlayer getPlayer() {
         return player;
-    }
-
-    private double getValue() {
-        synchronized (game.lock) {
-            return properties.stream().map(Property::getMortgagePrice).reduce(0.0, (a, b) -> a + b);
-        }
     }
 
     public final ObservableList<Property> getProperties() {

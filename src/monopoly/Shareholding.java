@@ -1,5 +1,12 @@
 package monopoly;
 
+import javafx.beans.binding.DoubleBinding;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableMap;
 import monopoly.extension.GameCalendar;
 import monopoly.stock.Stock;
 import monopoly.stock.StockMarket;
@@ -12,21 +19,17 @@ import java.util.logging.Logger;
 
 public class Shareholding {
     public static class StockHolding {
-        private double cost = 0.0;
-        private int amount = 0;
+        private final DoubleProperty cost = new SimpleDoubleProperty(0.0);
+        private final IntegerProperty amount = new SimpleIntegerProperty(0);
 
         private StockHolding() {
         }
 
-        public double getTotalCost() {
-            return cost;
+        public DoubleBinding averageCost() {
+            return cost.divide(amount);
         }
 
-        public double getAverageCost() {
-            return cost / amount;
-        }
-
-        public int getAmount() {
+        public IntegerProperty getAmount() {
             return amount;
         }
     }
@@ -42,12 +45,13 @@ public class Shareholding {
         if (onStockHoldingChange.get(g) == null) {
             GameCalendar.enable(g);
             onStockHoldingChange.put(g, new Event3<>());
+            g.onGameOver.addListener(winner -> parasites.clear());
             BasePlayer.onAddPlayer.get(g).addListener(player -> {
                 Shareholding holding = new Shareholding(player);
                 parasites.put(player, holding);
             });
             BasePlayer.onBankrupt.get(g).addListener(player ->
-                    parasites.get(player).holdingMap.forEach((stock, holding) -> holding.amount = 0));
+                    parasites.get(player).holdingMap.forEach((stock, holding) -> holding.amount.set(0)));
         }
     }
 
@@ -61,7 +65,7 @@ public class Shareholding {
 
     private final Game game;
     private final IPlayer player;
-    private final Map<Stock, StockHolding> holdingMap = new Hashtable<>();
+    private final ObservableMap<Stock, StockHolding> holdingMap = FXCollections.observableMap(new Hashtable<>());
 
     private Shareholding(IPlayer player) {
         this.player = player;
@@ -72,22 +76,22 @@ public class Shareholding {
         return holdingMap.get(stock);
     }
 
-    public final int getAmount(Stock stock) {
+    public final IntegerProperty getAmount(Stock stock) {
         StockHolding holding = holdingMap.get(stock);
         if (holding == null) {
-            return 0;
-        } else {
-            return holding.getAmount();
+            holding = new StockHolding();
+            holdingMap.put(stock, holding);
         }
+        return holding.amount;
     }
 
-    public final double getAverageCost(Stock stock) {
+    public final DoubleBinding getAverageCost(Stock stock) {
         StockHolding holding = holdingMap.get(stock);
         if (holding == null) {
-            return Double.NaN;
-        } else {
-            return holding.getAverageCost();
+            holding = new StockHolding();
+            holdingMap.put(stock, holding);
         }
+        return holding.averageCost();
     }
 
     public final void buy(Stock stock, int amount) {
@@ -108,8 +112,8 @@ public class Shareholding {
                                 holding = new StockHolding();
                                 holdingMap.put(stock, holding);
                             }
-                            holding.amount += amount;
-                            holding.cost += price;
+                            holding.amount.set(holding.amount.get() + amount);
+                            holding.cost.set(holding.cost.get() + price);
                             String msg = game.format("buy_stock", player.getName(), stock.toString(game), amount, price);
                             player.changeCash(-price, msg);
                             onStockHoldingChange.get(game).trigger(player, stock, amount);
@@ -140,13 +144,13 @@ public class Shareholding {
                         StockHolding holding = holdingMap.get(stock);
                         if (holding == null) {
                             game.triggerException("you_have_not_bought_this_stock");
-                        } else if (amount > holding.amount) {
+                        } else if (amount > holding.amount.get()) {
                             game.triggerException("sell_too_much_stock");
                         } else {
                             double price = market.getPrice(stock).get() * amount;
-                            int oldAmount = holding.amount;
-                            holding.amount -= amount;
-                            holding.cost = holding.cost * holding.amount / oldAmount;
+                            int oldAmount = holding.amount.get();
+                            holding.amount.set(holding.amount.get() - amount);
+                            holding.cost.set(holding.cost.get() * holding.amount.get() / oldAmount);
                             String msg = game.format("sell_stock", player.getName(), stock.toString(game), amount, price);
                             player.changeCash(price, msg);
                             onStockHoldingChange.get(this.game).trigger(player, stock, -amount);
