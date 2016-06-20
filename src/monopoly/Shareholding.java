@@ -21,12 +21,13 @@ public class Shareholding {
     public static class StockHolding {
         private final DoubleProperty cost = new SimpleDoubleProperty(0.0);
         private final IntegerProperty amount = new SimpleIntegerProperty(0);
+        private final DoubleBinding averageCost = cost.divide(amount);
 
         private StockHolding() {
         }
 
         public DoubleBinding averageCost() {
-            return cost.divide(amount);
+            return averageCost;
         }
 
         public IntegerProperty getAmount() {

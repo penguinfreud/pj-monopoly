@@ -4,11 +4,11 @@ import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
+import monopoly.place.Hospital;
 import monopoly.place.Place;
 import monopoly.util.Consumer0;
 
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public interface IPlayer extends GameObject {
     Game getGame();
@@ -100,8 +100,6 @@ public interface IPlayer extends GameObject {
 
     void triggerOnMoneyChange(double amount, String msg);
 
-    void triggerBankrupt();
-
     void startWalking(int steps);
 
     default void startTurn(Consumer0 cb) {
@@ -110,5 +108,14 @@ public interface IPlayer extends GameObject {
 
     default void askHowMuchToDepositOrWithdraw(Consumer<Double> cb) {
         cb.accept(0.0);
+    }
+
+    default void moveToHospital() {
+        Place p = getCurrentPlace();
+        while (!p.getName().equals("Hospital")) {
+            p = p.getNext();
+        }
+        currentPlaceProperty().set(p);
+        Hospital.accept(this);
     }
 }

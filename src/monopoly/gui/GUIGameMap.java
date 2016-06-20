@@ -4,8 +4,6 @@ import javafx.scene.Group;
 import monopoly.place.GameMap;
 import monopoly.place.GameMapReader;
 
-import java.util.function.Consumer;
-
 public class GUIGameMap extends GameMap {
     static {
         try {

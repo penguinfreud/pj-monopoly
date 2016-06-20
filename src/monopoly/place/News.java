@@ -43,6 +43,11 @@ public class News extends Place {
             }
         }, null));
         newsTypes.add(new NewsType(g -> {
+            IPlayer player = g.getCurrentPlayer();
+            g.triggerException("news_has_moved_to_hospital", player.getName());
+            player.moveToHospital();
+        }, null));
+        newsTypes.add(new NewsType(g -> {
             for (IPlayer player : g.getPlayers()) {
                 Cards.get(player).addCard(Cards.getRandomCard(g, false));
             }
@@ -59,6 +64,7 @@ public class News extends Place {
             String msg = g.format("news_biggest_landlord", player.getName(), award);
             player.changeCash(award, msg);
         }, Properties::isEnabled));
+
 
         Game.putDefaultConfig("news-award-min", 100.0);
         Game.putDefaultConfig("news-award-max", 200.0);

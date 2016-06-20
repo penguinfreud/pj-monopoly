@@ -1,6 +1,7 @@
 package monopoly.gui.popups;
 
-import javafx.beans.Observable;
+import javafx.beans.InvalidationListener;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -23,13 +24,29 @@ import monopoly.gui.MainController;
 import monopoly.stock.Stock;
 import monopoly.stock.StockMarket;
 
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.function.Consumer;
+
 public class StockWindow extends Stage {
+    private static final Map<MainController, StockWindow> parasites = new Hashtable<>();
+
+    public static StockWindow get(MainController controller) {
+        StockWindow instance = parasites.get(controller);
+        if (instance == null) {
+            instance = new StockWindow(controller);
+            parasites.put(controller, instance);
+        }
+        return instance;
+    }
+
     private MainController controller;
     private ObjectProperty<Stock> currentStock = new SimpleObjectProperty<>();
     private VBox root;
     private boolean inited = false;
+    private Consumer<Stock> onSelect;
 
-    public StockWindow(MainController controller) {
+    private StockWindow(MainController controller) {
         this.controller = controller;
         root = new VBox();
         Scene scene = new Scene(root, 400, 400);
@@ -48,7 +65,7 @@ public class StockWindow extends Stage {
         StockMarket market = StockMarket.getMarket(g);
 
         Axis<Number> xAxis = new NumberAxis(),
-        yAxis = new NumberAxis();
+                yAxis = new NumberAxis();
 
         LineChart<Number, Number> chart = new LineChart<>(xAxis, yAxis);
 
@@ -57,7 +74,7 @@ public class StockWindow extends Stage {
                 chart.setData(null);
             } else {
                 ObservableList<XYChart.Data<Number, Number>> dataList = FXCollections.observableArrayList();
-                for (int i = 0; i<10; i++) {
+                for (int i = 0; i < 10; i++) {
                     XYChart.Data<Number, Number> data = new XYChart.Data<>();
                     data.setXValue(10 - i);
                     data.YValueProperty().bind(market.getPrice(newValue, i));
@@ -99,22 +116,51 @@ public class StockWindow extends Stage {
         tableView.getColumns().add(fluctuationCol);
 
         Game g = controller.getGame();
-        for (IPlayer player: g.getPlayers()) {
+        for (IPlayer player : g.getPlayers()) {
             TableColumn<Stock, Number> holdingCol = new TableColumn<>(player.getName() + controller.getText("holding"));
             holdingCol.setCellValueFactory(df -> Shareholding.get(player).getAmount(df.getValue()));
             tableView.getColumns().add(holdingCol);
         }
 
         TableColumn<Stock, String> averageCostCol = new TableColumn<>(controller.getText("average_cost"));
-        g.currentPlayer().addListener((observable, oldValue, newValue) ->
-                averageCostCol.setCellValueFactory(df -> Shareholding.get(newValue)
-                        .getAverageCost(df.getValue()).asString("%.2f")));
+        averageCostCol.setCellValueFactory(df -> {
+            Stock stock = df.getValue();
+            DoubleBinding binding = Bindings.createDoubleBinding(
+                    () -> Shareholding.get(g.getCurrentPlayer()).getAverageCost(stock).get(),
+                    g.currentPlayer());
+            InvalidationListener listener = observable -> {
+                binding.invalidate();
+            };
+            g.currentPlayer().addListener((observable, oldValue, newValue) -> {
+                if (oldValue != null) {
+                    Shareholding.get(oldValue).getAverageCost(stock).removeListener(listener);
+                }
+                if (newValue != null) {
+                    Shareholding.get(newValue).getAverageCost(stock).addListener(listener);
+                }
+            });
+            Shareholding.get(g.getCurrentPlayer()).getAverageCost(stock).addListener(listener);
+            return binding.asString("%.2f");
+        });
+        tableView.getColumns().add(averageCostCol);
 
         tableView.setItems(market.getStocks());
 
         tableView.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> currentStock.set(newValue));
 
+        tableView.setOnMouseClicked(e -> {
+            if (e.getClickCount() == 2 && onSelect != null) {
+                Stock stock = tableView.getSelectionModel().getSelectedItem();
+                if (stock != null)
+                    onSelect.accept(stock);
+            }
+        });
+
         return tableView;
+    }
+
+    public void setOnSelect(Consumer<Stock> onSelect) {
+        this.onSelect = onSelect;
     }
 }

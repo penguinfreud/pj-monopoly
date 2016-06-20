@@ -7,7 +7,6 @@ import monopoly.Property;
 import monopoly.util.Consumer0;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 public abstract class Place implements GameObject {
@@ -84,7 +83,7 @@ public abstract class Place implements GameObject {
         List<Place> result = new ArrayList<>();
         Place forward = a, backward = a;
         result.add(a);
-        for (int i = 0; i<steps; i++) {
+        for (int i = 0; i < steps; i++) {
             forward = forward.getNext();
             backward = backward.getPrev();
             if (result.indexOf(forward) == -1)
@@ -109,8 +108,8 @@ public abstract class Place implements GameObject {
     public static List<Place> getPlacesWithinPlayersReach(IPlayer player, int steps) {
         List<Place> result = new ArrayList<>();
         Place cur = player.getCurrentPlace();
-        for (int i = 0; i<steps; i++) {
-            cur = player.isReversed()? cur.getPrev(): cur.getNext();
+        for (int i = 0; i < steps; i++) {
+            cur = player.isReversed() ? cur.getPrev() : cur.getNext();
             if (result.indexOf(cur) >= 0)
                 break;
             result.add(cur);
@@ -127,5 +126,6 @@ public abstract class Place implements GameObject {
         Class.forName("monopoly.place.CardSite");
         Class.forName("monopoly.place.CardShop");
         Class.forName("monopoly.place.Trap");
+        Class.forName("monopoly.place.Hospital");
     }
 }

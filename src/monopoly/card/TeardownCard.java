@@ -1,13 +1,10 @@
 package monopoly.card;
 
 import monopoly.*;
-import monopoly.Properties;
 import monopoly.place.Land;
 import monopoly.place.Place;
 import monopoly.place.Street;
 import monopoly.util.Consumer1;
-
-import java.util.*;
 
 public class TeardownCard extends Card {
     private static final Card instance = new TeardownCard();

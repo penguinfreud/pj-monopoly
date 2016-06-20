@@ -17,7 +17,8 @@ class Players {
         int i = currentPlayerIndex.get();
         return i < players.size() ?
                 players.get(i) : null;
-    }, players, currentPlayerIndex);;
+    }, players, currentPlayerIndex);
+    ;
 
     int count() {
         return players.size();

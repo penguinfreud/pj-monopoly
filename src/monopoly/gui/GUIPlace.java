@@ -5,9 +5,11 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
-import javafx.scene.layout.*;
+import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
-import monopoly.place.*;
+import monopoly.place.DelegatePlace;
+import monopoly.place.GameMap;
+import monopoly.place.Place;
 
 public class GUIPlace extends DelegatePlace {
     static {

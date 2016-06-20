@@ -1,7 +1,6 @@
 package monopoly.gui;
 
 import javafx.event.EventHandler;
-import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
@@ -13,7 +12,9 @@ import monopoly.card.Roadblock;
 import monopoly.card.TaxCard;
 import monopoly.gui.dialogs.BankDialog;
 import monopoly.gui.dialogs.ChoiceDialog;
+import monopoly.gui.dialogs.StockTradeDialog;
 import monopoly.gui.dialogs.YesOrNoDialog;
+import monopoly.gui.popups.StockWindow;
 import monopoly.place.Place;
 import monopoly.stock.Stock;
 import monopoly.stock.StockMarket;
@@ -21,9 +22,7 @@ import monopoly.util.Consumer0;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class GUIPlayer extends BasePlayer implements Properties.IPlayerWithProperties, IPlayerWithCardsAndStock {
     private MainController controller;
@@ -36,10 +35,22 @@ public class GUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
     @Override
     public void startTurn(Consumer0 cb) {
         DiceView diceView = DiceView.get(controller);
+        StockWindow stockWindow = StockWindow.get(controller);
         EventHandler<MouseEvent> listener = e -> {
             diceView.setOnMouseClicked(null);
+            stockWindow.setOnSelect(null);
             cb.accept();
         };
+        stockWindow.setOnSelect(stock -> {
+            new StockTradeDialog(controller).showAndWait().ifPresent(
+                    amount -> {
+                        if (amount > 0) {
+                            Shareholding.get(this).buy(stock, amount);
+                        } else if (amount < 0) {
+                            Shareholding.get(this).sell(stock, -amount);
+                        }
+                    });
+        });
         diceView.setOnMouseClicked(listener);
     }
 
@@ -92,7 +103,7 @@ public class GUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
                 controller.getText("buy_card"),
                 controller.format("ask_which_card_to_buy", Cards.get(this).getCoupons()),
                 Cards.getAvailableCards(getGame()),
-                card -> new Text(controller.format("card_and_price",
+                card -> new Text(getGame().format("card_and_price",
                         card.toString(getGame()),
                         card.getPrice(getGame()))),
                 true)
@@ -119,7 +130,7 @@ public class GUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
                 true)
                 .showAndWait().orElse(null));
     }
-    
+
     public void useCard() {
         if (getGame().getState() == Game.State.TURN_STARTING &&
                 Cards.get(this).getCardsCount() > 0) {
@@ -137,10 +148,10 @@ public class GUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
 
     @Override
     public void askForTargetPlace(Card card, List<Place> candidates, Consumer<Place> cb) {
-        String prompt = card instanceof ControlledDice?
-                controller.getText("ask_where_to_go"):
-                card instanceof Roadblock?
-                        controller.getText("ask_where_to_set_roadblock"): "";
+        String prompt = card instanceof ControlledDice ?
+                controller.getText("ask_where_to_go") :
+                card instanceof Roadblock ?
+                        controller.getText("ask_where_to_set_roadblock") : "";
         cb.accept(new ChoiceDialog<>(controller,
                 controller.getText("using") + card.toString(getGame()),
                 prompt,

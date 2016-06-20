@@ -6,7 +6,10 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import monopoly.*;
+import monopoly.Cards;
+import monopoly.Game;
+import monopoly.IPlayer;
+import monopoly.Properties;
 import monopoly.gui.MainController;
 
 public class PlayerInfoWindow extends Stage {

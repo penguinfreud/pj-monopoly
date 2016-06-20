@@ -11,10 +11,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 import monopoly.*;
-import monopoly.card.RobCard;
-import monopoly.card.TeardownCard;
 import monopoly.extension.Lottery;
 import monopoly.gui.dialogs.LocalButtonTypes;
 import monopoly.gui.popups.PlayerInfoWindow;
@@ -30,7 +27,6 @@ import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.stream.Collector;
 
 public class MainController {
     private static Config defaultConfig = new Config();
@@ -59,10 +55,9 @@ public class MainController {
 
     private IPane currentPane;
     private BorderPane rootPane = new BorderPane();
-    private IPane welcomePane, gameEditorPane, playerEditorPane, gamePane;
+    private IPane welcomePane, gameEditorPane, playerEditorPane, gamePane, gameOverPane;
 
     private PlayerInfoWindow playerInfoWindow;
-    private StockWindow stockWindow;
 
     MainController() throws ClassNotFoundException {
         Locale locale = Locale.forLanguageTag(game.getConfig("locale"));
@@ -96,11 +91,16 @@ public class MainController {
         gameEditorPane = new GameEditorPane(this);
         playerEditorPane = new PlayerEditorPane(this);
         gamePane = new GamePane(this);
+        gameOverPane = new GameOverPane(this);
 
         playerInfoWindow = new PlayerInfoWindow(this);
         playerInfoWindow.initOwner(stage);
-        stockWindow = new StockWindow(this);
-        stockWindow.initOwner(stage);
+        StockWindow.get(this).initOwner(stage);
+
+        game.onGameOver.addListener(winner -> {
+            ((GameOverPane) gameOverPane).setWinner(winner);
+            switchToPane(gameOverPane);
+        });
     }
 
     void initStage(Stage primaryStage) {
@@ -181,8 +181,8 @@ public class MainController {
     }
 
     public void toggleStockWindow() {
-        stockWindow.init();
-        toggleWindow(stockWindow);
+        StockWindow.get(this).init();
+        toggleWindow(StockWindow.get(this));
     }
 
     public ImageManager getImageManager() {

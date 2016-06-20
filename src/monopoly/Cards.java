@@ -6,7 +6,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import monopoly.card.LotteryCard;
 import monopoly.card.ReverseCard;
-import monopoly.card.Roadblock;
 import monopoly.place.Place;
 import monopoly.util.Consumer0;
 import monopoly.util.Event2;

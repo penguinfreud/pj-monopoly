@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -124,6 +123,7 @@ public class BasePlayer implements IPlayer {
     public void giveUp() {
         synchronized (game.lock) {
             bankrupt();
+            game.startWalking();
         }
     }
 
@@ -168,11 +168,6 @@ public class BasePlayer implements IPlayer {
     @Override
     public void triggerOnMoneyChange(double amount, String msg) {
         onMoneyChange.get(game).trigger(this, amount, msg);
-    }
-
-    @Override
-    public void triggerBankrupt() {
-        onBankrupt.get(game).trigger(this);
     }
 
     protected void startStep() {

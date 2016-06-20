@@ -22,7 +22,7 @@ public class DiceView extends ImageView {
 
     private MainController controller;
 
-    public DiceView(MainController controller) {
+    private DiceView(MainController controller) {
         this.controller = controller;
         Game g = controller.getGame();
         imageProperty().bind(Bindings.createObjectBinding(

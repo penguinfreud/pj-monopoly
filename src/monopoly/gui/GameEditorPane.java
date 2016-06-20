@@ -87,10 +87,18 @@ public class GameEditorPane extends VBox implements IPane {
                 });
 
         Button editBtn = controller.createButton("edit",
-                e -> Util.getListSelection(listView).ifPresent(controller::editPlayer));
+                e -> {
+                    IPlayer player = listView.getSelectionModel().getSelectedItem();
+                    if (player != null)
+                        controller.editPlayer(player);
+                });
 
         Button removeBtn = controller.createButton("remove",
-                e -> Util.getListSelection(listView).ifPresent(g::removePlayer));
+                e -> {
+                    IPlayer player = listView.getSelectionModel().getSelectedItem();
+                    if (player != null)
+                        g.removePlayer(player);
+                });
 
         buttons.getChildren().addAll(addBtn, editBtn, removeBtn);
         buttons.setSpacing(5);

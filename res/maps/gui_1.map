@@ -27,4 +27,4 @@ GUIProperty,0,350,Land,福州路,1100,南京路
 GUIProperty,0,280,Land,北京东路,1200,南京路
 GUIProperty,0,210,Land,南京东路,1300,南京路
 GUIPlace,0,140,CardShop
-GUIPlace,0,70,Empty
+GUIPlace,0,70,Hospital

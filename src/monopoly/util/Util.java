@@ -3,7 +3,6 @@ package monopoly.util;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
-import javafx.beans.binding.NumberBinding;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -43,6 +42,7 @@ public class Util {
         obj.addListener((observable, oldValue, newValue) -> {
             result.unbind();
             if (newValue != null) {
+                result.setValue(accessor.apply(newValue).getValue());
                 result.bind(accessor.apply(newValue));
             }
         });
@@ -64,20 +64,20 @@ public class Util {
                 .map(DoubleBinding::get)
                 .reduce(0.0, (a, b) -> a + b), list);
         InvalidationListener listener = e -> result.invalidate();
-        list.addListener((ListChangeListener<? super T>)  change -> {
+        list.addListener((ListChangeListener<? super T>) change -> {
             while (change.next()) {
                 if (change.wasAdded()) {
-                    for (T t: change.getAddedSubList()) {
+                    for (T t : change.getAddedSubList()) {
                         getNumber.apply(t).addListener(listener);
                     }
                 } else if (change.wasRemoved()) {
-                    for (T t: change.getRemoved()) {
+                    for (T t : change.getRemoved()) {
                         getNumber.apply(t).removeListener(listener);
                     }
                 }
             }
         });
-        for (T t: list) {
+        for (T t : list) {
             getNumber.apply(t).addListener(listener);
         }
         return result;

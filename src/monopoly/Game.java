@@ -21,7 +21,7 @@ public class Game {
     private static final Logger logger = Logger.getLogger(Game.class.getName());
     static final String WRONG_STATE = "wrong state";
 
-    static final InitEvent<Game> onInit = new InitEvent<>();
+    public static final InitEvent<Game> onInit = new InitEvent<>();
     private static final Config defaultConfig = new Config();
 
     static {
@@ -42,7 +42,7 @@ public class Game {
     private GameMap map;
     private final Players players = new Players();
     private final IntegerProperty dice = new SimpleIntegerProperty(1),
-    daysPassed = new SimpleIntegerProperty(0);
+            daysPassed = new SimpleIntegerProperty(0);
     private boolean hadBankrupt = false;
 
     public static void putDefaultConfig(String key, Object value) {
@@ -267,6 +267,7 @@ public class Game {
                 if (players.count() <= 1) {
                     endGame();
                 } else {
+                    onStartWalking.trigger(steps);
                     if (steps == 0) {
                         endWalking();
                     } else {
@@ -311,6 +312,7 @@ public class Game {
             onTurn = new Event0(),
             onLanded = new Event0(),
             onCycle = new Event0();
+    public final Event1<Integer> onStartWalking = new Event1<>();
     public final Event1<String> onException = new Event1<>();
     public final Event1<IPlayer> onBankrupt = new Event1<>(),
             onGameOver = new Event1<>();
