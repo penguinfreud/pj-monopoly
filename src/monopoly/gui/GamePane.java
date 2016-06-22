@@ -12,7 +12,12 @@ import monopoly.BasePlayer;
 import monopoly.Cards;
 import monopoly.Game;
 import monopoly.IPlayer;
+import monopoly.extension.Lottery;
+import monopoly.gui.dialogs.ChoiceDialog;
 import monopoly.place.Place;
+
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class GamePane implements IPane {
     private MainController controller;
@@ -86,14 +91,18 @@ public class GamePane implements IPane {
         Button tradeStockBtn = controller.createButton("trade_stock",
                 e -> controller.toggleStockWindow());
         Button buyLotteryBtn = controller.createButton("buy_lottery",
-                e -> {
-
-                });
+                e -> new ChoiceDialog<>(controller,
+                        controller.getText("lottery"),
+                        controller.getText("ask_what_number_to_bet"),
+                        Stream.iterate(1, a -> a + 1).limit(20).collect(Collectors.toList()),
+                        x -> new Text(Integer.toString(x)),
+                        true).showAndWait().ifPresent(
+                            x -> Lottery.buyLottery(g.getCurrentPlayer(), x)));
         Button giveUpBtn = controller.createButton("give_up",
                 e -> g.getCurrentPlayer().giveUp());
 
         return new VBox(
-                new HBox(useCardBtn, playerInfoBtn, checkAlertBtn, tradeStockBtn, giveUpBtn),
+                new HBox(useCardBtn, playerInfoBtn, checkAlertBtn, tradeStockBtn, buyLotteryBtn, giveUpBtn),
                 text);
     }
 

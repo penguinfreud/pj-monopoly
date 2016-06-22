@@ -6,10 +6,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import monopoly.*;
-import monopoly.card.ControlledDice;
-import monopoly.card.ReverseCard;
-import monopoly.card.Roadblock;
-import monopoly.card.TaxCard;
+import monopoly.card.*;
+import monopoly.extension.Lottery;
 import monopoly.gui.dialogs.BankDialog;
 import monopoly.gui.dialogs.ChoiceDialog;
 import monopoly.gui.dialogs.StockTradeDialog;
@@ -23,6 +21,8 @@ import monopoly.util.Consumer0;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class GUIPlayer extends BasePlayer implements Properties.IPlayerWithProperties, IPlayerWithCardsAndStock {
     private MainController controller;
@@ -170,5 +170,18 @@ public class GUIPlayer extends BasePlayer implements Properties.IPlayerWithPrope
                 stocks,
                 stock -> new Text(stock.toString(g)),
                 true).showAndWait().orElse(null));
+    }
+
+    @Override
+    public void askForInt(Card card, Consumer<Integer> cb) {
+        if (card instanceof LotteryCard) {
+            new ChoiceDialog<>(controller,
+                    controller.getText("lottery"),
+                    controller.getText("ask_for_lottery_number"),
+                    Stream.iterate(1, a -> a + 1).limit(20).collect(Collectors.toList()),
+                    x -> new Text(Integer.toString(x)),
+                    true).showAndWait()
+                    .ifPresent(x -> Lottery.cheat(getGame(), x));
+        }
     }
 }
