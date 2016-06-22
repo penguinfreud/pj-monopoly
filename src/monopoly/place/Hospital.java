@@ -12,6 +12,7 @@ public class Hospital extends Place {
     static {
         GameMap.registerPlaceReader("Hospital", (r, sc) -> new Hospital());
         Game.onInit.addListener(game -> {
+            game.onGameOver.addListener(winner -> turnsToStay.clear());
             game.onTurn.addListener(() -> {
                 IPlayer player = game.getCurrentPlayer();
                 Integer i = turnsToStay.get(player);

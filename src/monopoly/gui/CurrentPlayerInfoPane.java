@@ -7,8 +7,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import monopoly.Cards;
+import monopoly.Game;
 import monopoly.IPlayer;
 import monopoly.Properties;
+import monopoly.extension.GameCalendar;
 
 import java.util.Hashtable;
 import java.util.Map;
@@ -26,7 +28,9 @@ public class CurrentPlayerInfoPane extends VBox {
     }
 
     public CurrentPlayerInfoPane(MainController controller) {
+        Text dateText = new Text();
         Text nameText = new Text();
+        Text orientationText = new Text();
         Text cashText = new Text();
         Text depositText = new Text();
         Text couponsText = new Text();
@@ -35,8 +39,10 @@ public class CurrentPlayerInfoPane extends VBox {
         Text totalPossessionsText = new Text();
         ImageView iconView = new ImageView();
         getChildren().addAll(
+                new HBox(new Text(controller.getText("date_colon")), dateText),
                 iconView,
                 new HBox(new Text(controller.getText("name_colon")), nameText),
+                new HBox(orientationText),
                 new HBox(new Text(controller.getText("cash_colon")), cashText),
                 new HBox(new Text(controller.getText("deposit_colon")), depositText),
                 new HBox(new Text(controller.getText("coupons_colon")), couponsText),
@@ -44,6 +50,14 @@ public class CurrentPlayerInfoPane extends VBox {
                 new HBox(new Text(controller.getText("properties_colon")), propertiesText),
                 new HBox(new Text(controller.getText("total_possessions_colon")), totalPossessionsText));
         ObjectBinding<IPlayer> currentPlayer = controller.getGame().currentPlayer();
+        Game g = controller.getGame();
+        dateText.setText(GameCalendar.getDate(g));
+        g.onCycle.addListener(() -> dateText.setText(GameCalendar.getDate(g)));
+        monopoly.util.Util.bind(orientationText.textProperty(), currentPlayer,
+                player -> Bindings.createStringBinding(
+                        () -> controller.getText(
+                                player.isReversed()? "anticlockwise": "clockwise"),
+                        player.reversedProperty()));
         monopoly.util.Util.bind(nameText.textProperty(), currentPlayer, IPlayer::nameProperty);
         monopoly.util.Util.bind(cashText.textProperty(), currentPlayer,
                 player -> player.cashProperty().asString("%.2f"));

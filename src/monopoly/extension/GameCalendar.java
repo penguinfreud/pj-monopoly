@@ -46,7 +46,7 @@ public final class GameCalendar {
 
     public static String getDate(Game g) {
         Calendar calendar = calendars.get(g).calendar;
-        return MessageFormat.format("date_format",
+        return g.format("date_format",
                 String.format("%d", calendar.get(Calendar.YEAR)),
                 calendar.get(Calendar.MONTH) + 1,
                 calendar.get(Calendar.DATE));

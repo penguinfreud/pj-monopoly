@@ -1,5 +1,6 @@
 package monopoly.gui;
 
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -14,6 +15,8 @@ public class GameOverPane extends VBox implements IPane {
         winnerText = controller.createText("");
         getChildren().addAll(winnerText,
                 controller.createButton("ok", e -> controller.welcome()));
+        setAlignment(Pos.CENTER);
+        setSpacing(20);
     }
 
     public void setWinner(IPlayer player) {

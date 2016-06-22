@@ -297,14 +297,21 @@ public class Game {
         }
     }
 
-    private void endGame() {
-        if (state != State.OVER) {
-            state = State.OVER;
-            onGameOver.trigger(getCurrentPlayer());
-            reset();
-        } else {
-            logger.log(Level.WARNING, WRONG_STATE);
-            (new Exception()).printStackTrace();
+    public void endGame() {
+        synchronized (lock) {
+            if (state != State.OVER) {
+                state = State.OVER;
+                if (players.count() == 1) {
+                    onGameOver.trigger(getCurrentPlayer());
+                } else {
+                    onGameOver.trigger(players.getPlayers().stream().reduce(
+                            (a, b) -> a.getTotalPossessions() > b.getTotalPossessions()? a: b).orElse(null));
+                }
+                reset();
+            } else {
+                logger.log(Level.WARNING, WRONG_STATE);
+                (new Exception()).printStackTrace();
+            }
         }
     }
 

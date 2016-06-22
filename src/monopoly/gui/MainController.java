@@ -20,6 +20,7 @@ import monopoly.place.GameMap;
 import monopoly.place.Place;
 import monopoly.stock.Stock;
 import monopoly.stock.StockMarket;
+import monopoly.util.Consumer0;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -35,6 +36,7 @@ public class MainController {
         defaultConfig.put("default-maps", new String[]{"from_file", "gui_1.map"});
         defaultConfig.put("icons-count", 12);
         defaultConfig.put("font", new Font(16));
+        defaultConfig.put("duration", -1);
     }
 
     public static <T> void putDefaultConfig(String key, T value) {
@@ -156,6 +158,23 @@ public class MainController {
             }
             GameMap map = GameMap.readMap(is, mapReader);
             game.setMap(map);
+
+            if ((Integer) config.get("duration") > 0) {
+                game.onCycle.addListener(new Consumer0() {
+                    int daysLeft = config.get("duration");
+
+                    @Override
+                    public void accept() {
+                        if (daysLeft > 0) {
+                            daysLeft--;
+                            if (daysLeft == 0) {
+                                game.endGame();
+                            }
+                        }
+                    }
+                });
+            }
+
             game.start();
 
             switchToPane(gamePane);

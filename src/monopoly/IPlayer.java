@@ -1,6 +1,7 @@
 package monopoly;
 
 import javafx.beans.binding.DoubleBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
@@ -28,6 +29,8 @@ public interface IPlayer extends GameObject {
     default Place getCurrentPlace() {
         return currentPlaceProperty().get();
     }
+
+    BooleanProperty reversedProperty();
 
     boolean isReversed();
 

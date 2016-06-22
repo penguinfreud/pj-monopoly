@@ -40,8 +40,9 @@ public class BasePlayer implements IPlayer {
     private final SimpleObjectProperty<Place> currentPlace = new SimpleObjectProperty<>();
     private final DoubleProperty cash = new SimpleDoubleProperty();
     private final DoubleProperty deposit = new SimpleDoubleProperty();
+    private final BooleanProperty reversed = new SimpleBooleanProperty(false);
     private int stepsToAdvance;
-    private boolean reversed = false, bankrupted = false;
+    private boolean bankrupted = false;
     private final DoubleBinding totalPossessions;
     private final ObservableList<DoubleBinding> possessions = FXCollections.observableList(new CopyOnWriteArrayList<>());
     private final List<Consumer<Consumer0>> propertySellers = new CopyOnWriteArrayList<>();
@@ -104,13 +105,18 @@ public class BasePlayer implements IPlayer {
     }
 
     @Override
-    public final boolean isReversed() {
+    public BooleanProperty reversedProperty() {
         return reversed;
     }
 
     @Override
+    public final boolean isReversed() {
+        return reversed.get();
+    }
+
+    @Override
     public void reverse() {
-        reversed = !reversed;
+        reversed.set(!reversed.get());
     }
 
     private void bankrupt() {
@@ -177,7 +183,7 @@ public class BasePlayer implements IPlayer {
     protected final void endStep() {
         synchronized (game.lock) {
             if (game.getState() == Game.State.TURN_WALKING) {
-                currentPlace.set(reversed ? getCurrentPlace().getPrev() : getCurrentPlace().getNext());
+                currentPlace.set(reversed.get() ? getCurrentPlace().getPrev() : getCurrentPlace().getNext());
                 --stepsToAdvance;
                 if (getCurrentPlace().hasRoadblock()) {
                     stepsToAdvance = 0;
@@ -208,7 +214,7 @@ public class BasePlayer implements IPlayer {
             cash.set(game.getConfig("init-cash"));
             deposit.set(game.getConfig("init-deposit"));
             currentPlace.set(game.getMap().getStartingPoint());
-            reversed = false;
+            reversed.set(false);
             bankrupted = false;
         } else {
             logger.log(Level.WARNING, Game.WRONG_STATE);

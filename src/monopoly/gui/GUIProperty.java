@@ -5,6 +5,7 @@ import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import monopoly.IPlayer;
 import monopoly.Property;
 import monopoly.place.GameMap;
@@ -39,6 +40,11 @@ public class GUIProperty extends GUIPlace {
                     },
                     property.ownerProperty()));
             token.getChildren().add(0, rect);
+
+            Text levelText = new Text();
+            levelText.textProperty().bind(property.levelProperty().asString());
+            levelText.setTranslateY(35.0);
+            token.getChildren().add(levelText);
         }
         return token;
     }

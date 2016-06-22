@@ -1,6 +1,8 @@
 package monopoly.gui;
 
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -9,6 +11,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+import javafx.util.StringConverter;
 import monopoly.Config;
 import monopoly.Game;
 import monopoly.IPlayer;
@@ -27,7 +30,7 @@ public class GameEditorPane extends VBox implements IPane {
     public GameEditorPane(MainController controller) {
         this.controller = controller;
 
-        getChildren().addAll(createPlayerList(), createMapChooser());
+        getChildren().addAll(createPlayerList(), createMapChooser(), createDurationChooser());
         createBottom();
         setAlignment(Pos.TOP_CENTER);
         setPadding(new Insets(30));
@@ -81,7 +84,6 @@ public class GameEditorPane extends VBox implements IPane {
         Button addBtn = controller.createButton("add_a_human_player",
                 e -> {
                     IPlayer player = new GUIPlayer(g, controller);
-                    player.setName("wsy");
                     g.addPlayer(player);
                     controller.editPlayer(player);
                 });
@@ -156,6 +158,37 @@ public class GameEditorPane extends VBox implements IPane {
         vBox.setPadding(new Insets(10));
         vBox.setSpacing(10);
 
+        return vBox;
+    }
+
+    private VBox createDurationChooser() {
+        VBox vBox = new VBox();
+        ComboBox<Integer> comboBox = new ComboBox<>();
+        ObservableList<Integer> items = FXCollections.observableArrayList();
+        items.addAll(-1, 7, 14, 30, 60, 365);
+        comboBox.setItems(items);
+        comboBox.setConverter(new StringConverter<Integer>() {
+            @Override
+            public String toString(Integer object) {
+                if (object == -1) {
+                    return(controller.getText("unlimited"));
+                } else {
+                    return(object.toString() + controller.getText("days"));
+                }
+            }
+
+            @Override
+            public Integer fromString(String string) {
+                return -1;
+            }
+        });
+        comboBox.getSelectionModel().select(items.get(0));
+        comboBox.getSelectionModel().selectedItemProperty().addListener(
+                (observable, oldValue, newValue) -> controller.getConfig().put("duration", newValue));
+        vBox.getChildren().addAll(controller.createText("duration_colon"), comboBox);
+
+        vBox.setPadding(new Insets(10));
+        vBox.setSpacing(10);
         return vBox;
     }
 
